@@ -1,0 +1,17 @@
+### MacOS
+.DS_Store
+
+### Others
+*.icloud
+.icloud
+bower_components/
+node_modules/
+npm-debug.log
+src/bld
+demo
+
+### docusaurus
+.docusaurus
+build
+docs
+static
