@@ -4,30 +4,27 @@ import { testMainMethods, testTableMethod } from "./tstest/Test";
 import logo from "./logo.png";
 import "./App.css";
 
-const demoCode = `import pptxgen from "pptxgenjs";
+function extractFunctionBody(fn) {
+	const fnStr = fn.toString(); // 将函数转换为字符串
+	const bodyMatch = fnStr.match(/^[^{]*{\s*([\s\S]*)\s*}$/); // 使用正则表达式匹配函数体
 
-let pptx = new pptxgen();
-let slide = pptx.addSlide();
-
-slide.addText(
-  "React Demo!",
-  { x:1, y:0.5, w:'80%', h:1, fontSize:36, align:'center', fill:{ color:'D3E3F3' }, color:'008899' }
-);
-
-slide.addChart(
-  pptx.ChartType.radar, dataChartRadar, { x:1.0, y:1.9, w:8, h:3 }
-);
-
-slide.addText(
-  "PpptxGenJS version:",
-  { x:0, y:5.3, w:'100%', h:0.33, align:'center', fill:{ color:'E1E1E1' }, color:'A1A1A1' }
-);
-
-pptx.writeFile({ fileName: 'pptxgenjs-demo-react.pptx' });`;
+	if (bodyMatch && bodyMatch.length > 1) {
+		return bodyMatch[1]; // 返回匹配到的函数体
+	} else {
+		throw new Error('无法提取函数体');
+	}
+}
 
 function App() {
-	function runDemo() {
+	const runDemo = () => {
 		let pptx = new pptxgen();
+
+		pptx.theme = {
+			clrSchemeColor: {
+				accent1: "a6e22e",
+			},
+		};
+
 		let slide = pptx.addSlide();
 
 		let dataChartRadar = [
@@ -49,8 +46,7 @@ function App() {
 			h: 1,
 			fontSize: 36,
 			align: "center",
-			fill: { color: "D3E3F3" },
-			color: "008899",
+			color: "accent1",
 		});
 
 		slide.addChart(pptx.ChartType.radar, dataChartRadar, { x: 1, y: 1.9, w: 8, h: 3 });
@@ -125,7 +121,7 @@ function App() {
 
 					<h5 className="text-info">Demo Code (.tsx)</h5>
 					<pre className="my-4">
-						<code className="language-javascript">{demoCode}</code>
+						<code className="language-javascript">{extractFunctionBody(runDemo)}</code>
 					</pre>
 
 					<div className="row row-cols-1 row-cols-md-3 g-4">

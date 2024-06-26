@@ -6,7 +6,18 @@ import pptxgen from "pptxgenjs";
 
 export function testMainMethods() {
 	let pptx = new pptxgen();
-
+	// pptx.theme = {
+	// 	clrSchemeColor: {
+	// 		accent1: "FF0000",
+	// 		accent2: "00FF00",
+	// 		accent3: "0000FF",
+	// 		accent4: "FFFF00",
+	// 		accent5: "FF00FF",
+	// 		accent6: "00FFFF",
+	// 		hlink: "FF0000",
+	// 		folHlink: "00FF00",
+	// 	},
+	// };
 	// PPTX Method 1:
 	//pptx.layout = "LAYOUT_WIDE";
 	//pptx.defineLayout({ name:'A3', width:16.5, height:11.7 });
@@ -455,15 +466,12 @@ function testMethod_Shape(pptx: pptxgen) {
 function testMethod_Text(pptx: pptxgen) {
 	let slide = pptx.addSlide();
 
-	slide.addText(
-		[{ text: "Link without Tooltip", options: { hyperlink: { /*slide: '1',*/ tooltip: "hi world", url: "https://github.com/gitbrent" } } }],
-		{
-			x: 2,
-			y: 2,
-			w: 2,
-			h: 0.5,
-		}
-	);
+	slide.addText([{ text: "Link without Tooltip", options: { hyperlink: { /*slide: '1',*/ tooltip: "hi world", url: "https://github.com/gitbrent" } } }], {
+		x: 2,
+		y: 2,
+		w: 2,
+		h: 0.5,
+	});
 
 	slide.addText(
 		[

@@ -2,7 +2,7 @@
  * PptxGenJS Interfaces
  */
 
-import { CHART_NAME, PLACEHOLDER_TYPE, SHAPE_NAME, SLIDE_OBJECT_TYPES, TEXT_HALIGN, TEXT_VALIGN, WRITE_OUTPUT_TYPE } from './core-enums'
+import { CHART_NAME, CLR_SCHEME_COLOR, PLACEHOLDER_TYPE, SHAPE_NAME, SLIDE_OBJECT_TYPES, TEXT_HALIGN, TEXT_VALIGN, WRITE_OUTPUT_TYPE } from './core-enums'
 
 // Core Types
 // ==========
@@ -471,6 +471,25 @@ export interface ThemeProps {
 	 * @default 'Calibri'
 	 */
 	bodyFontFace?: string
+	/**
+	 * 	自定义主题色
+	 * @example { 'accent1': 'FF0000' }
+	 * @default {
+	 *	dk1: '000000',
+	 *	lt1: 'FFFFFF',
+	 *	dk2: '44546A',
+	 *	lt2: 'E7E6E6',
+	 *	accent1: '4472C4',
+	 *	accent2: 'ED7D31',
+	 *	accent3: 'A5A5A5',
+	 *	accent4: 'FFC000',
+	 *	accent5: '5B9BD5',
+	 *	accent6: '70AD47',
+	 *	hlink: '0563C1',
+	 *  folHlink: '954F72'
+	 * }
+	 */
+	clrSchemeColor?: Partial<Record<CLR_SCHEME_COLOR, string>>
 }
 
 // image / media ==================================================================================

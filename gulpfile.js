@@ -45,7 +45,7 @@ gulp.task('build', () => {
 			})
 		})
 })
-const info = `/* ${pkg.name} ${pkg.version} @ ${new Date().toISOString()} */\n`
+const info = `/* ${pkg.name} ${pkg.version} @ ${new Date().toLocaleString()} */\n`
 
 gulp.task('min', () => {
 	return gulp
@@ -88,7 +88,7 @@ gulp.task('es', () => {
 
 gulp.task('reactTestCode', () => {
 	return gulp
-		.src(['./dist/pptxgen.es.js'])
+		.src(['./dist/pptxgen.es.js', './dist/pptxgen.cjs.js', './dist/pptxgen.min.js', './dist/pptxgen.min.js.map', './dist/pptxgen.bundle.js', './dist/pptxgen.bundle.js.map'])
 		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist'))
 })
 

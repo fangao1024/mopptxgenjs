@@ -719,6 +719,21 @@ export enum SCHEME_COLOR_NAMES {
 	'ACCENT6' = 'accent6'
 }
 
+export enum CLR_SCHEME_COLOR {
+	'DK1' = 'dk1',
+	'LT1' = 'lt1',
+	'DK2' = 'dk2',
+	'LT2' = 'lt2',
+	'ACCENT1' = 'accent1',
+	'ACCENT2' = 'accent2',
+	'ACCENT3' = 'accent3',
+	'ACCENT4' = 'accent4',
+	'ACCENT5' = 'accent5',
+	'ACCENT6' = 'accent6',
+	'HLINK' = 'hlink',
+	'FOL_HLINK' = 'folHlink'
+}
+
 export enum MASTER_OBJECTS {
 	'chart' = 'chart',
 	'image' = 'image',
