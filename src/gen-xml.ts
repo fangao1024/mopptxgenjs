@@ -868,6 +868,7 @@ function genXmlParagraphProperties(textObj: ISlideObject | TextProps, isDefault:
 			if (textObj?.options?.bullet?.indent) bulletMarL = valToPts(textObj.options.bullet.indent)
 
 			if (textObj.options.bullet.type) {
+				// 判断类型错误 改为判断全部类型 如果是 bullet 则使用默认的 bullet
 				if (textObj.options.bullet.type.toString().toLowerCase() === 'number') {
 					paragraphPropXml += ` marL="${
 						textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
@@ -875,6 +876,11 @@ function genXmlParagraphProperties(textObj: ISlideObject | TextProps, isDefault:
 					strXmlBullet = `<a:buSzPct val="100000"/><a:buFont typeface="+mj-lt"/><a:buAutoNum type="${textObj.options.bullet.style || 'arabicPeriod'}" startAt="${
 						textObj.options.bullet.numberStartAt || textObj.options.bullet.startAt || '1'
 					}"/>`
+				} else if (textObj.options.bullet.type.toString().toLowerCase() === 'bullet') {
+					paragraphPropXml += ` marL="${
+						textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
+					}" indent="-${bulletMarL}"`
+					strXmlBullet = `<a:buSzPct val="100000"/><a:buChar char="${BULLET_TYPES.DEFAULT}"/>`
 				}
 			} else if (textObj.options.bullet.characterCode) {
 				let bulletCode = `&#x${textObj.options.bullet.characterCode};`
@@ -1213,17 +1219,17 @@ export function genXmlTextBody(slideObj: ISlideObject | TableCell): string {
 	const arrLines: TextProps[][] = []
 	let arrTexts: TextProps[] = []
 	arrTextObjects.forEach((textObj, idx) => {
-		// A: Align or Bullet trigger new line
-		if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
+		// A: Align or Bullet trigger new line 先判断是否有bullet，再判断是否有align 如果aligin和bullet同时存在，先处理bullet
+		if (arrTexts.length > 0 && textObj.options.bullet && arrTexts.length > 0) {
+			arrLines.push(arrTexts)
+			arrTexts = []
+			textObj.options.breakLine = false // For cases with both `bullet` and `brekaLine` - prevent double lineBreak
+		} else if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
 			// Only start a new paragraph when align *changes*
 			if (textObj.options.align !== arrTextObjects[idx - 1].options.align) {
 				arrLines.push(arrTexts)
 				arrTexts = []
 			}
-		} else if (arrTexts.length > 0 && textObj.options.bullet && arrTexts.length > 0) {
-			arrLines.push(arrTexts)
-			arrTexts = []
-			textObj.options.breakLine = false // For cases with both `bullet` and `brekaLine` - prevent double lineBreak
 		}
 
 		// B: Add this text to current line

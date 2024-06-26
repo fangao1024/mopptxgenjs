@@ -39,7 +39,7 @@ function App() {
 		//slide.addShape(pptx.ShapeType.rect, { x: 4.36, y: 2.36, w: 5, h: 2.5, fill: pptx.SchemeColor.background2 });
 
 		//slide.addText("React Demo!", { x: 1, y: 1, w: "80%", h: 1, fontSize: 36, fill: "eeeeee", align: "center" });
-		slide.addText("React Demo!", {
+		slide.addText("React Demo! \n text", {
 			x: 1,
 			y: 0.5,
 			w: "80%",

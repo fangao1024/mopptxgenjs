@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.2 @ 2024/6/26 12:24:10 */
+/* mopptxgenjs 0.0.3 @ 2024/6/26 17:00:58 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -5835,9 +5835,14 @@ function genXmlParagraphProperties(textObj, isDefault) {
             if ((_b = (_a = textObj === null || textObj === void 0 ? void 0 : textObj.options) === null || _a === void 0 ? void 0 : _a.bullet) === null || _b === void 0 ? void 0 : _b.indent)
                 bulletMarL = valToPts(textObj.options.bullet.indent);
             if (textObj.options.bullet.type) {
+                // 判断类型错误 改为判断全部类型 如果是 bullet 则使用默认的 bullet
                 if (textObj.options.bullet.type.toString().toLowerCase() === 'number') {
                     paragraphPropXml += " marL=\"".concat(textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL, "\" indent=\"-").concat(bulletMarL, "\"");
                     strXmlBullet = "<a:buSzPct val=\"100000\"/><a:buFont typeface=\"+mj-lt\"/><a:buAutoNum type=\"".concat(textObj.options.bullet.style || 'arabicPeriod', "\" startAt=\"").concat(textObj.options.bullet.numberStartAt || textObj.options.bullet.startAt || '1', "\"/>");
+                }
+                else if (textObj.options.bullet.type.toString().toLowerCase() === 'bullet') {
+                    paragraphPropXml += " marL=\"".concat(textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL, "\" indent=\"-").concat(bulletMarL, "\"");
+                    strXmlBullet = "<a:buSzPct val=\"100000\"/><a:buChar char=\"".concat(BULLET_TYPES.DEFAULT, "\"/>");
                 }
             }
             else if (textObj.options.bullet.characterCode) {
@@ -6168,18 +6173,18 @@ function genXmlTextBody(slideObj) {
     var arrLines = [];
     var arrTexts = [];
     arrTextObjects.forEach(function (textObj, idx) {
-        // A: Align or Bullet trigger new line
-        if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
+        // A: Align or Bullet trigger new line 先判断是否有bullet，再判断是否有align 如果aligin和bullet同时存在，先处理bullet
+        if (arrTexts.length > 0 && textObj.options.bullet && arrTexts.length > 0) {
+            arrLines.push(arrTexts);
+            arrTexts = [];
+            textObj.options.breakLine = false; // For cases with both `bullet` and `brekaLine` - prevent double lineBreak
+        }
+        else if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
             // Only start a new paragraph when align *changes*
             if (textObj.options.align !== arrTextObjects[idx - 1].options.align) {
                 arrLines.push(arrTexts);
                 arrTexts = [];
             }
-        }
-        else if (arrTexts.length > 0 && textObj.options.bullet && arrTexts.length > 0) {
-            arrLines.push(arrTexts);
-            arrTexts = [];
-            textObj.options.breakLine = false; // For cases with both `bullet` and `brekaLine` - prevent double lineBreak
         }
         // B: Add this text to current line
         arrTexts.push(textObj);
