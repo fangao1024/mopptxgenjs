@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.3 @ 2024/6/26 17:00:58 */
+/* mopptxgenjs 0.0.3 @ 2024/6/27 15:57:05 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -2058,7 +2058,8 @@ function addImageDefinition(target, opt) {
         flipH: opt.flipH || false,
         transparency: opt.transparency || 0,
         objectName: objectName,
-        shadow: correctShadowOptions(opt.shadow)
+        shadow: correctShadowOptions(opt.shadow),
+        clipShape: opt.clipShape || null
     };
     // STEP 4: Add this image to this Slide Rels (rId/rels count spans all slides! Count all images to get next rId)
     if (strImgExtn === 'svg') {
@@ -5091,7 +5092,7 @@ function slideObjectToXml(slide) {
     strSlideXml += '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>';
     // STEP 3: Loop over all Slide.data objects and add them to this slide
     slide._slideObjects.forEach(function (slideItemObj, idx) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
         var x = 0;
         var y = 0;
         var cx = getSmartParseNumber('75%', 'X', slide._presLayout);
@@ -5106,6 +5107,7 @@ function slideObjectToXml(slide) {
         var strXml = null;
         var sizing = (_a = slideItemObj.options) === null || _a === void 0 ? void 0 : _a.sizing;
         var rounding = (_b = slideItemObj.options) === null || _b === void 0 ? void 0 : _b.rounding;
+        var clipShape = (_c = slideItemObj.options) === null || _c === void 0 ? void 0 : _c.clipShape;
         if (slide._slideLayout !== undefined && slide._slideLayout._slideObjects !== undefined && slideItemObj.options && slideItemObj.options.placeholder) {
             placeholderObj = slide._slideLayout._slideObjects.filter(function (object) { return object.options.placeholder === slideItemObj.options.placeholder; })[0];
         }
@@ -5390,15 +5392,15 @@ function slideObjectToXml(slide) {
                 // B: The addition of the "txBox" attribute is the sole determiner of if an object is a shape or textbox
                 strSlideXml += "<p:nvSpPr><p:cNvPr id=\"".concat(idx + 2, "\" name=\"").concat(slideItemObj.options.objectName, "\">");
                 // <Hyperlink>
-                if ((_c = slideItemObj.options.hyperlink) === null || _c === void 0 ? void 0 : _c.url) {
+                if ((_d = slideItemObj.options.hyperlink) === null || _d === void 0 ? void 0 : _d.url) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.options.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.options.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.options.hyperlink.tooltip) : '', "\"/>");
                 }
-                if ((_d = slideItemObj.options.hyperlink) === null || _d === void 0 ? void 0 : _d.slide) {
+                if ((_e = slideItemObj.options.hyperlink) === null || _e === void 0 ? void 0 : _e.slide) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.options.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.options.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.options.hyperlink.tooltip) : '', "\" action=\"ppaction://hlinksldjump\"/>");
                 }
                 // </Hyperlink>
                 strSlideXml += '</p:cNvPr>';
-                strSlideXml += '<p:cNvSpPr' + (((_e = slideItemObj.options) === null || _e === void 0 ? void 0 : _e.isTextBox) ? ' txBox="1"/>' : '/>');
+                strSlideXml += '<p:cNvSpPr' + (((_f = slideItemObj.options) === null || _f === void 0 ? void 0 : _f.isTextBox) ? ' txBox="1"/>' : '/>');
                 strSlideXml += "<p:nvPr>".concat(slideItemObj._type === 'placeholder' ? genXmlPlaceholder(slideItemObj) : genXmlPlaceholder(placeholderObj), "</p:nvPr>");
                 strSlideXml += '</p:nvSpPr><p:spPr>';
                 strSlideXml += "<a:xfrm".concat(locationAttr, ">");
@@ -5414,7 +5416,7 @@ function slideObjectToXml(slide) {
                     strSlideXml += '<a:rect l="l" t="t" r="r" b="b" />';
                     strSlideXml += '<a:pathLst>';
                     strSlideXml += "<a:path w=\"".concat(cx, "\" h=\"").concat(cy, "\">");
-                    (_f = slideItemObj.options.points) === null || _f === void 0 ? void 0 : _f.forEach(function (point, i) {
+                    (_g = slideItemObj.options.points) === null || _g === void 0 ? void 0 : _g.forEach(function (point, i) {
                         if ('curve' in point) {
                             switch (point.curve.type) {
                                 case 'arc':
@@ -5510,10 +5512,10 @@ function slideObjectToXml(slide) {
                 strSlideXml += '<p:pic>';
                 strSlideXml += '  <p:nvPicPr>';
                 strSlideXml += "<p:cNvPr id=\"".concat(idx + 2, "\" name=\"").concat(slideItemObj.options.objectName, "\" descr=\"").concat(encodeXmlEntities(slideItemObj.options.altText || slideItemObj.image), "\">");
-                if ((_g = slideItemObj.hyperlink) === null || _g === void 0 ? void 0 : _g.url) {
+                if ((_h = slideItemObj.hyperlink) === null || _h === void 0 ? void 0 : _h.url) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : '', "\"/>");
                 }
-                if ((_h = slideItemObj.hyperlink) === null || _h === void 0 ? void 0 : _h.slide) {
+                if ((_j = slideItemObj.hyperlink) === null || _j === void 0 ? void 0 : _j.slide) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : '', "\" action=\"ppaction://hlinksldjump\"/>");
                 }
                 strSlideXml += '    </p:cNvPr>';
@@ -5555,7 +5557,31 @@ function slideObjectToXml(slide) {
                 strSlideXml += "  <a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
                 strSlideXml += "  <a:ext cx=\"".concat(imgWidth, "\" cy=\"").concat(imgHeight, "\"/>");
                 strSlideXml += ' </a:xfrm>';
-                strSlideXml += " <a:prstGeom prst=\"".concat(rounding ? 'ellipse' : 'rect', "\"><a:avLst/></a:prstGeom>");
+                strSlideXml += ' <a:prstGeom';
+                // Clip shape or rounding
+                if (clipShape && clipShape.name) {
+                    strSlideXml += " prst=\"".concat(clipShape.name, "\">");
+                }
+                else if (rounding) {
+                    strSlideXml += ' prst="ellipse">';
+                }
+                else {
+                    strSlideXml += ' prst="rect">';
+                }
+                // 控制点
+                if (clipShape && clipShape.adjusting && Object.entries(clipShape.adjusting).length > 0) {
+                    var adjustingList = Object.entries(clipShape.adjusting);
+                    strSlideXml += '<a:avLst>';
+                    for (var _i = 0, adjustingList_1 = adjustingList; _i < adjustingList_1.length; _i++) {
+                        var _l = adjustingList_1[_i], name_1 = _l[0], adj = _l[1];
+                        strSlideXml += "<a:gd name=\"".concat(name_1, "\" fmla=\"val ").concat(adj, "\"/>");
+                    }
+                    strSlideXml += '</a:avLst>';
+                }
+                else {
+                    strSlideXml += '<a:avLst/>';
+                }
+                strSlideXml += '</a:prstGeom>';
                 // EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
                 if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
                     slideItemObj.options.shadow.type = slideItemObj.options.shadow.type || 'outer';

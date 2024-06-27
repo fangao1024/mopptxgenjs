@@ -694,6 +694,21 @@ function testMethod_Masters(pptx: pptxgen) {
 	});
 }
 
+export function testMethod_Image(pptx: pptxgen) {
+	let slide = pptx.addSlide();
+	// 形状裁剪
+	slide.addImage({
+		clipShape: {
+			name: "star5",
+			adjusting: {
+				adj: 30111,
+				hf: 105146,
+				vf: 110557,
+			},
+		},
+	});
+}
+
 export function testTableMethod() {
 	let pptx = new pptxgen();
 

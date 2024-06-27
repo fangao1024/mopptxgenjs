@@ -61,6 +61,21 @@ function App() {
 			fill: "E1E1E1", //{ color: pptx.SchemeColor.background2 },
 			color: "A1A1A1", // pptx.SchemeColor.accent3,
 		});
+		slide.addImage({
+			x: 0.5,
+			y: 0.5,
+			w: 2,
+			h: 2,
+			path: 'https://ppt-qn.molishe.com/zhangweipeng/test/1719296183220/ppt/media/image1.png?imageView2/0/w/1920/h/1080',
+			clipShape: {
+				name: 'star5',
+				adjusting: {
+					adj: 30111,
+					hf: 105146,
+					vf: 110557,
+				},
+			}
+		})
 
 		pptx.writeFile({ fileName: "pptxgenjs-demo-react.pptx" });
 	}

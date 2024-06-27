@@ -1372,8 +1372,28 @@ declare namespace PptxGenJS {
 		/**
 		 * Enable image rounding
 		 * @default false
+		 * @deprecated  use `clipShape` instead
 		 */
 		rounding?: boolean
+		/**
+		 * 形状裁剪
+		 * @example
+		 * { name: 'rect', adjusting: { adj1: 10000, adj2: 10000 } }
+		 */
+		clipShape?: {
+			/**
+			 * 形状名称
+			 * @default 'rect'
+			 * @example 'rect'
+			 */
+			name?: SHAPE_NAME
+			/**
+			 * 形状的控制点 单位 EMU 不在使用英寸
+			 * @example
+			 *  { adj1: 10000, adj2: 10000 },
+			 */
+			adjusting?: Record<string, number>
+		}
 		/**
 		 * Shadow Props
 		 * - MS-PPT > Format Picture > Shadow

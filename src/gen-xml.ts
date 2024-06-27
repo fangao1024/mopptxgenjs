@@ -109,6 +109,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 		let strXml: string = null
 		const sizing: ObjectOptions['sizing'] = slideItemObj.options?.sizing
 		const rounding = slideItemObj.options?.rounding
+		const clipShape = slideItemObj.options?.clipShape
 
 		if ((slide as PresSlide)._slideLayout !== undefined && (slide as PresSlide)._slideLayout._slideObjects !== undefined && slideItemObj.options && slideItemObj.options.placeholder) {
 			placeholderObj = (slide as PresSlide)._slideLayout._slideObjects.filter((object: ISlideObject) => object.options.placeholder === slideItemObj.options.placeholder)[0]
@@ -582,7 +583,30 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				strSlideXml += `  <a:off x="${x}" y="${y}"/>`
 				strSlideXml += `  <a:ext cx="${imgWidth}" cy="${imgHeight}"/>`
 				strSlideXml += ' </a:xfrm>'
-				strSlideXml += ` <a:prstGeom prst="${rounding ? 'ellipse' : 'rect'}"><a:avLst/></a:prstGeom>`
+				strSlideXml += ' <a:prstGeom'
+
+				// Clip shape or rounding
+				if (clipShape && clipShape.name) {
+					strSlideXml += ` prst="${clipShape.name}">`
+				} else if (rounding) {
+					strSlideXml += ' prst="ellipse">'
+				} else {
+					strSlideXml += ' prst="rect">'
+				}
+
+				// 控制点
+				if (clipShape && clipShape.adjusting && Object.entries(clipShape.adjusting).length > 0) {
+					const adjustingList = Object.entries(clipShape.adjusting)
+					strSlideXml += '<a:avLst>'
+					for (const [name, adj] of adjustingList) {
+						strSlideXml += `<a:gd name="${name}" fmla="val ${adj}"/>`
+					}
+					strSlideXml += '</a:avLst>'
+				} else {
+					strSlideXml += '<a:avLst/>'
+				}
+
+				strSlideXml += '</a:prstGeom>'
 
 				// EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
 				if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
