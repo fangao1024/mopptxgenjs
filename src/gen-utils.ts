@@ -16,7 +16,9 @@ import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineP
  * @param {PresLayout} layout - presentation layout
  * @returns {number} calculated size
  */
-export function getSmartParseNumber(size: Coord, xyDir: 'X' | 'Y', layout: PresLayout): number {
+export function getSmartParseNumber(size: number): number
+export function getSmartParseNumber(size: Coord, xyDir: 'X' | 'Y', layout: PresLayout): number
+export function getSmartParseNumber(size: Coord, xyDir?: 'X' | 'Y', layout?: PresLayout): number {
 	// FIRST: Convert string numeric value if reqd
 	if (typeof size === 'string' && !isNaN(Number(size))) size = Number(size)
 

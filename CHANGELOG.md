@@ -1,3 +1,7 @@
+## 修改 版本：0.0.7 时间: 2024/06/28 13:26
+
+> 删除形状 points 配置项 改为 shapePath.paths 并增加设置形状宽高
+
 ## 修改 版本：0.0.6 时间: 2024/06/28 11:01
 
 > 删除形状 rectRadius angleRange arcThicknessRatio 配置项 改为使用 shapeAdjusting

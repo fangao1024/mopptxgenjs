@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.5 @ 2024/6/28 11:04:38 */
+/* mopptxgenjs 0.0.7 @ 2024/6/28 13:28:27 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -678,17 +678,6 @@ var IMG_PLAYBTN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAB4AAAAVnCAYAAAC
 
 /**
  * PptxGenJS: Utility Methods
- */
-/**
- * Translates any type of `x`/`y`/`w`/`h` prop to EMU
- * - guaranteed to return a result regardless of undefined, null, etc. (0)
- * - {number} - 12800 (EMU)
- * - {number} - 0.5 (inches)
- * - {string} - "75%"
- * @param {number|string} size - numeric ("5.5") or percentage ("90%")
- * @param {'X' | 'Y'} xyDir - direction
- * @param {PresLayout} layout - presentation layout
- * @returns {number} calculated size
  */
 function getSmartParseNumber(size, xyDir, layout) {
     // FIRST: Convert string numeric value if reqd
@@ -5092,7 +5081,7 @@ function slideObjectToXml(slide) {
     strSlideXml += '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>';
     // STEP 3: Loop over all Slide.data objects and add them to this slide
     slide._slideObjects.forEach(function (slideItemObj, idx) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         var x = 0;
         var y = 0;
         var cx = getSmartParseNumber('75%', 'X', slide._presLayout);
@@ -5415,29 +5404,28 @@ function slideObjectToXml(slide) {
                     strSlideXml += '</a:cxnLst>';
                     strSlideXml += '<a:rect l="l" t="t" r="r" b="b" />';
                     strSlideXml += '<a:pathLst>';
-                    strSlideXml += "<a:path w=\"".concat(cx, "\" h=\"").concat(cy, "\">");
-                    (_g = slideItemObj.options.points) === null || _g === void 0 ? void 0 : _g.forEach(function (point, i) {
-                        if ('curve' in point) {
-                            switch (point.curve.type) {
-                                case 'arc':
-                                    strSlideXml += "<a:arcTo hR=\"".concat(getSmartParseNumber(point.curve.hR, 'Y', slide._presLayout), "\" wR=\"").concat(getSmartParseNumber(point.curve.wR, 'X', slide._presLayout), "\" stAng=\"").concat(convertRotationDegrees(point.curve.stAng), "\" swAng=\"").concat(convertRotationDegrees(point.curve.swAng), "\" />");
-                                    break;
-                                case 'cubic':
-                                    strSlideXml += "<a:cubicBezTo>\n\t\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(point.curve.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.curve.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(point.curve.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.curve.y2, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(point.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t\t</a:cubicBezTo>");
-                                    break;
-                                case 'quadratic':
-                                    strSlideXml += "<a:quadBezTo>\n\t\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(point.curve.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.curve.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(point.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t\t</a:quadBezTo>");
-                                    break;
-                            }
-                        }
-                        else if ('close' in point) {
-                            strSlideXml += '<a:close />';
-                        }
-                        else if (point.moveTo || i === 0) {
-                            strSlideXml += "<a:moveTo><a:pt x=\"".concat(getSmartParseNumber(point.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.y, 'Y', slide._presLayout), "\" /></a:moveTo>");
-                        }
-                        else {
-                            strSlideXml += "<a:lnTo><a:pt x=\"".concat(getSmartParseNumber(point.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(point.y, 'Y', slide._presLayout), "\" /></a:lnTo>");
+                    var shapePath = slideItemObj.options.shapePath;
+                    strSlideXml += "<a:path w=\"".concat((shapePath === null || shapePath === void 0 ? void 0 : shapePath.w) ? getSmartParseNumber(shapePath === null || shapePath === void 0 ? void 0 : shapePath.w) : cx, "\" h=\"").concat((shapePath === null || shapePath === void 0 ? void 0 : shapePath.h) ? getSmartParseNumber(shapePath === null || shapePath === void 0 ? void 0 : shapePath.h) : cy, "\">");
+                    shapePath === null || shapePath === void 0 ? void 0 : shapePath.paths.forEach(function (path) {
+                        switch (path.type) {
+                            case 'moveTo':
+                                strSlideXml += "<a:moveTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:moveTo>");
+                                break;
+                            case 'lineTo':
+                                strSlideXml += "<a:lnTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:lnTo>");
+                                break;
+                            case 'arcTo':
+                                strSlideXml += "<a:arcTo wR=\"".concat(getSmartParseNumber(path.wR, 'X', slide._presLayout), "\" hR=\"").concat(getSmartParseNumber(path.hR, 'Y', slide._presLayout), "\" stAng=\"").concat(path.stAng, "\" swAng=\"").concat(path.swAng, "\" />");
+                                break;
+                            case 'cubicBezTo':
+                                strSlideXml += "<a:cubicBezTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x3, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y3, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:cubicBezTo>");
+                                break;
+                            case 'quadBezTo':
+                                strSlideXml += "<a:quadBezTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:quadBezTo>");
+                                break;
+                            case 'close':
+                                strSlideXml += '<a:close />';
+                                break;
                         }
                     });
                     strSlideXml += '</a:path>';
@@ -5450,7 +5438,7 @@ function slideObjectToXml(slide) {
                     if (slideItemObj.options.shapeAdjusting && Object.keys(slideItemObj.options.shapeAdjusting).length > 0) {
                         Object.entries(slideItemObj.options.shapeAdjusting).forEach(function (_a) {
                             var key = _a[0], value = _a[1];
-                            strSlideXml += "<a:gd name=\"".concat(key, "\" fmla=\"val ").concat(value, "\" />");
+                            strSlideXml += "<a:gd name=\"".concat(key, "\" fmla=\"val ").concat(getSmartParseNumber(value), "\" />");
                         });
                     }
                     strSlideXml += '</a:avLst></a:prstGeom>';
@@ -5507,10 +5495,10 @@ function slideObjectToXml(slide) {
                 strSlideXml += '<p:pic>';
                 strSlideXml += '  <p:nvPicPr>';
                 strSlideXml += "<p:cNvPr id=\"".concat(idx + 2, "\" name=\"").concat(slideItemObj.options.objectName, "\" descr=\"").concat(encodeXmlEntities(slideItemObj.options.altText || slideItemObj.image), "\">");
-                if ((_h = slideItemObj.hyperlink) === null || _h === void 0 ? void 0 : _h.url) {
+                if ((_g = slideItemObj.hyperlink) === null || _g === void 0 ? void 0 : _g.url) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : '', "\"/>");
                 }
-                if ((_j = slideItemObj.hyperlink) === null || _j === void 0 ? void 0 : _j.slide) {
+                if ((_h = slideItemObj.hyperlink) === null || _h === void 0 ? void 0 : _h.slide) {
                     strSlideXml += "<a:hlinkClick r:id=\"rId".concat(slideItemObj.hyperlink._rId, "\" tooltip=\"").concat(slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : '', "\" action=\"ppaction://hlinksldjump\"/>");
                 }
                 strSlideXml += '    </p:cNvPr>';
@@ -5568,8 +5556,8 @@ function slideObjectToXml(slide) {
                     var adjustingList = Object.entries(clipShape.adjusting);
                     strSlideXml += '<a:avLst>';
                     for (var _i = 0, adjustingList_1 = adjustingList; _i < adjustingList_1.length; _i++) {
-                        var _l = adjustingList_1[_i], name_1 = _l[0], adj = _l[1];
-                        strSlideXml += "<a:gd name=\"".concat(name_1, "\" fmla=\"val ").concat(adj, "\"/>");
+                        var _j = adjustingList_1[_i], name_1 = _j[0], adj = _j[1];
+                        strSlideXml += "<a:gd name=\"".concat(name_1, "\" fmla=\"val ").concat(getSmartParseNumber(adj), "\"/>");
                     }
                     strSlideXml += '</a:avLst>';
                 }

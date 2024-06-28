@@ -422,43 +422,43 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					strSlideXml += '<a:rect l="l" t="t" r="r" b="b" />'
 
 					strSlideXml += '<a:pathLst>'
-					strSlideXml += `<a:path w="${cx}" h="${cy}">`
-
-					slideItemObj.options.points?.forEach((point, i) => {
-						if ('curve' in point) {
-							switch (point.curve.type) {
-								case 'arc':
-									strSlideXml += `<a:arcTo hR="${getSmartParseNumber(point.curve.hR, 'Y', slide._presLayout)}" wR="${getSmartParseNumber(
-										point.curve.wR,
-										'X',
-										slide._presLayout
-									)}" stAng="${convertRotationDegrees(point.curve.stAng)}" swAng="${convertRotationDegrees(point.curve.swAng)}" />`
-									break
-								case 'cubic':
-									strSlideXml += `<a:cubicBezTo>
-									<a:pt x="${getSmartParseNumber(point.curve.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.curve.y1, 'Y', slide._presLayout)}" />
-									<a:pt x="${getSmartParseNumber(point.curve.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.curve.y2, 'Y', slide._presLayout)}" />
-									<a:pt x="${getSmartParseNumber(point.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.y, 'Y', slide._presLayout)}" />
-									</a:cubicBezTo>`
-									break
-								case 'quadratic':
-									strSlideXml += `<a:quadBezTo>
-									<a:pt x="${getSmartParseNumber(point.curve.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.curve.y1, 'Y', slide._presLayout)}" />
-									<a:pt x="${getSmartParseNumber(point.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.y, 'Y', slide._presLayout)}" />
-									</a:quadBezTo>`
-									break
-								default:
-									break
-							}
-						} else if ('close' in point) {
-							strSlideXml += '<a:close />'
-						} else if (point.moveTo || i === 0) {
-							strSlideXml += `<a:moveTo><a:pt x="${getSmartParseNumber(point.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.y, 'Y', slide._presLayout)}" /></a:moveTo>`
-						} else {
-							strSlideXml += `<a:lnTo><a:pt x="${getSmartParseNumber(point.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(point.y, 'Y', slide._presLayout)}" /></a:lnTo>`
+					const shapePath = slideItemObj.options.shapePath
+					strSlideXml += `<a:path w="${shapePath?.w ? getSmartParseNumber(shapePath?.w) : cx}" h="${shapePath?.h ? getSmartParseNumber(shapePath?.h) : cy}">`
+					shapePath?.paths.forEach((path) => {
+						switch (path.type) {
+							case 'moveTo':
+								strSlideXml += `<a:moveTo>
+								<a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" />
+								</a:moveTo>`
+								break
+							case 'lineTo':
+								strSlideXml += `<a:lnTo>
+								<a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" />
+								</a:lnTo>`
+								break
+							case 'arcTo':
+								strSlideXml += `<a:arcTo wR="${getSmartParseNumber(path.wR, 'X', slide._presLayout)}" hR="${getSmartParseNumber(path.hR, 'Y', slide._presLayout)}" stAng="${
+									path.stAng
+								}" swAng="${path.swAng}" />`
+								break
+							case 'cubicBezTo':
+								strSlideXml += `<a:cubicBezTo>
+								<a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y1, 'Y', slide._presLayout)}" />
+								<a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" />
+								<a:pt x="${getSmartParseNumber(path.x3, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y3, 'Y', slide._presLayout)}" />
+								</a:cubicBezTo>`
+								break
+							case 'quadBezTo':
+								strSlideXml += `<a:quadBezTo>
+								<a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y1, 'Y', slide._presLayout)}" />
+								<a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" />
+								</a:quadBezTo>`
+								break
+							case 'close':
+								strSlideXml += '<a:close />'
+								break
 						}
 					})
-
 					strSlideXml += '</a:path>'
 					strSlideXml += '</a:pathLst>'
 					strSlideXml += '</a:custGeom>'
@@ -467,7 +467,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					// 这里删除了老的配置 改为使用统一的配置项 v0.0.6
 					if (slideItemObj.options.shapeAdjusting && Object.keys(slideItemObj.options.shapeAdjusting).length > 0) {
 						Object.entries(slideItemObj.options.shapeAdjusting).forEach(([key, value]) => {
-							strSlideXml += `<a:gd name="${key}" fmla="val ${value}" />`
+							strSlideXml += `<a:gd name="${key}" fmla="val ${getSmartParseNumber(value)}" />`
 						})
 					}
 					strSlideXml += '</a:avLst></a:prstGeom>'
@@ -593,7 +593,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					const adjustingList = Object.entries(clipShape.adjusting)
 					strSlideXml += '<a:avLst>'
 					for (const [name, adj] of adjustingList) {
-						strSlideXml += `<a:gd name="${name}" fmla="val ${adj}"/>`
+						strSlideXml += `<a:gd name="${name}" fmla="val ${getSmartParseNumber(adj)}"/>`
 					}
 					strSlideXml += '</a:avLst>'
 				} else {

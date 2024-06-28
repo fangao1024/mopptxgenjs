@@ -544,7 +544,7 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 		 */
 		name?: SHAPE_NAME
 		/**
-		 * 形状的控制点 单位 EMU 不在使用英寸
+		 * 形状的控制点
 		 * @example
 		 *  { adj1: 10000, adj2: 10000 },
 		 */
@@ -678,23 +678,6 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 */
 	line?: ShapeLineProps
 	/**
-	 * Points (only for pptx.shapes.CUSTOM_GEOMETRY)
-	 * - type: 'arc'
-	 * - `hR` Shape Arc Height Radius
-	 * - `wR` Shape Arc Width Radius
-	 * - `stAng` Shape Arc Start Angle
-	 * - `swAng` Shape Arc Swing Angle
-	 * @see http://www.datypic.com/sc/ooxml/e-a_arcTo-1.html
-	 * @example [{ x: 0, y: 0 }, { x: 10, y: 10 }] // draw a line between those two points
-	 */
-	points?: Array<
-		| { x: Coord; y: Coord; moveTo?: boolean }
-		| { x: Coord; y: Coord; curve: { type: 'arc'; hR: Coord; wR: Coord; stAng: number; swAng: number } }
-		| { x: Coord; y: Coord; curve: { type: 'cubic'; x1: Coord; y1: Coord; x2: Coord; y2: Coord } }
-		| { x: Coord; y: Coord; curve: { type: 'quadratic'; x1: Coord; y1: Coord } }
-		| { close: true }
-	>
-	/**
 	 * Rotation (degrees)
 	 * - range: -360 to 360
 	 * @default 0
@@ -707,7 +690,22 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 */
 	shadow?: ShadowProps
 	/**
-	 * 形状控制点 单位 EMU 不在使用英寸
+	 * 	形状配置 只有类型是 CUSTOM_GEOMETRY 时才需要这个配置项
+	 */
+	shapePath?: {
+		w: number
+		h: number
+		paths: Array<
+			| { type: 'moveTo'; x: Coord; y: Coord }
+			| { type: 'lineTo'; x: Coord; y: Coord }
+			| { type: 'cubicBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord; x3: Coord; y3: Coord }
+			| { type: 'arcTo'; wR: Coord; hR: Coord; stAng: number; swAng: number }
+			| { type: 'quadBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord }
+			| { type: 'close' }
+		>
+	}
+	/**
+	 * 形状控制点
 	 * @example
 	 *  { adj1: 10000, adj2: 10000 },
 	 */
