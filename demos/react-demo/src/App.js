@@ -66,7 +66,7 @@ function App() {
 			y: 0.5,
 			w: 2,
 			h: 2,
-			path: 'https://ppt-qn.molishe.com/zhangweipeng/test/1719296183220/ppt/media/image1.png?imageView2/0/w/1920/h/1080',
+			path: '',
 			clipShape: {
 				name: 'star5',
 				adjusting: {
