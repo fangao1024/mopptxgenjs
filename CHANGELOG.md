@@ -1,3 +1,7 @@
+## 修改 版本：0.0.6 时间: 2024/06/28 11:01
+
+> 删除形状 rectRadius angleRange arcThicknessRatio 配置项 改为使用 shapeAdjusting
+
 ## 修改 版本：0.0.5 时间: 2024/06/28 09:49
 
 > 修复 ts 类型文件错误

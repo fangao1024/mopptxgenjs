@@ -464,17 +464,11 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					strSlideXml += '</a:custGeom>'
 				} else {
 					strSlideXml += '<a:prstGeom prst="' + slideItemObj.shape + '"><a:avLst>'
-					if (slideItemObj.options.rectRadius) {
-						strSlideXml += `<a:gd name="adj" fmla="val ${Math.round((slideItemObj.options.rectRadius * EMU * 100000) / Math.min(cx, cy))}"/>`
-					} else if (slideItemObj.options.angleRange) {
-						for (let i = 0; i < 2; i++) {
-							const angle = slideItemObj.options.angleRange[i]
-							strSlideXml += `<a:gd name="adj${i + 1}" fmla="val ${convertRotationDegrees(angle)}" />`
-						}
-
-						if (slideItemObj.options.arcThicknessRatio) {
-							strSlideXml += `<a:gd name="adj3" fmla="val ${Math.round(slideItemObj.options.arcThicknessRatio * 50000)}" />`
-						}
+					// 这里删除了老的配置 改为使用统一的配置项 v0.0.6
+					if (slideItemObj.options.shapeAdjusting && Object.keys(slideItemObj.options.shapeAdjusting).length > 0) {
+						Object.entries(slideItemObj.options.shapeAdjusting).forEach(([key, value]) => {
+							strSlideXml += `<a:gd name="${key}" fmla="val ${value}" />`
+						})
 					}
 					strSlideXml += '</a:avLst></a:prstGeom>'
 				}

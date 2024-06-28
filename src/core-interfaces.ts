@@ -652,22 +652,6 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 */
 	align?: HAlign
 	/**
-	 * Radius (only for pptx.shapes.PIE, pptx.shapes.ARC, pptx.shapes.BLOCK_ARC)
-	 * - In the case of pptx.shapes.BLOCK_ARC you have to setup the arcThicknessRatio
-	 * - values: [0-359, 0-359]
-	 * @since v3.4.0
-	 * @default [270, 0]
-	 */
-	angleRange?: [number, number]
-	/**
-	 * Radius (only for pptx.shapes.BLOCK_ARC)
-	 * - You have to setup the angleRange values too
-	 * - values: 0.0-1.0
-	 * @since v3.4.0
-	 * @default 0.5
-	 */
-	arcThicknessRatio?: number
-	/**
 	 * Shape fill color properties
 	 * @example { color:'FF0000' } // hex color (red)
 	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
@@ -711,12 +695,6 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 		| { close: true }
 	>
 	/**
-	 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-	 * - values: 0.0 to 1.0
-	 * @default 0
-	 */
-	rectRadius?: number
-	/**
 	 * Rotation (degrees)
 	 * - range: -360 to 360
 	 * @default 0
@@ -728,6 +706,12 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 * TODO: need new demo.js entry for shape shadow
 	 */
 	shadow?: ShadowProps
+	/**
+	 * 形状控制点 单位 EMU 不在使用英寸
+	 * @example
+	 *  { adj1: 10000, adj2: 10000 },
+	 */
+	shapeAdjusting?: Record<string, number>
 
 	/**
 	 * @deprecated v3.3.0
@@ -1099,12 +1083,6 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	paraSpaceAfter?: number
 	paraSpaceBefore?: number
 	placeholder?: string
-	/**
-	 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-	 * - values: 0.0 to 1.0
-	 * @default 0
-	 */
-	rectRadius?: number
 	/**
 	 * Rotation (degrees)
 	 * - range: -360 to 360

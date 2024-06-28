@@ -462,6 +462,7 @@ function testMethod_Shape(pptx: pptxgen) {
 		line: { color: "000000" },
 		flipH: true,
 	});
+	slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 0.5, w: 3, h: 3, fill: { color: "66ff99" }, shapeAdjusting: { adj: 10000 } });
 }
 function testMethod_Text(pptx: pptxgen) {
 	let slide = pptx.addSlide();
@@ -491,6 +492,17 @@ function testMethod_Text(pptx: pptxgen) {
 		bullet: { type: "number", numberStartAt: 5 },
 		color: pptx.SchemeColor.accent6,
 		fill: { color: pptx.SchemeColor.background2 },
+	});
+	slide.addText("teset", {
+		x: 7.0,
+		y: 1.0,
+		w: "40%",
+		h: 0.75,
+		fontFace: "Courier New",
+		shape: "accentBorderCallout1",
+		shapeAdjusting: {
+			adj: 10000,
+		},
 	});
 }
 function testMethod_Masters(pptx: pptxgen) {

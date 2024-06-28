@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.5 @ 2024/6/28 09:49:36 */
+/* mopptxgenjs 0.0.5 @ 2024/6/28 11:04:38 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -5440,17 +5440,12 @@ function slideObjectToXml(slide) {
                 }
                 else {
                     strSlideXml += '<a:prstGeom prst="' + slideItemObj.shape + '"><a:avLst>';
-                    if (slideItemObj.options.rectRadius) {
-                        strSlideXml += "<a:gd name=\"adj\" fmla=\"val ".concat(Math.round((slideItemObj.options.rectRadius * EMU * 100000) / Math.min(cx, cy)), "\"/>");
-                    }
-                    else if (slideItemObj.options.angleRange) {
-                        for (var i = 0; i < 2; i++) {
-                            var angle = slideItemObj.options.angleRange[i];
-                            strSlideXml += "<a:gd name=\"adj".concat(i + 1, "\" fmla=\"val ").concat(convertRotationDegrees(angle), "\" />");
-                        }
-                        if (slideItemObj.options.arcThicknessRatio) {
-                            strSlideXml += "<a:gd name=\"adj3\" fmla=\"val ".concat(Math.round(slideItemObj.options.arcThicknessRatio * 50000), "\" />");
-                        }
+                    // 这里删除了老的配置 改为使用统一的配置项 v0.0.6
+                    if (slideItemObj.options.shapeAdjusting && Object.keys(slideItemObj.options.shapeAdjusting).length > 0) {
+                        Object.entries(slideItemObj.options.shapeAdjusting).forEach(function (_a) {
+                            var key = _a[0], value = _a[1];
+                            strSlideXml += "<a:gd name=\"".concat(key, "\" fmla=\"val ").concat(value, "\" />");
+                        });
                     }
                     strSlideXml += '</a:avLst></a:prstGeom>';
                 }

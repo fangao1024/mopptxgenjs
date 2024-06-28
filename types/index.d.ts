@@ -1499,22 +1499,6 @@ declare namespace PptxGenJS {
 		 */
 		align?: HAlign
 		/**
-		 * Radius (only for pptx.shapes.PIE, pptx.shapes.ARC, pptx.shapes.BLOCK_ARC)
-		 * - In the case of pptx.shapes.BLOCK_ARC you have to setup the arcThicknessRatio
-		 * - values: [0-359, 0-359]
-		 * @since v3.4.0
-		 * @default [270, 0]
-		 */
-		angleRange?: [number, number]
-		/**
-		 * Radius (only for pptx.shapes.BLOCK_ARC)
-		 * - You have to setup the angleRange values too
-		 * - values: 0.0-1.0
-		 * @since v3.4.0
-		 * @default 0.5
-		 */
-		arcThicknessRatio?: number
-		/**
 		 * Shape fill color properties
 		 * @example { color:'FF0000' } // hex color (red)
 		 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
@@ -1558,12 +1542,6 @@ declare namespace PptxGenJS {
 			| { close: true }
 		>
 		/**
-		 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-		 * - values: 0.0 to 1.0
-		 * @default 0
-		 */
-		rectRadius?: number
-		/**
 		 * Rotation (degrees)
 		 * - range: -360 to 360
 		 * @default 0
@@ -1575,6 +1553,12 @@ declare namespace PptxGenJS {
 		 * TODO: need new demo.js entry for shape shadow
 		 */
 		shadow?: ShadowProps
+		/**
+		 * 形状控制点 单位 EMU 不在使用英寸
+		 * @example
+		 *  { adj1: 10000, adj2: 10000 },
+		 */
+		shapeAdjusting?: Record<string, number>
 
 		/**
 		 * @deprecated v3.3.0
@@ -1921,12 +1905,6 @@ declare namespace PptxGenJS {
 		paraSpaceBefore?: number
 		placeholder?: string
 		/**
-		 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
-		 * - values: 0.0 to 1.0
-		 * @default 0
-		 */
-		rectRadius?: number
-		/**
 		 * Rotation (degrees)
 		 * - range: -360 to 360
 		 * @default 0
@@ -1939,7 +1917,30 @@ declare namespace PptxGenJS {
 		 */
 		rtlMode?: boolean
 		shadow?: ShadowProps
+		/**
+		 * Points (only for pptx.shapes.CUSTOM_GEOMETRY)
+		 * - type: 'arc'
+		 * - `hR` Shape Arc Height Radius
+		 * - `wR` Shape Arc Width Radius
+		 * - `stAng` Shape Arc Start Angle
+		 * - `swAng` Shape Arc Swing Angle
+		 * @see http://www.datypic.com/sc/ooxml/e-a_arcTo-1.html
+		 * @example [{ x: 0, y: 0 }, { x: 10, y: 10 }] // draw a line between those two points
+		 */
+		points?: Array<
+			| { x: Coord; y: Coord; moveTo?: boolean }
+			| { x: Coord; y: Coord; curve: { type: 'arc'; hR: Coord; wR: Coord; stAng: number; swAng: number } }
+			| { x: Coord; y: Coord; curve: { type: 'cubic'; x1: Coord; y1: Coord; x2: Coord; y2: Coord } }
+			| { x: Coord; y: Coord; curve: { type: 'quadratic'; x1: Coord; y1: Coord } }
+			| { close: true }
+		>
 		shape?: SHAPE_NAME
+		/**
+		 * 形状控制点 单位 EMU 不在使用英寸
+		 * @example
+		 *  { adj1: 10000, adj2: 10000 },
+		 */
+		shapeAdjusting?: Record<string, number>
 		strike?: boolean | 'dblStrike' | 'sngStrike'
 		subscript?: boolean
 		superscript?: boolean
