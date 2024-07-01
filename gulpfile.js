@@ -4,6 +4,7 @@ const { resolve } = require('@rollup/plugin-node-resolve')
 const { commonjs } = require('@rollup/plugin-commonjs')
 const typescript = require('rollup-plugin-typescript2')
 const { watch, series } = require('gulp')
+const replace = require('gulp-replace');
 const gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	ignore = require('gulp-ignore'),
@@ -86,11 +87,24 @@ gulp.task('es', () => {
 		.pipe(gulp.dest('./dist/'))
 })
 
+gulp.task('dts', () => {
+	return gulp
+		.src(['./src/bld/*.d.ts'])
+		.pipe(gulp.dest('./dist/types/'))
+})
+
 gulp.task('reactTestCode', () => {
 	return gulp
-		.src(['./dist/pptxgen.es.js', './dist/pptxgen.cjs.js', './dist/pptxgen.min.js', './dist/pptxgen.min.js.map', './dist/pptxgen.bundle.js', './dist/pptxgen.bundle.js.map'])
+		.src(['./dist/*.js', './dist/*.js.map'])
 		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist'))
 })
+
+gulp.task('reactTestDts', () => {
+	return gulp
+		.src(['./dist/types/*.d.ts'])
+		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist/types'))
+})
+
 
 gulp.task('reactTestDefs', () => {
 	return gulp
@@ -104,16 +118,20 @@ gulp.task('nodeTest', () => {
 		.pipe(gulp.dest('./demos/node/node_modules/pptxgenjs/dist'))
 })
 
+gulp.task('defs', gulp.series('reactTestDts', 'reactTestDefs'), () => {
+	console.log('... ./dist/types/*.d.ts files created!');
+})
+
 // Build/Deploy (ad-hoc, no watch)
-gulp.task('ship', gulp.series('build', 'min', 'cjs', 'es', 'bundle', 'reactTestCode', 'reactTestDefs', 'nodeTest'), () => {
+gulp.task('ship', gulp.series('build', 'min', 'cjs', 'es', 'dts', 'bundle', 'reactTestCode', 'reactTestDts', 'reactTestDefs', 'nodeTest'), () => {
 	console.log('... ./dist/*.js files created!')
 })
 // Build/Deploy
-gulp.task('default', gulp.series('build', 'min', 'cjs', 'es', 'bundle', 'reactTestCode', 'reactTestDefs', 'nodeTest'), () => {
+gulp.task('default', gulp.series('build', 'min', 'cjs', 'es', 'dts', 'bundle', 'reactTestCode', 'reactTestDts', 'reactTestDefs', 'nodeTest'), () => {
 	console.log('... ./dist/*.js files created!')
 })
 
 // Watch
 exports.default = function () {
-	watch('src/*.ts', series('build', 'min', 'cjs', 'es', 'bundle', 'nodeTest'))
+	watch('src/*.ts', series('build', 'min', 'cjs', 'es', 'dts', 'bundle', 'nodeTest'))
 }

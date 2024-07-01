@@ -3,7 +3,7 @@
  */
 
 import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps } from './core-interfaces'
+import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps, ColorSelection } from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -184,22 +184,53 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
 
 /**
  * Create color selection
- * @param {Color | ShapeFillProps | ShapeLineProps} props fill props
+ * @param {Color | ColorSelection} props fill props
  * @returns XML string
  */
-export function genXmlColorSelection(props: Color | ShapeFillProps | ShapeLineProps): string {
+export function genXmlColorSelection(props: Color): string
+export function genXmlColorSelection(props: ColorSelection): string
+export function genXmlColorSelection(props: Color | ColorSelection): string {
 	let fillType = 'solid'
 	let colorVal = ''
 	let internalElements = ''
 	let outText = ''
 
 	if (props) {
-		if (typeof props === 'string') colorVal = props
-		else {
-			if (props.type) fillType = props.type
-			if (props.color) colorVal = props.color
-			if (props.alpha) internalElements += `<a:alpha val="${Math.round((100 - props.alpha) * 1000)}"/>` // DEPRECATED: @deprecated v3.3.0
-			if (props.transparency) internalElements += `<a:alpha val="${Math.round((100 - props.transparency) * 1000)}"/>`
+		if (typeof props === 'string') {
+			colorVal = props
+		} else {
+			if (props.type) {
+				fillType = props.type
+			}
+			if (props.color) {
+				colorVal = props.color
+			}
+			if (props.colorConfig) {
+				if (props.colorConfig.alpha) {
+					internalElements += `<a:alpha val="${Math.round((100 - props.colorConfig.alpha) * 1000)}"/>`
+				}
+				if (props.colorConfig.hueMod) {
+					internalElements += `<a:hueMod val="${Math.round((100 - props.colorConfig.hueMod) * 1000)}"/>`
+				}
+				if (props.colorConfig.lumMod) {
+					internalElements += `<a:lumMod val="${Math.round((100 - props.colorConfig.lumMod) * 1000)}"/>`
+				}
+				if (props.colorConfig.lumOff) {
+					internalElements += `<a:lumOff val="${Math.round((100 - props.colorConfig.lumOff) * 1000)}"/>`
+				}
+				if (props.colorConfig.satMod) {
+					internalElements += `<a:satMod val="${Math.round((100 - props.colorConfig.satMod) * 1000)}"/>`
+				}
+				if (props.colorConfig.satOff) {
+					internalElements += `<a:satOff val="${Math.round((100 - props.colorConfig.satOff) * 1000)}"/>`
+				}
+				if (props.colorConfig.shade) {
+					internalElements += `<a:shade val="${Math.round((100 - props.colorConfig.shade) * 1000)}"/>`
+				}
+				if (props.colorConfig.tint) {
+					internalElements += `<a:tint val="${Math.round((100 - props.colorConfig.tint) * 1000)}"/>`
+				}
+			}
 		}
 
 		switch (fillType) {

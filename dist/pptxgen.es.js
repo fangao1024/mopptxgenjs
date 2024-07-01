@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.7 @ 2024/6/28 13:28:27 */
+/* mopptxgenjs 0.0.8 @ 2024/7/1 09:58:58 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -823,28 +823,48 @@ function createGlowElement(options, defaults) {
     strXml += '</a:glow>';
     return strXml;
 }
-/**
- * Create color selection
- * @param {Color | ShapeFillProps | ShapeLineProps} props fill props
- * @returns XML string
- */
 function genXmlColorSelection(props) {
     var fillType = 'solid';
     var colorVal = '';
     var internalElements = '';
     var outText = '';
     if (props) {
-        if (typeof props === 'string')
+        if (typeof props === 'string') {
             colorVal = props;
+        }
         else {
-            if (props.type)
+            if (props.type) {
                 fillType = props.type;
-            if (props.color)
+            }
+            if (props.color) {
                 colorVal = props.color;
-            if (props.alpha)
-                internalElements += "<a:alpha val=\"".concat(Math.round((100 - props.alpha) * 1000), "\"/>"); // DEPRECATED: @deprecated v3.3.0
-            if (props.transparency)
-                internalElements += "<a:alpha val=\"".concat(Math.round((100 - props.transparency) * 1000), "\"/>");
+            }
+            if (props.colorConfig) {
+                if (props.colorConfig.alpha) {
+                    internalElements += "<a:alpha val=\"".concat(Math.round((100 - props.colorConfig.alpha) * 1000), "\"/>");
+                }
+                if (props.colorConfig.hueMod) {
+                    internalElements += "<a:hueMod val=\"".concat(Math.round((100 - props.colorConfig.hueMod) * 1000), "\"/>");
+                }
+                if (props.colorConfig.lumMod) {
+                    internalElements += "<a:lumMod val=\"".concat(Math.round((100 - props.colorConfig.lumMod) * 1000), "\"/>");
+                }
+                if (props.colorConfig.lumOff) {
+                    internalElements += "<a:lumOff val=\"".concat(Math.round((100 - props.colorConfig.lumOff) * 1000), "\"/>");
+                }
+                if (props.colorConfig.satMod) {
+                    internalElements += "<a:satMod val=\"".concat(Math.round((100 - props.colorConfig.satMod) * 1000), "\"/>");
+                }
+                if (props.colorConfig.satOff) {
+                    internalElements += "<a:satOff val=\"".concat(Math.round((100 - props.colorConfig.satOff) * 1000), "\"/>");
+                }
+                if (props.colorConfig.shade) {
+                    internalElements += "<a:shade val=\"".concat(Math.round((100 - props.colorConfig.shade) * 1000), "\"/>");
+                }
+                if (props.colorConfig.tint) {
+                    internalElements += "<a:tint val=\"".concat(Math.round((100 - props.colorConfig.tint) * 1000), "\"/>");
+                }
+            }
         }
         switch (fillType) {
             case 'solid':
@@ -1903,7 +1923,7 @@ function addChartDefinition(target, type, data, opt) {
     }
     if (options.border)
         options.plotArea.border = options.border; // @deprecated [[remove in v4.0]]
-    options.plotArea.fill = options.plotArea.fill || { color: null, transparency: null };
+    options.plotArea.fill = options.plotArea.fill || { color: null, colorConfig: null };
     if (options.fill)
         options.plotArea.fill.color = options.fill; // @deprecated [[remove in v4.0]]
     //
@@ -2039,7 +2059,7 @@ function addImageDefinition(target, opt) {
         rotate: opt.rotate || 0,
         flipV: opt.flipV || false,
         flipH: opt.flipH || false,
-        transparency: opt.transparency || 0,
+        opacity: opt.opacity || 0,
         objectName: objectName,
         shadow: correctShadowOptions(opt.shadow),
         clipShape: opt.clipShape || null
@@ -2252,7 +2272,7 @@ function addShapeDefinition(target, shapeName, opts) {
     var newLineOpts = {
         type: options.line.type || 'solid',
         color: options.line.color || DEF_SHAPE_LINE_COLOR,
-        transparency: options.line.transparency || 0,
+        colorConfig: options.line.colorConfig,
         width: options.line.width || 1,
         dashType: options.line.dashType || 'solid',
         beginArrowType: options.line.beginArrowType || null,
@@ -2588,7 +2608,7 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
                 var newLineOpts = {
                     type: itemOpts.line.type || 'solid',
                     color: itemOpts.line.color || DEF_SHAPE_LINE_COLOR,
-                    transparency: itemOpts.line.transparency || 0,
+                    colorConfig: itemOpts.line.colorConfig,
                     width: itemOpts.line.width || 1,
                     dashType: itemOpts.line.dashType || 'solid',
                     beginArrowType: itemOpts.line.beginArrowType || null,
@@ -5503,7 +5523,7 @@ function slideObjectToXml(slide) {
                 // NOTE: This works for both cases: either `path` or `data` contains the SVG
                 if ((slide._relsMedia || []).filter(function (rel) { return rel.rId === slideItemObj.imageRid; })[0] && (slide._relsMedia || []).filter(function (rel) { return rel.rId === slideItemObj.imageRid; })[0].extn === 'svg') {
                     strSlideXml += "<a:blip r:embed=\"rId".concat(slideItemObj.imageRid - 1, "\">");
-                    strSlideXml += slideItemObj.options.transparency ? " <a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.transparency) * 1000), "\"/>") : '';
+                    strSlideXml += slideItemObj.options.opacity ? " <a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.opacity) * 1000), "\"/>") : '';
                     strSlideXml += ' <a:extLst>';
                     strSlideXml += '  <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">';
                     strSlideXml += "   <asvg:svgBlip xmlns:asvg=\"http://schemas.microsoft.com/office/drawing/2016/SVG/main\" r:embed=\"rId".concat(slideItemObj.imageRid, "\"/>");
@@ -5513,7 +5533,7 @@ function slideObjectToXml(slide) {
                 }
                 else {
                     strSlideXml += "<a:blip r:embed=\"rId".concat(slideItemObj.imageRid, "\">");
-                    strSlideXml += slideItemObj.options.transparency ? "<a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.transparency) * 1000), "\"/>") : '';
+                    strSlideXml += slideItemObj.options.opacity ? "<a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.opacity) * 1000), "\"/>") : '';
                     strSlideXml += '</a:blip>';
                 }
                 if (sizing === null || sizing === void 0 ? void 0 : sizing.type) {
@@ -5940,7 +5960,7 @@ function genXmlTextRunProperties(opts, isDefault) {
             runProps += "<a:ln w=\"".concat(valToPts(opts.outline.size || 0.75), "\">").concat(genXmlColorSelection(opts.outline.color || 'FFFFFF'), "</a:ln>");
         }
         if (opts.color)
-            runProps += genXmlColorSelection({ color: opts.color, transparency: opts.transparency });
+            runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig });
         if (opts.highlight)
             runProps += "<a:highlight>".concat(createColorElement(opts.highlight), "</a:highlight>");
         if (typeof opts.underline === 'object' && opts.underline.color)

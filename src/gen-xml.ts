@@ -547,7 +547,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				// NOTE: This works for both cases: either `path` or `data` contains the SVG
 				if ((slide._relsMedia || []).filter((rel) => rel.rId === slideItemObj.imageRid)[0] && (slide._relsMedia || []).filter((rel) => rel.rId === slideItemObj.imageRid)[0].extn === 'svg') {
 					strSlideXml += `<a:blip r:embed="rId${slideItemObj.imageRid - 1}">`
-					strSlideXml += slideItemObj.options.transparency ? ` <a:alphaModFix amt="${Math.round((100 - slideItemObj.options.transparency) * 1000)}"/>` : ''
+					strSlideXml += slideItemObj.options.opacity ? ` <a:alphaModFix amt="${Math.round((100 - slideItemObj.options.opacity) * 1000)}"/>` : ''
 					strSlideXml += ' <a:extLst>'
 					strSlideXml += '  <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">'
 					strSlideXml += `   <asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId${slideItemObj.imageRid}"/>`
@@ -556,7 +556,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					strSlideXml += '</a:blip>'
 				} else {
 					strSlideXml += `<a:blip r:embed="rId${slideItemObj.imageRid}">`
-					strSlideXml += slideItemObj.options.transparency ? `<a:alphaModFix amt="${Math.round((100 - slideItemObj.options.transparency) * 1000)}"/>` : ''
+					strSlideXml += slideItemObj.options.opacity ? `<a:alphaModFix amt="${Math.round((100 - slideItemObj.options.opacity) * 1000)}"/>` : ''
 					strSlideXml += '</a:blip>'
 				}
 				if (sizing?.type) {
@@ -997,7 +997,7 @@ function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefau
 		if (opts.outline && typeof opts.outline === 'object') {
 			runProps += `<a:ln w="${valToPts(opts.outline.size || 0.75)}">${genXmlColorSelection(opts.outline.color || 'FFFFFF')}</a:ln>`
 		}
-		if (opts.color) runProps += genXmlColorSelection({ color: opts.color, transparency: opts.transparency })
+		if (opts.color) runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig })
 		if (opts.highlight) runProps += `<a:highlight>${createColorElement(opts.highlight)}</a:highlight>`
 		if (typeof opts.underline === 'object' && opts.underline.color) runProps += `<a:uFill>${genXmlColorSelection(opts.underline.color)}</a:uFill>`
 		if (opts.glow) runProps += `<a:effectLst>${createGlowElement(opts.glow, DEF_TEXT_GLOW)}</a:effectLst>`

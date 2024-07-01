@@ -313,7 +313,7 @@ export function addChartDefinition(target: PresSlide, type: CHART_NAME | IChartM
 		options.plotArea.border.color = DEF_CHART_BORDER.color
 	}
 	if (options.border) options.plotArea.border = options.border // @deprecated [[remove in v4.0]]
-	options.plotArea.fill = options.plotArea.fill || { color: null, transparency: null }
+	options.plotArea.fill = options.plotArea.fill || { color: null, colorConfig: null }
 	if (options.fill) options.plotArea.fill.color = options.fill // @deprecated [[remove in v4.0]]
 	//
 	options.chartArea = options.chartArea || {}
@@ -452,7 +452,7 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		rotate: opt.rotate || 0,
 		flipV: opt.flipV || false,
 		flipH: opt.flipH || false,
-		transparency: opt.transparency || 0,
+		opacity: opt.opacity || 0,
 		objectName,
 		shadow: correctShadowOptions(opt.shadow),
 		clipShape: opt.clipShape || null
@@ -680,7 +680,7 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	const newLineOpts: ShapeLineProps = {
 		type: options.line.type || 'solid',
 		color: options.line.color || DEF_SHAPE_LINE_COLOR,
-		transparency: options.line.transparency || 0,
+		colorConfig: options.line.colorConfig,
 		width: options.line.width || 1,
 		dashType: options.line.dashType || 'solid',
 		beginArrowType: options.line.beginArrowType || null,
@@ -1029,7 +1029,7 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 				const newLineOpts: ShapeLineProps = {
 					type: itemOpts.line.type || 'solid',
 					color: itemOpts.line.color || DEF_SHAPE_LINE_COLOR,
-					transparency: itemOpts.line.transparency || 0,
+					colorConfig: itemOpts.line.colorConfig,
 					width: itemOpts.line.width || 1,
 					dashType: itemOpts.line.dashType || 'solid',
 					beginArrowType: itemOpts.line.beginArrowType || null,

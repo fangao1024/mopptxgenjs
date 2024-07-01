@@ -65,10 +65,10 @@ export interface DataOrPathProps {
 	 */
 	data?: string
 }
-export interface BackgroundProps extends DataOrPathProps, ShapeFillProps {
+export interface BackgroundProps extends DataOrPathProps, ColorSelection {
 	/**
 	 * Color (hex format)
-	 * @deprecated v3.6.0 - use `ShapeFillProps` instead
+	 * @deprecated v3.6.0 - use `ColorSelection` instead
 	 */
 	fill?: HexColor
 
@@ -88,6 +88,45 @@ export type Color = HexColor | ThemeColor
 export type Margin = number | [number, number, number, number]
 export type HAlign = 'left' | 'center' | 'right' | 'justify'
 export type VAlign = 'top' | 'middle' | 'bottom'
+// 颜色配置项
+export interface ColorConfig {
+	/**
+	 * 下面是颜色配置项
+	 *  范围 0-100
+	 */
+	alpha?: number
+	hueMod?: number
+	lumMod?: number
+	lumOff?: number
+	satMod?: number
+	satOff?: number
+	shade?: number
+	tint?: number
+}
+
+// 实色填充
+export interface FillColor {
+	/**
+	 * Fill color
+	 * - `HexColor` or `ThemeColor`
+	 * @example 'FF0000' // hex color (red)
+	 * @example pptx.SchemeColor.text1 // Theme color (Text1)
+	 */
+	color?: Color
+	/**
+	 *  颜色配置项 取值范围 0-100
+	 * @example { alpha: 50, hueMod: 50, lumMod: 50, lumOff: 50, satMod: 50, satOff: 50, shade: 50, tint: 50 }
+	 */
+	colorConfig?: ColorConfig
+}
+
+export interface ColorSelection extends FillColor {
+	/**
+	 * Fill type
+	 * @default 'solid'
+	 */
+	type?: 'none' | 'solid'
+}
 
 // used by charts, shape, text
 export interface BorderProps {
@@ -103,9 +142,8 @@ export interface BorderProps {
 	 */
 	color?: HexColor
 
-	// TODO: add `transparency` prop to Borders (0-100%)
+	// TODO: add `ColorSelection`
 
-	// TODO: add `width` - deprecate `pt`
 	/**
 	 * Border size (points)
 	 * @default 1
@@ -140,7 +178,7 @@ export interface ShadowProps {
 	 * - range: 0.0-1.0
 	 * @example 0.5 // 50% opaque
 	 */
-	opacity?: number // TODO: "Transparency (0-100%)" in PPT // TODO: deprecate and add `transparency`
+	opacity?: number
 	/**
 	 * blur (points)
 	 * - range: 0-100
@@ -170,35 +208,11 @@ export interface ShadowProps {
 	 */
 	rotateWithShape?: boolean
 }
-// used by: shape, table, text
-export interface ShapeFillProps {
-	/**
-	 * Fill color
-	 * - `HexColor` or `ThemeColor`
-	 * @example 'FF0000' // hex color (red)
-	 * @example pptx.SchemeColor.text1 // Theme color (Text1)
-	 */
-	color?: Color
-	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Shape > Fill & Line > Fill > Transparency
-	 * - range: 0-100
-	 * @default 0
-	 */
-	transparency?: number
-	/**
-	 * Fill type
-	 * @default 'solid'
-	 */
-	type?: 'none' | 'solid'
 
-	/**
-	 * Transparency (percent)
-	 * @deprecated v3.3.0 - use `transparency`
-	 */
-	alpha?: number
-}
-export interface ShapeLineProps extends ShapeFillProps {
+// used by: shape, table, text
+export interface ShapeFillProps extends ColorSelection {}
+
+export interface ShapeLineProps extends ColorSelection {
 	/**
 	 * Line width (pt)
 	 * @default 1
@@ -247,7 +261,7 @@ export interface ShapeLineProps extends ShapeFillProps {
 	size?: number
 }
 // used by: chart, slide, table, text
-export interface TextBaseProps {
+export interface TextBaseProps extends FillColor {
 	/**
 	 * Horizontal alignment
 	 * @default 'left'
@@ -345,14 +359,6 @@ export interface TextBaseProps {
 				style?: string
 		  }
 	/**
-	 * Text color
-	 * - `HexColor` or `ThemeColor`
-	 * - MS-PPT > Format Shape > Text Options > Text Fill & Outline > Text Fill > Color
-	 * @example 'FF0000' // hex color (red)
-	 * @example pptx.SchemeColor.text1 // Theme color (Text1)
-	 */
-	color?: Color
-	/**
 	 * Font face name
 	 * @example 'Arial' // Arial font
 	 */
@@ -400,13 +406,6 @@ export interface TextBaseProps {
 	 * @default 'horz'
 	 */
 	textDirection?: 'horz' | 'vert' | 'vert270' | 'wordArtVert'
-	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Shape > Text Options > Text Fill & Outline > Text Fill > Transparency
-	 * - range: 0-100
-	 * @default 0
-	 */
-	transparency?: number
 	/**
 	 * underline properties
 	 * - PowerPoint: Font > Color & Underline > Underline Style/Underline Color
@@ -597,13 +596,13 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 		y?: Coord
 	}
 	/**
-	 * Transparency (percent)
-	 * - MS-PPT > Format Picture > Picture > Picture Transparency > Transparency
+	 * opacity (percent)
+	 * - MS-PPT > Format Picture > Picture > Picture opacity > opacity
 	 * - range: 0-100
 	 * @default 0
-	 * @example 25 // 25% transparent
+	 * @example 25 // 25% opacity
 	 */
-	transparency?: number
+	opacity?: number
 }
 /**
  * Add media (audio/video) to slide
@@ -654,10 +653,10 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	/**
 	 * Shape fill color properties
 	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
+	 * @example { color:'0088CC', colorConfig:{} } // hex color, 50% opacity
 	 * @example { color:pptx.SchemeColor.accent1 } // Theme color Accent1
 	 */
-	fill?: ShapeFillProps
+	fill?: ColorSelection
 	/**
 	 * Flip shape horizontally?
 	 * @default false
@@ -849,10 +848,10 @@ export interface TableCellProps extends TextBaseProps {
 	/**
 	 * Fill color
 	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
+	 * @example { color:'0088CC', colorConfig:{} } // hex color, 50% opacity
 	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
 	 */
-	fill?: ShapeFillProps
+	fill?: ColorSelection
 	hyperlink?: HyperlinkProps
 	/**
 	 * Cell margin (inches)
@@ -927,10 +926,10 @@ export interface TableProps extends PositionProps, TextBaseProps, ObjectNameProp
 	/**
 	 * Cell background color
 	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
+	 * @example { color:'0088CC', colorConfig:{} } // hex color, 50% opacity
 	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
 	 */
-	fill?: ShapeFillProps
+	fill?: ColorSelection
 	/**
 	 * Cell margin (inches)
 	 * - affects all table cells, is superceded by cell options
@@ -1034,10 +1033,10 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	/**
 	 * Shape fill
 	 * @example { color:'FF0000' } // hex color (red)
-	 * @example { color:'0088CC', transparency:50 } // hex color, 50% transparent
+	 * @example { color:'0088CC', colorConfig:{} } // hex color,
 	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
 	 */
-	fill?: ShapeFillProps
+	fill?: ColorSelection
 	/**
 	 * Flip shape horizontally?
 	 * @default false
@@ -1233,9 +1232,9 @@ export interface IChartPropsFillLine {
 	 * PowerPoint: Format Chart Area/Plot Area > Fill
 	 * @example fill: {color: '696969'} // hex RGB color value
 	 * @example fill: {color: pptx.SchemeColor.background2} // Theme color value
-	 * @example fill: {transparency: 50} // 50% transparency
+	 * @example fill: {configColor: 50} // 50% configColor
 	 */
-	fill?: ShapeFillProps
+	fill?: ColorSelection
 }
 export interface IChartAreaProps extends IChartPropsFillLine {
 	/**
@@ -1834,7 +1833,7 @@ export interface PresSlide extends SlideBaseProps {
 	/**
 	 * Background color or image (`color` | `path` | `data`)
 	 * @example { color: 'FF3399' } - hex color
-	 * @example { color: 'FF3399', transparency:50 } - hex color with 50% transparency
+	 * @example { color: 'FF3399', colorConfig:{} } - hex color
 	 * @example { path: 'https://onedrives.com/myimg.png` } - retrieve image via URL
 	 * @example { path: '/home/gitbrent/images/myimg.png` } - retrieve image via local path
 	 * @example { data: 'image/png;base64,iVtDaDrF[...]=' } - base64 string
