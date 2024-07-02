@@ -2,7 +2,7 @@
  * PptxGenJS: Slide Class
  */
 import { CHART_NAME, SHAPE_NAME } from './core-enums';
-import { AddSlideProps, BackgroundProps, HexColor, IChartMulti, IChartOpts, IOptsChartData, ISlideObject, ISlideRel, ISlideRelChart, ISlideRelMedia, ImageProps, MediaProps, PresLayout, PresSlide, ShapeProps, SlideLayout, SlideNumberProps, TableProps, TableRow, TextProps, TextPropsOptions } from './core-interfaces';
+import { AddSlideProps, BackgroundProps, GroupProps, HexColor, IChartMulti, IChartOpts, IOptsChartData, ISlideObject, ISlideRel, ISlideRelChart, ISlideRelMedia, ImageProps, MediaProps, PresLayout, PresSlide, ShapeProps, SlideLayout, SlideNumberProps, TableProps, TableRow, TextProps, TextPropsOptions } from './core-interfaces';
 export default class Slide {
     private readonly _setSlideNum;
     addSlide: (options?: AddSlideProps) => PresSlide;
@@ -116,4 +116,12 @@ export default class Slide {
      * @return {Slide} this Slide
      */
     addText(text: string | TextProps[], options?: TextPropsOptions): Slide;
+    /**
+     * 开始添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+     */
+    startGroup(options?: GroupProps): Slide;
+    /**
+     * 结束添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+     */
+    endGroup(): Slide;
 }

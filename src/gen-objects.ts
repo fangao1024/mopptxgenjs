@@ -26,6 +26,7 @@ import {
 import {
 	AddSlideProps,
 	BackgroundProps,
+	GroupProps,
 	IChartMulti,
 	IChartOptsLib,
 	IOptsChartData,
@@ -1205,4 +1206,32 @@ function createHyperlinkRels(target: PresSlide, text: number | string | ISlideOb
 			}
 		}
 	})
+}
+
+/**
+ * 添加一个组
+ * @param {Presentation} target - presentation object
+ * @param {GroupProps} options - slide options
+ */
+export function startGroupDefinition(target: PresSlide, options?: GroupProps) {
+	options = options || {}
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.groupStart
+	}
+	options.objectName = options.objectName ? encodeXmlEntities(options.objectName) : `Group ${target._slideObjects.filter((obj) => obj._type === SLIDE_OBJECT_TYPES.groupStart).length}`
+	newObject.options = options
+	// LAST: Add object to Slide
+	target._slideObjects.push(newObject)
+}
+
+/**
+ * 结束一个组
+ * @param {Presentation} target - presentation object
+ */
+export function endGroupDefinition(target: PresSlide) {
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.groupEnd
+	}
+	// LAST: Add object to Slide
+	target._slideObjects.push(newObject)
 }

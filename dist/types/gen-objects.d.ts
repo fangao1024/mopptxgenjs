@@ -2,7 +2,7 @@
  * PptxGenJS: Slide Object Generators
  */
 import { CHART_NAME, SHAPE_NAME } from './core-enums';
-import { AddSlideProps, BackgroundProps, IChartMulti, IChartOptsLib, IOptsChartData, ImageProps, MediaProps, PresLayout, PresSlide, ShapeProps, SlideLayout, SlideMasterProps, TableProps, TableRow, TextProps, TextPropsOptions } from './core-interfaces';
+import { AddSlideProps, BackgroundProps, GroupProps, IChartMulti, IChartOptsLib, IOptsChartData, ImageProps, MediaProps, PresLayout, PresSlide, ShapeProps, SlideLayout, SlideMasterProps, TableProps, TableRow, TextProps, TextPropsOptions } from './core-interfaces';
 /**
  * Transforms a slide definition to a slide object that is then passed to the XML transformation process.
  * @param {SlideMasterProps} props - slide definition
@@ -95,3 +95,14 @@ export declare function addPlaceholdersToSlideLayouts(slide: PresSlide): void;
  * @param {PresSlide} target - slide object that the background is set to
  */
 export declare function addBackgroundDefinition(props: BackgroundProps, target: SlideLayout): void;
+/**
+ * 添加一个组
+ * @param {Presentation} target - presentation object
+ * @param {GroupProps} options - slide options
+ */
+export declare function startGroupDefinition(target: PresSlide, options?: GroupProps): void;
+/**
+ * 结束一个组
+ * @param {Presentation} target - presentation object
+ */
+export declare function endGroupDefinition(target: PresSlide): void;

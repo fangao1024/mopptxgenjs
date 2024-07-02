@@ -6,6 +6,7 @@ import { CHART_NAME, SHAPE_NAME } from './core-enums'
 import {
 	AddSlideProps,
 	BackgroundProps,
+	GroupProps,
 	HexColor,
 	IChartMulti,
 	IChartOpts,
@@ -241,6 +242,20 @@ export default class Slide {
 	addText(text: string | TextProps[], options?: TextPropsOptions): Slide {
 		const textParam = typeof text === 'string' || typeof text === 'number' ? [{ text, options }] : text
 		genObj.addTextDefinition(this, textParam, options, false)
+		return this
+	}
+	/**
+	 * 开始添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+	 */
+	startGroup(options?: GroupProps): Slide {
+		genObj.startGroupDefinition(this, options)
+		return this
+	}
+	/**
+	 * 结束添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+	 */
+	endGroup(): Slide {
+		genObj.endGroupDefinition(this)
 		return this
 	}
 }

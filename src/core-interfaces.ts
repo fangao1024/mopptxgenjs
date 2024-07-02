@@ -430,8 +430,7 @@ export interface TextBaseProps extends FillColor {
 			| 'wavy'
 			| 'wavyDbl'
 			| 'wavyHeavy'
-		color?: Color
-	}
+	} & FillColor
 	/**
 	 * vertical alignment
 	 * @default 'top'
@@ -489,6 +488,28 @@ export interface ThemeProps {
 	 * }
 	 */
 	clrSchemeColor?: Partial<Record<CLR_SCHEME_COLOR, string>>
+}
+
+// groups =========================================================================================
+
+export interface GroupProps extends PositionProps, ObjectNameProps {
+	/**
+	 * Flip horizontally?
+	 * @default false
+	 */
+	flipH?: boolean
+	/**
+	 * Flip vertical?
+	 * @default false
+	 */
+	flipV?: boolean
+	/**
+	 * Image rotation (degrees)
+	 * - range: -360 to 360
+	 * @default 0
+	 * @example 180 // rotate image 180 degrees
+	 */
+	rotate?: number
 }
 
 // image / media ==================================================================================
@@ -1076,7 +1097,7 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	 * @example [10,5,10,5] // Top margin 10, Right margin 5, Bottom margin 10, Left margin 5
 	 */
 	margin?: Margin
-	outline?: { color: Color; size: number }
+	outline?: { size: number } & FillColor
 	paraSpaceAfter?: number
 	paraSpaceBefore?: number
 	placeholder?: string

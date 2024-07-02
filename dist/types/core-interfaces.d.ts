@@ -372,8 +372,7 @@ export interface TextBaseProps extends FillColor {
      */
     underline?: {
         style?: 'dash' | 'dashHeavy' | 'dashLong' | 'dashLongHeavy' | 'dbl' | 'dotDash' | 'dotDashHeave' | 'dotDotDash' | 'dotDotDashHeavy' | 'dotted' | 'dottedHeavy' | 'heavy' | 'none' | 'sng' | 'wavy' | 'wavyDbl' | 'wavyHeavy';
-        color?: Color;
-    };
+    } & FillColor;
     /**
      * vertical alignment
      * @default 'top'
@@ -431,6 +430,25 @@ export interface ThemeProps {
      * }
      */
     clrSchemeColor?: Partial<Record<CLR_SCHEME_COLOR, string>>;
+}
+export interface GroupProps extends PositionProps, ObjectNameProps {
+    /**
+     * Flip horizontally?
+     * @default false
+     */
+    flipH?: boolean;
+    /**
+     * Flip vertical?
+     * @default false
+     */
+    flipV?: boolean;
+    /**
+     * Image rotation (degrees)
+     * - range: -360 to 360
+     * @default 0
+     * @example 180 // rotate image 180 degrees
+     */
+    rotate?: number;
 }
 export type MediaType = 'audio' | 'online' | 'video';
 export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNameProps {
@@ -1032,9 +1050,8 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
      */
     margin?: Margin;
     outline?: {
-        color: Color;
         size: number;
-    };
+    } & FillColor;
     paraSpaceAfter?: number;
     paraSpaceBefore?: number;
     placeholder?: string;

@@ -681,6 +681,36 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				strSlideXml += ' </a:graphic>'
 				strSlideXml += '</p:graphicFrame>'
 				break
+			case SLIDE_OBJECT_TYPES.groupStart:
+				// 开始添加组
+				strSlideXml += '<p:grpSp>'
+				strSlideXml += `<p:nvGrpSpPr><p:cNvPr id="${idx + 2}" name="${slideItemObj.options.objectName}"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>`
+				strSlideXml += '<p:grpSpPr>'
+				strSlideXml += '<a:xfrm'
+				// 旋转
+				if (slideItemObj.options.rotate) {
+					strSlideXml += ` rot="${convertRotationDegrees(slideItemObj.options.rotate)}"`
+				}
+				// 反转
+				if (slideItemObj.options.flipH) {
+					strSlideXml += ` flipH="1"`
+				}
+				// 反转
+				if (slideItemObj.options.flipV) {
+					strSlideXml += ` flipV="1"`
+				}
+				strSlideXml += '>'
+				strSlideXml += `<a:off x="${x}" y="${y}"/>`
+				strSlideXml += `<a:ext cx="${cx}" cy="${cy}"/>`
+				strSlideXml += `<a:chOff x="0" y="0"/>`
+				strSlideXml += `<a:chExt cx="${cx}" cy="${cy}"/>`
+				strSlideXml += '</a:xfrm>'
+				strSlideXml += '</p:grpSpPr>'
+				break
+			case SLIDE_OBJECT_TYPES.groupEnd:
+				// 结束添加组
+				strSlideXml += '</p:grpSp>'
+				break
 
 			default:
 				strSlideXml += ''
@@ -995,11 +1025,12 @@ function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefau
 	// Color / Font / Highlight / Outline are children of <a:rPr>, so add them now before closing the runProperties tag
 	if (opts.color || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
 		if (opts.outline && typeof opts.outline === 'object') {
-			runProps += `<a:ln w="${valToPts(opts.outline.size || 0.75)}">${genXmlColorSelection(opts.outline.color || 'FFFFFF')}</a:ln>`
+			runProps += `<a:ln w="${valToPts(opts.outline.size || 0.75)}">${genXmlColorSelection({ color: opts.outline.color || 'FFFFFF', colorConfig: opts.outline.colorConfig })}</a:ln>`
 		}
 		if (opts.color) runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig })
 		if (opts.highlight) runProps += `<a:highlight>${createColorElement(opts.highlight)}</a:highlight>`
-		if (typeof opts.underline === 'object' && opts.underline.color) runProps += `<a:uFill>${genXmlColorSelection(opts.underline.color)}</a:uFill>`
+		if (typeof opts.underline === 'object' && opts.underline.color)
+			runProps += `<a:uFill>${genXmlColorSelection({ color: opts.underline.color, colorConfig: opts.underline.colorConfig })}</a:uFill>`
 		if (opts.glow) runProps += `<a:effectLst>${createGlowElement(opts.glow, DEF_TEXT_GLOW)}</a:effectLst>`
 		if (opts.fontFace) {
 			// NOTE: 'cs' = Complex Script, 'ea' = East Asian (use "-120" instead of "0" - per Issue #174); ea must come first (Issue #174)

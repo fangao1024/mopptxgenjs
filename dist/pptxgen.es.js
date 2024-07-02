@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.10 @ 2024/7/2 13:47:55 */
+/* mopptxgenjs 0.0.10 @ 2024/7/2 18:22:03 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -643,6 +643,8 @@ var SLIDE_OBJECT_TYPES;
     SLIDE_OBJECT_TYPES["table"] = "table";
     SLIDE_OBJECT_TYPES["tablecell"] = "tablecell";
     SLIDE_OBJECT_TYPES["text"] = "text";
+    SLIDE_OBJECT_TYPES["groupStart"] = "groupStart";
+    SLIDE_OBJECT_TYPES["groupEnd"] = "groupEnd";
     SLIDE_OBJECT_TYPES["notes"] = "notes";
 })(SLIDE_OBJECT_TYPES || (SLIDE_OBJECT_TYPES = {}));
 var PLACEHOLDER_TYPES;
@@ -828,7 +830,6 @@ function genXmlColorSelection(props) {
     var colorVal = '';
     var internalElements = '';
     var outText = '';
-    console.log(props, 'props============');
     if (props) {
         if (typeof props === 'string') {
             colorVal = props;
@@ -2790,6 +2791,32 @@ function createHyperlinkRels(target, text) {
         }
     });
 }
+/**
+ * 添加一个组
+ * @param {Presentation} target - presentation object
+ * @param {GroupProps} options - slide options
+ */
+function startGroupDefinition(target, options) {
+    options = options || {};
+    var newObject = {
+        _type: SLIDE_OBJECT_TYPES.groupStart
+    };
+    options.objectName = options.objectName ? encodeXmlEntities(options.objectName) : "Group ".concat(target._slideObjects.filter(function (obj) { return obj._type === SLIDE_OBJECT_TYPES.groupStart; }).length);
+    newObject.options = options;
+    // LAST: Add object to Slide
+    target._slideObjects.push(newObject);
+}
+/**
+ * 结束一个组
+ * @param {Presentation} target - presentation object
+ */
+function endGroupDefinition(target) {
+    var newObject = {
+        _type: SLIDE_OBJECT_TYPES.groupEnd
+    };
+    // LAST: Add object to Slide
+    target._slideObjects.push(newObject);
+}
 
 /**
  * PptxGenJS: Slide Class
@@ -2965,6 +2992,20 @@ var Slide = /** @class */ (function () {
     Slide.prototype.addText = function (text, options) {
         var textParam = typeof text === 'string' || typeof text === 'number' ? [{ text: text, options: options }] : text;
         addTextDefinition(this, textParam, options, false);
+        return this;
+    };
+    /**
+     * 开始添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+     */
+    Slide.prototype.startGroup = function (options) {
+        startGroupDefinition(this, options);
+        return this;
+    };
+    /**
+     * 结束添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+     */
+    Slide.prototype.endGroup = function () {
+        endGroupDefinition(this);
         return this;
     };
     return Slide;
@@ -5655,6 +5696,36 @@ function slideObjectToXml(slide) {
                 strSlideXml += ' </a:graphic>';
                 strSlideXml += '</p:graphicFrame>';
                 break;
+            case SLIDE_OBJECT_TYPES.groupStart:
+                // 开始添加组
+                strSlideXml += '<p:grpSp>';
+                strSlideXml += "<p:nvGrpSpPr><p:cNvPr id=\"".concat(idx + 2, "\" name=\"").concat(slideItemObj.options.objectName, "\"/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr>");
+                strSlideXml += '<p:grpSpPr>';
+                strSlideXml += '<a:xfrm';
+                // 旋转
+                if (slideItemObj.options.rotate) {
+                    strSlideXml += " rot=\"".concat(convertRotationDegrees(slideItemObj.options.rotate), "\"");
+                }
+                // 反转
+                if (slideItemObj.options.flipH) {
+                    strSlideXml += " flipH=\"1\"";
+                }
+                // 反转
+                if (slideItemObj.options.flipV) {
+                    strSlideXml += " flipV=\"1\"";
+                }
+                strSlideXml += '>';
+                strSlideXml += "<a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
+                strSlideXml += "<a:ext cx=\"".concat(cx, "\" cy=\"").concat(cy, "\"/>");
+                strSlideXml += "<a:chOff x=\"0\" y=\"0\"/>";
+                strSlideXml += "<a:chExt cx=\"".concat(cx, "\" cy=\"").concat(cy, "\"/>");
+                strSlideXml += '</a:xfrm>';
+                strSlideXml += '</p:grpSpPr>';
+                break;
+            case SLIDE_OBJECT_TYPES.groupEnd:
+                // 结束添加组
+                strSlideXml += '</p:grpSp>';
+                break;
             default:
                 strSlideXml += '';
                 break;
@@ -5958,14 +6029,14 @@ function genXmlTextRunProperties(opts, isDefault) {
     // Color / Font / Highlight / Outline are children of <a:rPr>, so add them now before closing the runProperties tag
     if (opts.color || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
         if (opts.outline && typeof opts.outline === 'object') {
-            runProps += "<a:ln w=\"".concat(valToPts(opts.outline.size || 0.75), "\">").concat(genXmlColorSelection(opts.outline.color || 'FFFFFF'), "</a:ln>");
+            runProps += "<a:ln w=\"".concat(valToPts(opts.outline.size || 0.75), "\">").concat(genXmlColorSelection({ color: opts.outline.color || 'FFFFFF', colorConfig: opts.outline.colorConfig }), "</a:ln>");
         }
         if (opts.color)
             runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig });
         if (opts.highlight)
             runProps += "<a:highlight>".concat(createColorElement(opts.highlight), "</a:highlight>");
         if (typeof opts.underline === 'object' && opts.underline.color)
-            runProps += "<a:uFill>".concat(genXmlColorSelection(opts.underline.color), "</a:uFill>");
+            runProps += "<a:uFill>".concat(genXmlColorSelection({ color: opts.underline.color, colorConfig: opts.underline.colorConfig }), "</a:uFill>");
         if (opts.glow)
             runProps += "<a:effectLst>".concat(createGlowElement(opts.glow, DEF_TEXT_GLOW), "</a:effectLst>");
         if (opts.fontFace) {

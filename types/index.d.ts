@@ -1275,8 +1275,7 @@ declare namespace PptxGenJS {
 				| 'wavy'
 				| 'wavyDbl'
 				| 'wavyHeavy'
-			color?: Color
-		}
+		} & FillColor
 		/**
 		 * vertical alignment
 		 * @default 'top'
@@ -1334,6 +1333,28 @@ declare namespace PptxGenJS {
 		 * }
 		 */
 		clrSchemeColor?: Partial<Record<CLR_SCHEME_COLOR, string>>
+	}
+
+	// groups =========================================================================================
+
+	export interface GroupProps extends PositionProps, ObjectNameProps {
+		/**
+		 * Flip horizontally?
+		 * @default false
+		 */
+		flipH?: boolean
+		/**
+		 * Flip vertical?
+		 * @default false
+		 */
+		flipV?: boolean
+		/**
+		 * Image rotation (degrees)
+		 * - range: -360 to 360
+		 * @default 0
+		 * @example 180 // rotate image 180 degrees
+		 */
+		rotate?: number
 	}
 
 	// image / media ==================================================================================
@@ -1896,7 +1917,7 @@ declare namespace PptxGenJS {
 		 * @example [10,5,10,5] // Top margin 10, Right margin 5, Bottom margin 10, Left margin 5
 		 */
 		margin?: Margin
-		outline?: { color: Color; size: number }
+		outline?: { size: number } & FillColor
 		paraSpaceAfter?: number
 		paraSpaceBefore?: number
 		placeholder?: string
@@ -2725,7 +2746,14 @@ declare namespace PptxGenJS {
 		 * @return {Slide} this Slide
 		 */
 		addText(text: string | TextProps[], options?: TextPropsOptions): Slide
-
+		/**
+		 * 开始添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+		 */
+		startGroup(options?: GroupProps): Slide
+		/**
+		 * 结束添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
+		 */
+		endGroup(): Slide
 		/**
 		 * Background color
 		 * @deprecated in 3.3.0 - use `background` instead
