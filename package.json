@@ -1,6 +1,6 @@
 {
 	"name": "mopptxgenjs",
-	"version": "0.0.9",
+	"version": "0.0.10",
 	"author": {
 		"name": "fangao1024",
 		"url": "https://github.com/fangao1024/"
@@ -21,6 +21,7 @@
 		"ship": "gulp ship",
 		"defs": "gulp defs",
 		"watch": "rollup -cw",
+		"fr": "gulp frontend",
 		"doctoc": "./node_modules/doctoc/doctoc.js README.md"
 	},
 	"browser": {

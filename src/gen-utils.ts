@@ -194,7 +194,6 @@ export function genXmlColorSelection(props: Color | ColorSelection): string {
 	let colorVal = ''
 	let internalElements = ''
 	let outText = ''
-
 	if (props) {
 		if (typeof props === 'string') {
 			colorVal = props
@@ -205,30 +204,31 @@ export function genXmlColorSelection(props: Color | ColorSelection): string {
 			if (props.color) {
 				colorVal = props.color
 			}
+
 			if (props.colorConfig) {
 				if (props.colorConfig.alpha) {
-					internalElements += `<a:alpha val="${Math.round((100 - props.colorConfig.alpha) * 1000)}"/>`
+					internalElements += `<a:alpha val="${Math.round(props.colorConfig.alpha * 1000)}"/>`
 				}
 				if (props.colorConfig.hueMod) {
-					internalElements += `<a:hueMod val="${Math.round((100 - props.colorConfig.hueMod) * 1000)}"/>`
+					internalElements += `<a:hueMod val="${Math.round(props.colorConfig.hueMod * 1000)}"/>`
 				}
 				if (props.colorConfig.lumMod) {
-					internalElements += `<a:lumMod val="${Math.round((100 - props.colorConfig.lumMod) * 1000)}"/>`
+					internalElements += `<a:lumMod val="${Math.round(props.colorConfig.lumMod * 1000)}"/>`
 				}
 				if (props.colorConfig.lumOff) {
-					internalElements += `<a:lumOff val="${Math.round((100 - props.colorConfig.lumOff) * 1000)}"/>`
+					internalElements += `<a:lumOff val="${Math.round(props.colorConfig.lumOff * 1000)}"/>`
 				}
 				if (props.colorConfig.satMod) {
-					internalElements += `<a:satMod val="${Math.round((100 - props.colorConfig.satMod) * 1000)}"/>`
+					internalElements += `<a:satMod val="${Math.round(props.colorConfig.satMod * 1000)}"/>`
 				}
 				if (props.colorConfig.satOff) {
-					internalElements += `<a:satOff val="${Math.round((100 - props.colorConfig.satOff) * 1000)}"/>`
+					internalElements += `<a:satOff val="${Math.round(props.colorConfig.satOff * 1000)}"/>`
 				}
 				if (props.colorConfig.shade) {
-					internalElements += `<a:shade val="${Math.round((100 - props.colorConfig.shade) * 1000)}"/>`
+					internalElements += `<a:shade val="${Math.round(props.colorConfig.shade * 1000)}"/>`
 				}
 				if (props.colorConfig.tint) {
-					internalElements += `<a:tint val="${Math.round((100 - props.colorConfig.tint) * 1000)}"/>`
+					internalElements += `<a:tint val="${Math.round(props.colorConfig.tint * 1000)}"/>`
 				}
 			}
 		}

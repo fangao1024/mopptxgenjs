@@ -118,6 +118,29 @@ gulp.task('nodeTest', () => {
 		.pipe(gulp.dest('./demos/node/node_modules/pptxgenjs/dist'))
 })
 
+// 打包到frontend
+gulp.task('frontendCode', () => {
+	return gulp
+		.src(['./dist/**/*'])
+		.pipe(insert.prepend(`/* 来自 frontendCode 命令 */\n`))
+		.pipe(gulp.dest('../frontend/node_modules/mopptxgenjs/dist'))
+})
+gulp.task('frontendDefs', () => {
+	return gulp
+		.src(['./types/**/*'])
+		.pipe(insert.prepend(`/* 来自 frontendDefs 命令 */\n`))
+		.pipe(gulp.dest('../frontend/node_modules/mopptxgenjs/types'))
+})
+gulp.task('frontendMin', () => {
+	return gulp
+		.src(['./dist/pptxgen.min.js', './dist/pptxgen.min.js.map'])
+		.pipe(insert.prepend(`/* 来自 frontendMin 命令 */\n console.log('frontendMin=========','${new Date().toLocaleString()}');\n`))
+		.pipe(gulp.dest('../frontend/public/assets/js/mopptxgenjs'))
+})
+gulp.task('frontend', gulp.series('frontendCode', 'frontendDefs', 'frontendMin'), () => {
+	console.log('... frontend files created!');
+})
+
 gulp.task('defs', gulp.series('reactTestDts', 'reactTestDefs'), () => {
 	console.log('... ./dist/types/*.d.ts files created!');
 })

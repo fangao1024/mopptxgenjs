@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.9 @ 2024/7/2 09:47:33 */
+/* mopptxgenjs 0.0.10 @ 2024/7/2 13:47:55 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -828,6 +828,7 @@ function genXmlColorSelection(props) {
     var colorVal = '';
     var internalElements = '';
     var outText = '';
+    console.log(props, 'props============');
     if (props) {
         if (typeof props === 'string') {
             colorVal = props;
@@ -841,28 +842,28 @@ function genXmlColorSelection(props) {
             }
             if (props.colorConfig) {
                 if (props.colorConfig.alpha) {
-                    internalElements += "<a:alpha val=\"".concat(Math.round((100 - props.colorConfig.alpha) * 1000), "\"/>");
+                    internalElements += "<a:alpha val=\"".concat(Math.round(props.colorConfig.alpha * 1000), "\"/>");
                 }
                 if (props.colorConfig.hueMod) {
-                    internalElements += "<a:hueMod val=\"".concat(Math.round((100 - props.colorConfig.hueMod) * 1000), "\"/>");
+                    internalElements += "<a:hueMod val=\"".concat(Math.round(props.colorConfig.hueMod * 1000), "\"/>");
                 }
                 if (props.colorConfig.lumMod) {
-                    internalElements += "<a:lumMod val=\"".concat(Math.round((100 - props.colorConfig.lumMod) * 1000), "\"/>");
+                    internalElements += "<a:lumMod val=\"".concat(Math.round(props.colorConfig.lumMod * 1000), "\"/>");
                 }
                 if (props.colorConfig.lumOff) {
-                    internalElements += "<a:lumOff val=\"".concat(Math.round((100 - props.colorConfig.lumOff) * 1000), "\"/>");
+                    internalElements += "<a:lumOff val=\"".concat(Math.round(props.colorConfig.lumOff * 1000), "\"/>");
                 }
                 if (props.colorConfig.satMod) {
-                    internalElements += "<a:satMod val=\"".concat(Math.round((100 - props.colorConfig.satMod) * 1000), "\"/>");
+                    internalElements += "<a:satMod val=\"".concat(Math.round(props.colorConfig.satMod * 1000), "\"/>");
                 }
                 if (props.colorConfig.satOff) {
-                    internalElements += "<a:satOff val=\"".concat(Math.round((100 - props.colorConfig.satOff) * 1000), "\"/>");
+                    internalElements += "<a:satOff val=\"".concat(Math.round(props.colorConfig.satOff * 1000), "\"/>");
                 }
                 if (props.colorConfig.shade) {
-                    internalElements += "<a:shade val=\"".concat(Math.round((100 - props.colorConfig.shade) * 1000), "\"/>");
+                    internalElements += "<a:shade val=\"".concat(Math.round(props.colorConfig.shade * 1000), "\"/>");
                 }
                 if (props.colorConfig.tint) {
-                    internalElements += "<a:tint val=\"".concat(Math.round((100 - props.colorConfig.tint) * 1000), "\"/>");
+                    internalElements += "<a:tint val=\"".concat(Math.round(props.colorConfig.tint * 1000), "\"/>");
                 }
             }
         }
