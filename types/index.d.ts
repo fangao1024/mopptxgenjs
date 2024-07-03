@@ -911,12 +911,11 @@ declare namespace PptxGenJS {
 		 */
 		data?: string
 	}
-	export interface BackgroundProps extends DataOrPathProps, ShapeFillProps {
+	export interface BackgroundProps extends DataOrPathProps {
 		/**
-		 * Color (hex format)
-		 *  * @deprecated v3.6.0 - use `ColorSelection` instead
+		 * 填充方式
 		 */
-		fill?: HexColor
+		fill?: ColorSelection
 
 		/**
 		 * source URL
@@ -966,13 +965,24 @@ declare namespace PptxGenJS {
 		colorConfig?: ColorConfig
 	}
 
-	export interface ColorSelection extends FillColor {
-		/**
-		 * Fill type
-		 * @default 'solid'
-		 */
-		type?: 'none' | 'solid'
+	export interface NoneFillColor {
+		type: 'none'
 	}
+
+	// 实色填充
+	export interface SolidFillColor extends FillColor {
+		type: 'solid'
+	}
+
+	// 渐变填充
+	export interface GradFillColor {
+		type: 'grad'
+		gradientStopList?: { pos: number; color: FillColor }[]
+		gradientType?: 'radial' | 'linear'
+		gradientProps?: { rot?: number; left?: number; right?: number; bottom?: number; top?: number }
+	}
+
+	export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor
 
 	// used by charts, shape, text
 	export interface BorderProps {
@@ -1055,9 +1065,12 @@ declare namespace PptxGenJS {
 		 */
 		rotateWithShape?: boolean
 	}
-	// used by: shape, table, text
-	export interface ShapeFillProps extends ColorSelection {}
-	export interface ShapeLineProps extends ColorSelection {
+
+	export interface ShapeLineProps {
+		/**
+		 * 字体颜色
+		 */
+		color?: ColorSelection
 		/**
 		 * Line width (pt)
 		 * @default 1
@@ -1081,6 +1094,9 @@ declare namespace PptxGenJS {
 		// FUTURE: beginArrowSize (1-9)
 		// FUTURE: endArrowSize (1-9)
 
+		capType?: string
+
+		joinType?: string
 		/**
 		 * Dash type
 		 * @deprecated v3.3.0 - use `dashType`
@@ -1106,7 +1122,11 @@ declare namespace PptxGenJS {
 		size?: number
 	}
 	// used by: chart, slide, table, text
-	export interface TextBaseProps extends FillColor {
+	export interface TextBaseProps {
+		/**
+		 * 字体颜色
+		 */
+		fontColor?: ColorSelection
 		/**
 		 * Horizontal alignment
 		 * @default 'left'
@@ -1257,6 +1277,7 @@ declare namespace PptxGenJS {
 		 * @default (none)
 		 */
 		underline?: {
+			color?: ColorSelection
 			style?:
 				| 'dash'
 				| 'dashHeavy'
@@ -1275,7 +1296,7 @@ declare namespace PptxGenJS {
 				| 'wavy'
 				| 'wavyDbl'
 				| 'wavyHeavy'
-		} & FillColor
+		}
 		/**
 		 * vertical alignment
 		 * @default 'top'
@@ -1917,7 +1938,7 @@ declare namespace PptxGenJS {
 		 * @example [10,5,10,5] // Top margin 10, Right margin 5, Bottom margin 10, Left margin 5
 		 */
 		margin?: Margin
-		outline?: { size: number } & FillColor
+		outline?: { size: number; color: ColorSelection }
 		paraSpaceAfter?: number
 		paraSpaceBefore?: number
 		placeholder?: string

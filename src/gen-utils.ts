@@ -3,7 +3,7 @@
  */
 
 import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps, ColorSelection } from './core-interfaces'
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor } from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -82,7 +82,7 @@ export function inch2Emu(inches: number | string): number {
 }
 
 /**
- * Convert `pt` into points (using `ONEPT`)
+ * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -181,6 +181,86 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
 
 	return strXml
 }
+/**
+ * 获取颜色配置项元素
+ * @param {ColorConfig} colorConfig
+ * @returns {string} elements XML
+ */
+export function createColorConfigElement(colorConfig?: ColorConfig) {
+	let elements = ''
+	if (colorConfig) {
+		if (colorConfig.alpha) {
+			elements += `<a:alpha val="${Math.round(colorConfig.alpha * 1000)}"/>`
+		}
+		if (colorConfig.hueMod) {
+			elements += `<a:hueMod val="${Math.round(colorConfig.hueMod * 1000)}"/>`
+		}
+		if (colorConfig.lumMod) {
+			elements += `<a:lumMod val="${Math.round(colorConfig.lumMod * 1000)}"/>`
+		}
+		if (colorConfig.lumOff) {
+			elements += `<a:lumOff val="${Math.round(colorConfig.lumOff * 1000)}"/>`
+		}
+		if (colorConfig.satMod) {
+			elements += `<a:satMod val="${Math.round(colorConfig.satMod * 1000)}"/>`
+		}
+		if (colorConfig.satOff) {
+			elements += `<a:satOff val="${Math.round(colorConfig.satOff * 1000)}"/>`
+		}
+		if (colorConfig.shade) {
+			elements += `<a:shade val="${Math.round(colorConfig.shade * 1000)}"/>`
+		}
+		if (colorConfig.tint) {
+			elements += `<a:tint val="${Math.round(colorConfig.tint * 1000)}"/>`
+		}
+	}
+	return elements
+}
+
+/**
+ * 创建实色填充
+ * @param {SolidFillColor} options 实色填充参数
+ */
+export function createSolidFillElement(options: SolidFillColor) {
+	return `<a:solidFill>${createColorElement(options.color, createColorConfigElement(options.colorConfig))}</a:solidFill>`
+}
+/**
+ * 创建渐变填充
+ * @param {GradFillColor} options 渐变填充参数
+ */
+export function createGradFillElement(options: GradFillColor) {
+	const gradientStopList = options.gradientStopList || []
+	const gradientType = options.gradientType || 'linear'
+	let element = ''
+	element += '<a:gradFill>'
+	if (gradientStopList.length > 0) {
+		element += `<a:gsLst>`
+		element += gradientStopList
+			.map((stop) => `<a:gs pos="${Math.round(stop.pos * 1000)}">${createColorElement(stop.color.color, createColorConfigElement(stop.color.colorConfig))}</a:gs>`)
+			.join('')
+		element += `</a:gsLst>`
+	}
+	switch (gradientType) {
+		case 'linear': {
+			const rot = options?.gradientProps?.rot || 0
+			element += `<a:lin ang="${convertRotationDegrees(rot)}" scaled="0"/>`
+			break
+		}
+		case 'radial': {
+			const top = options?.gradientProps?.top || 0
+			const left = options?.gradientProps.left || 0
+			const bottom = options?.gradientProps.bottom || 0
+			const right = options?.gradientProps.right || 0
+			element += `<a:path path="circle"><a:fillToRect l="${left}" t="${top}" r="${right}" b="${bottom}"/></a:path>`
+			break
+		}
+		default:
+			break
+	}
+	element += '</a:gradFill>'
+
+	return element
+}
 
 /**
  * Create color selection
@@ -190,60 +270,20 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
 export function genXmlColorSelection(props: Color): string
 export function genXmlColorSelection(props: ColorSelection): string
 export function genXmlColorSelection(props: Color | ColorSelection): string {
-	let fillType = 'solid'
-	let colorVal = ''
-	let internalElements = ''
-	let outText = ''
-	if (props) {
-		if (typeof props === 'string') {
-			colorVal = props
-		} else {
-			if (props.type) {
-				fillType = props.type
-			}
-			if (props.color) {
-				colorVal = props.color
-			}
-
-			if (props.colorConfig) {
-				if (props.colorConfig.alpha) {
-					internalElements += `<a:alpha val="${Math.round(props.colorConfig.alpha * 1000)}"/>`
-				}
-				if (props.colorConfig.hueMod) {
-					internalElements += `<a:hueMod val="${Math.round(props.colorConfig.hueMod * 1000)}"/>`
-				}
-				if (props.colorConfig.lumMod) {
-					internalElements += `<a:lumMod val="${Math.round(props.colorConfig.lumMod * 1000)}"/>`
-				}
-				if (props.colorConfig.lumOff) {
-					internalElements += `<a:lumOff val="${Math.round(props.colorConfig.lumOff * 1000)}"/>`
-				}
-				if (props.colorConfig.satMod) {
-					internalElements += `<a:satMod val="${Math.round(props.colorConfig.satMod * 1000)}"/>`
-				}
-				if (props.colorConfig.satOff) {
-					internalElements += `<a:satOff val="${Math.round(props.colorConfig.satOff * 1000)}"/>`
-				}
-				if (props.colorConfig.shade) {
-					internalElements += `<a:shade val="${Math.round(props.colorConfig.shade * 1000)}"/>`
-				}
-				if (props.colorConfig.tint) {
-					internalElements += `<a:tint val="${Math.round(props.colorConfig.tint * 1000)}"/>`
-				}
-			}
-		}
-
-		switch (fillType) {
+	const options: ColorSelection = typeof props === 'string' ? { type: 'solid', color: props } : props
+	if (options) {
+		switch (options.type) {
 			case 'solid':
-				outText += `<a:solidFill>${createColorElement(colorVal, internalElements)}</a:solidFill>`
-				break
-			default: // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
-				outText += ''
-				break
+				return createSolidFillElement(options)
+			case 'grad':
+				return createGradFillElement(options)
+			case 'none':
+				return '<a:noFill/>'
+			default:
+				// @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
+				return ''
 		}
 	}
-
-	return outText
 }
 
 /**

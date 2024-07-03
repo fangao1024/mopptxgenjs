@@ -2,7 +2,7 @@
  * PptxGenJS: Utility Methods
  */
 import { SCHEME_COLORS } from './core-enums';
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection } from './core-interfaces';
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor } from './core-interfaces';
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
  * - guaranteed to return a result regardless of undefined, null, etc. (0)
@@ -36,7 +36,7 @@ export declare function encodeXmlEntities(xml: string): string;
  */
 export declare function inch2Emu(inches: number | string): number;
 /**
- * Convert `pt` into points (using `ONEPT`)
+ * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -83,6 +83,22 @@ export declare function createColorElement(colorStr: string | SCHEME_COLORS, inn
  * { size: 8, color: 'FFFFFF', opacity: 0.75 };
  */
 export declare function createGlowElement(options: TextGlowProps, defaults: TextGlowProps): string;
+/**
+ * 获取颜色配置项元素
+ * @param {ColorConfig} colorConfig
+ * @returns {string} elements XML
+ */
+export declare function createColorConfigElement(colorConfig?: ColorConfig): string;
+/**
+ * 创建实色填充
+ * @param {SolidFillColor} options 实色填充参数
+ */
+export declare function createSolidFillElement(options: SolidFillColor): string;
+/**
+ * 创建渐变填充
+ * @param {GradFillColor} options 渐变填充参数
+ */
+export declare function createGradFillElement(options: GradFillColor): string;
 /**
  * Create color selection
  * @param {Color | ColorSelection} props fill props

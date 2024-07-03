@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.10 @ 2024/7/2 18:22:03 */
+/* mopptxgenjs 0.0.12 @ 2024/7/3 19:07:00 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -738,7 +738,7 @@ function inch2Emu(inches) {
     return Math.round(EMU * inches);
 }
 /**
- * Convert `pt` into points (using `ONEPT`)
+ * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -825,59 +825,98 @@ function createGlowElement(options, defaults) {
     strXml += '</a:glow>';
     return strXml;
 }
-function genXmlColorSelection(props) {
-    var fillType = 'solid';
-    var colorVal = '';
-    var internalElements = '';
-    var outText = '';
-    if (props) {
-        if (typeof props === 'string') {
-            colorVal = props;
+/**
+ * 获取颜色配置项元素
+ * @param {ColorConfig} colorConfig
+ * @returns {string} elements XML
+ */
+function createColorConfigElement(colorConfig) {
+    var elements = '';
+    if (colorConfig) {
+        if (colorConfig.alpha) {
+            elements += "<a:alpha val=\"".concat(Math.round(colorConfig.alpha * 1000), "\"/>");
         }
-        else {
-            if (props.type) {
-                fillType = props.type;
-            }
-            if (props.color) {
-                colorVal = props.color;
-            }
-            if (props.colorConfig) {
-                if (props.colorConfig.alpha) {
-                    internalElements += "<a:alpha val=\"".concat(Math.round(props.colorConfig.alpha * 1000), "\"/>");
-                }
-                if (props.colorConfig.hueMod) {
-                    internalElements += "<a:hueMod val=\"".concat(Math.round(props.colorConfig.hueMod * 1000), "\"/>");
-                }
-                if (props.colorConfig.lumMod) {
-                    internalElements += "<a:lumMod val=\"".concat(Math.round(props.colorConfig.lumMod * 1000), "\"/>");
-                }
-                if (props.colorConfig.lumOff) {
-                    internalElements += "<a:lumOff val=\"".concat(Math.round(props.colorConfig.lumOff * 1000), "\"/>");
-                }
-                if (props.colorConfig.satMod) {
-                    internalElements += "<a:satMod val=\"".concat(Math.round(props.colorConfig.satMod * 1000), "\"/>");
-                }
-                if (props.colorConfig.satOff) {
-                    internalElements += "<a:satOff val=\"".concat(Math.round(props.colorConfig.satOff * 1000), "\"/>");
-                }
-                if (props.colorConfig.shade) {
-                    internalElements += "<a:shade val=\"".concat(Math.round(props.colorConfig.shade * 1000), "\"/>");
-                }
-                if (props.colorConfig.tint) {
-                    internalElements += "<a:tint val=\"".concat(Math.round(props.colorConfig.tint * 1000), "\"/>");
-                }
-            }
+        if (colorConfig.hueMod) {
+            elements += "<a:hueMod val=\"".concat(Math.round(colorConfig.hueMod * 1000), "\"/>");
         }
-        switch (fillType) {
-            case 'solid':
-                outText += "<a:solidFill>".concat(createColorElement(colorVal, internalElements), "</a:solidFill>");
-                break;
-            default: // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
-                outText += '';
-                break;
+        if (colorConfig.lumMod) {
+            elements += "<a:lumMod val=\"".concat(Math.round(colorConfig.lumMod * 1000), "\"/>");
+        }
+        if (colorConfig.lumOff) {
+            elements += "<a:lumOff val=\"".concat(Math.round(colorConfig.lumOff * 1000), "\"/>");
+        }
+        if (colorConfig.satMod) {
+            elements += "<a:satMod val=\"".concat(Math.round(colorConfig.satMod * 1000), "\"/>");
+        }
+        if (colorConfig.satOff) {
+            elements += "<a:satOff val=\"".concat(Math.round(colorConfig.satOff * 1000), "\"/>");
+        }
+        if (colorConfig.shade) {
+            elements += "<a:shade val=\"".concat(Math.round(colorConfig.shade * 1000), "\"/>");
+        }
+        if (colorConfig.tint) {
+            elements += "<a:tint val=\"".concat(Math.round(colorConfig.tint * 1000), "\"/>");
         }
     }
-    return outText;
+    return elements;
+}
+/**
+ * 创建实色填充
+ * @param {SolidFillColor} options 实色填充参数
+ */
+function createSolidFillElement(options) {
+    return "<a:solidFill>".concat(createColorElement(options.color, createColorConfigElement(options.colorConfig)), "</a:solidFill>");
+}
+/**
+ * 创建渐变填充
+ * @param {GradFillColor} options 渐变填充参数
+ */
+function createGradFillElement(options) {
+    var _a, _b;
+    var gradientStopList = options.gradientStopList || [];
+    var gradientType = options.gradientType || 'linear';
+    var element = '';
+    element += '<a:gradFill>';
+    if (gradientStopList.length > 0) {
+        element += "<a:gsLst>";
+        element += gradientStopList
+            .map(function (stop) { return "<a:gs pos=\"".concat(Math.round(stop.pos * 1000), "\">").concat(createColorElement(stop.color.color, createColorConfigElement(stop.color.colorConfig)), "</a:gs>"); })
+            .join('');
+        element += "</a:gsLst>";
+    }
+    switch (gradientType) {
+        case 'linear': {
+            var rot = ((_a = options === null || options === void 0 ? void 0 : options.gradientProps) === null || _a === void 0 ? void 0 : _a.rot) || 0;
+            element += "<a:lin ang=\"".concat(convertRotationDegrees(rot), "\" scaled=\"0\"/>");
+            break;
+        }
+        case 'radial': {
+            var top_1 = ((_b = options === null || options === void 0 ? void 0 : options.gradientProps) === null || _b === void 0 ? void 0 : _b.top) || 0;
+            var left = (options === null || options === void 0 ? void 0 : options.gradientProps.left) || 0;
+            var bottom = (options === null || options === void 0 ? void 0 : options.gradientProps.bottom) || 0;
+            var right = (options === null || options === void 0 ? void 0 : options.gradientProps.right) || 0;
+            element += "<a:path path=\"circle\"><a:fillToRect l=\"".concat(left, "\" t=\"").concat(top_1, "\" r=\"").concat(right, "\" b=\"").concat(bottom, "\"/></a:path>");
+            break;
+        }
+    }
+    element += '</a:gradFill>';
+    return element;
+}
+function genXmlColorSelection(props) {
+    var options = typeof props === 'string' ? { type: 'solid', color: props } : props;
+    if (options) {
+        switch (options.type) {
+            case 'solid':
+                return createSolidFillElement(options);
+            case 'grad':
+                return createGradFillElement(options);
+            case 'none':
+                return '<a:noFill/>';
+            default:
+                // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
+                return '';
+        }
+    }
 }
 /**
  * Get a new rel ID (rId) for charts, media, etc.
@@ -1530,8 +1569,11 @@ function genTableToSlides(pptx, tabEleId, options, masterSlide) {
                     align: null,
                     bold: !!(window.getComputedStyle(cell).getPropertyValue('font-weight') === 'bold' || Number(window.getComputedStyle(cell).getPropertyValue('font-weight')) >= 500),
                     border: null,
-                    color: rgbToHex(Number(arrRGB1[0]), Number(arrRGB1[1]), Number(arrRGB1[2])),
-                    fill: { color: rgbToHex(Number(arrRGB2[0]), Number(arrRGB2[1]), Number(arrRGB2[2])) },
+                    fontColor: {
+                        type: 'solid',
+                        color: rgbToHex(Number(arrRGB1[0]), Number(arrRGB1[1]), Number(arrRGB1[2]))
+                    },
+                    fill: { type: 'solid', color: rgbToHex(Number(arrRGB2[0]), Number(arrRGB2[1]), Number(arrRGB2[2])) },
                     fontFace: (window.getComputedStyle(cell).getPropertyValue('font-family') || '').split(',')[0].replace(/"/g, '').replace('inherit', '').replace('initial', '') || null,
                     fontSize: Number(window.getComputedStyle(cell).getPropertyValue('font-size').replace(/[a-z]/gi, '')),
                     margin: null,
@@ -1925,9 +1967,14 @@ function addChartDefinition(target, type, data, opt) {
     }
     if (options.border)
         options.plotArea.border = options.border; // @deprecated [[remove in v4.0]]
-    options.plotArea.fill = options.plotArea.fill || { color: null, colorConfig: null };
-    if (options.fill)
-        options.plotArea.fill.color = options.fill; // @deprecated [[remove in v4.0]]
+    options.plotArea.fill = options.plotArea.fill || { type: 'solid', color: null, colorConfig: null };
+    if (options.fill) {
+        // @deprecated [[remove in v4.0]]
+        options.plotArea.fill = {
+            type: 'solid',
+            color: options.fill
+        };
+    }
     //
     options.chartArea = options.chartArea || {};
     options.chartArea.border = options.chartArea.border && typeof options.chartArea.border === 'object' ? options.chartArea.border : null;
@@ -2260,7 +2307,7 @@ function addNotesDefinition(target, notes) {
  */
 function addShapeDefinition(target, shapeName, opts) {
     var options = typeof opts === 'object' ? opts : {};
-    options.line = options.line || { type: 'none' };
+    options.line = options.line || { color: { type: 'none' } };
     var newObject = {
         _type: SLIDE_OBJECT_TYPES.text,
         shape: shapeName || SHAPE_TYPE.RECTANGLE,
@@ -2272,15 +2319,18 @@ function addShapeDefinition(target, shapeName, opts) {
         throw new Error('Missing/Invalid shape parameter! Example: `addShape(pptxgen.shapes.LINE, {x:1, y:1, w:1, h:1});`');
     // 1: ShapeLineProps defaults
     var newLineOpts = {
-        type: options.line.type || 'solid',
-        color: options.line.color || DEF_SHAPE_LINE_COLOR,
-        colorConfig: options.line.colorConfig,
+        color: options.line.color || {
+            type: 'solid',
+            color: DEF_SHAPE_LINE_COLOR
+        },
         width: options.line.width || 1,
         dashType: options.line.dashType || 'solid',
         beginArrowType: options.line.beginArrowType || null,
-        endArrowType: options.line.endArrowType || null
+        endArrowType: options.line.endArrowType || null,
+        capType: options.line.capType || null,
+        joinType: options.line.joinType || null
     };
-    if (typeof options.line === 'object' && options.line.type !== 'none')
+    if (typeof options.line === 'object' && options.line.color.type !== 'none')
         options.line = newLineOpts;
     // 2: Set options defaults
     options.x = options.x || (options.x === 0 ? 0 : 1);
@@ -2291,7 +2341,10 @@ function addShapeDefinition(target, shapeName, opts) {
     // 3: Handle line (lots of deprecated opts)
     if (typeof options.line === 'string') {
         var tmpOpts = newLineOpts;
-        tmpOpts.color = String(options.line); // @deprecated `options.line` string (was line color)
+        tmpOpts.color = {
+            type: 'solid',
+            color: String(options.line)
+        };
         options.line = tmpOpts;
     }
     if (typeof options.lineSize === 'number')
@@ -2408,8 +2461,13 @@ function addTableDefinition(target, tableRows, options, slideLayout, presLayout,
     opt.margin = opt.margin === 0 || opt.margin ? opt.margin : DEF_CELL_MARGIN_IN;
     if (typeof opt.margin === 'number')
         opt.margin = [Number(opt.margin), Number(opt.margin), Number(opt.margin), Number(opt.margin)];
-    if (!opt.color)
-        opt.color = opt.color || DEF_FONT_COLOR; // Set default color if needed (table option > inherit from Slide > default to black)
+    if (!opt.fontColor) {
+        // Set default color if needed (table option > inherit from Slide > default to black)
+        opt.fontColor = {
+            type: 'solid',
+            color: DEF_FONT_COLOR
+        };
+    }
     if (typeof opt.border === 'string') {
         console.warn("addTable `border` option must be an object. Ex: `{border: {type:'none'}}`");
         opt.border = null;
@@ -2590,7 +2648,11 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
         {
             // A.1: Color (placeholders should inherit their colors or override them, so don't default them)
             if (!itemOpts.placeholder) {
-                itemOpts.color = itemOpts.color || newObject.options.color || target.color || DEF_FONT_COLOR;
+                itemOpts.fontColor = itemOpts.fontColor ||
+                    newObject.options.fontColor || {
+                    color: target.color || DEF_FONT_COLOR,
+                    type: 'solid'
+                };
             }
             // A.2: Placeholder should inherit their bullets or override them, so don't default them
             if (itemOpts.placeholder || isPlaceholder) {
@@ -2608,13 +2670,16 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
             if (itemOpts.shape === SHAPE_TYPE.LINE) {
                 // ShapeLineProps defaults
                 var newLineOpts = {
-                    type: itemOpts.line.type || 'solid',
-                    color: itemOpts.line.color || DEF_SHAPE_LINE_COLOR,
-                    colorConfig: itemOpts.line.colorConfig,
+                    color: itemOpts.line.color || {
+                        type: 'solid',
+                        color: DEF_SHAPE_LINE_COLOR
+                    },
                     width: itemOpts.line.width || 1,
                     dashType: itemOpts.line.dashType || 'solid',
                     beginArrowType: itemOpts.line.beginArrowType || null,
-                    endArrowType: itemOpts.line.endArrowType || null
+                    endArrowType: itemOpts.line.endArrowType || null,
+                    capType: itemOpts.line.capType || null,
+                    joinType: itemOpts.line.joinType || null
                 };
                 if (typeof itemOpts.line === 'object')
                     itemOpts.line = newLineOpts;
@@ -2654,8 +2719,9 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
                 itemOpts._bodyProp.bIns = inch2Emu(itemOpts.inset);
             }
             // F: Transform @deprecated props
-            if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true)
+            if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true) {
                 itemOpts.underline = { style: 'sng' };
+            }
         }
         // STEP 2: Transform `align`/`valign` to XML values, store in _bodyProp for XML gen
         {
@@ -2710,13 +2776,16 @@ function addPlaceholdersToSlideLayouts(slide) {
  * @param {PresSlide} target - slide object that the background is set to
  */
 function addBackgroundDefinition(props, target) {
-    var _a;
     // A: @deprecated
     if (target.bkgd) {
         if (!target.background)
             target.background = {};
-        if (typeof target.bkgd === 'string')
-            target.background.color = target.bkgd;
+        if (typeof target.bkgd === 'string') {
+            target.background.fill = {
+                type: 'solid',
+                color: target.bkgd
+            };
+        }
         else {
             if (target.bkgd.data)
                 target.background.data = target.bkgd.data;
@@ -2726,8 +2795,6 @@ function addBackgroundDefinition(props, target) {
                 target.background.path = target.bkgd.src; // @deprecated (drop in 4.x)
         }
     }
-    if ((_a = target.background) === null || _a === void 0 ? void 0 : _a.fill)
-        target.background.color = target.background.fill;
     // B: Handle media
     if (props && (props.path || props.data)) {
         // Allow the use of only the data key (`path` isnt reqd)
@@ -3501,7 +3568,7 @@ function createExcelWorksheet(chartObject, zip) {
  * @return {string} XML
  */
 function makeXmlCharts(rel) {
-    var _a, _b, _c, _d;
+    var _a, _b;
     var strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
     var usesSecondaryValAxis = false;
     // STEP 1: Create chart
@@ -3516,7 +3583,10 @@ function makeXmlCharts(rel) {
         if (rel.opts.showTitle) {
             strXml += genXmlTitle({
                 title: rel.opts.title || 'Chart Title',
-                color: rel.opts.titleColor,
+                fontColor: {
+                    type: 'solid',
+                    color: rel.opts.titleColor
+                },
                 fontFace: rel.opts.titleFontFace,
                 fontSize: rel.opts.titleFontSize || DEF_FONT_TITLE_SIZE,
                 titleAlign: rel.opts.titleAlign,
@@ -3637,7 +3707,7 @@ function makeXmlCharts(rel) {
         }
         strXml += '  <c:spPr>';
         // OPTION: Fill
-        strXml += ((_c = rel.opts.plotArea.fill) === null || _c === void 0 ? void 0 : _c.color) ? genXmlColorSelection(rel.opts.plotArea.fill) : '<a:noFill/>';
+        strXml += genXmlColorSelection(rel.opts.plotArea.fill);
         // OPTION: Border
         strXml += rel.opts.plotArea.border ? "<a:ln w=\"".concat(valToPts(rel.opts.plotArea.border.pt), "\" cap=\"flat\">").concat(genXmlColorSelection(rel.opts.plotArea.border.color), "</a:ln>") : '<a:ln><a:noFill/></a:ln>';
         // Close shapeProp/plotArea before Legend
@@ -3680,7 +3750,7 @@ function makeXmlCharts(rel) {
     strXml += '</c:chart>';
     // D: CHARTSPACE SHAPE PROPS
     strXml += '<c:spPr>';
-    strXml += ((_d = rel.opts.chartArea.fill) === null || _d === void 0 ? void 0 : _d.color) ? genXmlColorSelection(rel.opts.chartArea.fill) : '<a:noFill/>';
+    strXml += genXmlColorSelection(rel.opts.chartArea.fill);
     strXml += rel.opts.chartArea.border ? "<a:ln w=\"".concat(valToPts(rel.opts.chartArea.border.pt), "\" cap=\"flat\">").concat(genXmlColorSelection(rel.opts.chartArea.border.color), "</a:ln>") : '<a:ln><a:noFill/></a:ln>';
     strXml += '  <a:effectLst/>';
     strXml += '</c:spPr>';
@@ -4540,7 +4610,10 @@ function makeCatAxis(opts, axisId, valAxisId) {
     // '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
     if (opts.showCatAxisTitle) {
         strXml += genXmlTitle({
-            color: opts.catAxisTitleColor,
+            fontColor: {
+                type: 'solid',
+                color: opts.catAxisTitleColor
+            },
             fontFace: opts.catAxisTitleFontFace,
             fontSize: opts.catAxisTitleFontSize,
             titleRotate: opts.catAxisTitleRotate,
@@ -4660,7 +4733,10 @@ function makeValAxis(opts, valAxisId) {
     // '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
     if (opts.showValAxisTitle) {
         strXml += genXmlTitle({
-            color: opts.valAxisTitleColor,
+            fontColor: {
+                type: 'solid',
+                color: opts.valAxisTitleColor
+            },
             fontFace: opts.valAxisTitleFontFace,
             fontSize: opts.valAxisTitleFontSize,
             titleRotate: opts.valAxisTitleRotate,
@@ -4741,7 +4817,10 @@ function makeSerAxis(opts, axisId, valAxisId) {
     // '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
     if (opts.showSerAxisTitle) {
         strXml += genXmlTitle({
-            color: opts.serAxisTitleColor,
+            fontColor: {
+                type: 'solid',
+                color: opts.serAxisTitleColor
+            },
             fontFace: opts.serAxisTitleFontFace,
             fontSize: opts.serAxisTitleFontSize,
             titleRotate: opts.serAxisTitleRotate,
@@ -4827,7 +4906,7 @@ function genXmlTitle(opts, chartX, chartY) {
             valY = valY / 10;
         layout = "<c:layout><c:manualLayout><c:xMode val=\"edge\"/><c:yMode val=\"edge\"/><c:x val=\"".concat(valX, "\"/><c:y val=\"").concat(valY, "\"/></c:manualLayout></c:layout>");
     }
-    return "<c:title>\n      <c:tx>\n        <c:rich>\n          ".concat(rotate, "\n          <a:lstStyle/>\n          <a:p>\n            ").concat(align, "\n            <a:defRPr ").concat(sizeAttr, " b=\"").concat(titleBold, "\" i=\"0\" u=\"none\" strike=\"noStrike\">\n              <a:solidFill>").concat(createColorElement(opts.color || DEF_FONT_COLOR), "</a:solidFill>\n              <a:latin typeface=\"").concat(opts.fontFace || 'Arial', "\"/>\n            </a:defRPr>\n          </a:pPr>\n          <a:r>\n            <a:rPr ").concat(sizeAttr, " b=\"").concat(titleBold, "\" i=\"0\" u=\"none\" strike=\"noStrike\">\n              <a:solidFill>").concat(createColorElement(opts.color || DEF_FONT_COLOR), "</a:solidFill>\n              <a:latin typeface=\"").concat(opts.fontFace || 'Arial', "\"/>\n            </a:rPr>\n            <a:t>").concat(encodeXmlEntities(opts.title) || '', "</a:t>\n          </a:r>\n        </a:p>\n        </c:rich>\n      </c:tx>\n      ").concat(layout, "\n      <c:overlay val=\"0\"/>\n    </c:title>");
+    return "<c:title>\n      <c:tx>\n        <c:rich>\n          ".concat(rotate, "\n          <a:lstStyle/>\n          <a:p>\n            ").concat(align, "\n            <a:defRPr ").concat(sizeAttr, " b=\"").concat(titleBold, "\" i=\"0\" u=\"none\" strike=\"noStrike\">\n\t\t\t\t").concat(genXmlColorSelection(Object.assign({ type: 'solid', color: DEF_FONT_COLOR }, opts.fontColor)), "\n              <a:latin typeface=\"").concat(opts.fontFace || 'Arial', "\"/>\n            </a:defRPr>\n          </a:pPr>\n          <a:r>\n            <a:rPr ").concat(sizeAttr, " b=\"").concat(titleBold, "\" i=\"0\" u=\"none\" strike=\"noStrike\">\n\t\t\t\t").concat(genXmlColorSelection(Object.assign({ type: 'solid', color: DEF_FONT_COLOR }, opts.fontColor)), "\n              <a:latin typeface=\"").concat(opts.fontFace || 'Arial', "\"/>\n            </a:rPr>\n            <a:t>").concat(encodeXmlEntities(opts.title) || '', "</a:t>\n          </a:r>\n        </a:p>\n        </c:rich>\n      </c:tx>\n      ").concat(layout, "\n      <c:overlay val=\"0\"/>\n    </c:title>");
 }
 /**
  * Calc and return excel column name for a given column length
@@ -5123,8 +5202,8 @@ function slideObjectToXml(slide) {
     if (slide._bkgdImgRid) {
         strSlideXml += "<p:bg><p:bgPr><a:blipFill dpi=\"0\" rotWithShape=\"1\"><a:blip r:embed=\"rId".concat(slide._bkgdImgRid, "\"><a:lum/></a:blip><a:srcRect/><a:stretch><a:fillRect/></a:stretch></a:blipFill><a:effectLst/></p:bgPr></p:bg>");
     }
-    else if ((_a = slide.background) === null || _a === void 0 ? void 0 : _a.color) {
-        strSlideXml += "<p:bg><p:bgPr>".concat(genXmlColorSelection(slide.background), "</p:bgPr></p:bg>");
+    else if ((_a = slide.background) === null || _a === void 0 ? void 0 : _a.fill) {
+        strSlideXml += "<p:bg><p:bgPr>".concat(genXmlColorSelection(slide.background.fill), "</p:bgPr></p:bg>");
     }
     else if (!slide.bkgd && slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
         // NOTE: Default [white] background is needed on slideMaster1.xml to avoid gray background in Keynote (and Finder previews)
@@ -5465,19 +5544,19 @@ function slideObjectToXml(slide) {
                     shapePath === null || shapePath === void 0 ? void 0 : shapePath.paths.forEach(function (path) {
                         switch (path.type) {
                             case 'moveTo':
-                                strSlideXml += "<a:moveTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:moveTo>");
+                                strSlideXml += "<a:moveTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:moveTo>");
                                 break;
                             case 'lineTo':
-                                strSlideXml += "<a:lnTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:lnTo>");
+                                strSlideXml += "<a:lnTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:lnTo>");
                                 break;
                             case 'arcTo':
                                 strSlideXml += "<a:arcTo wR=\"".concat(getSmartParseNumber(path.wR, 'X', slide._presLayout), "\" hR=\"").concat(getSmartParseNumber(path.hR, 'Y', slide._presLayout), "\" stAng=\"").concat(path.stAng, "\" swAng=\"").concat(path.swAng, "\" />");
                                 break;
                             case 'cubicBezTo':
-                                strSlideXml += "<a:cubicBezTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x3, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y3, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:cubicBezTo>");
+                                strSlideXml += "<a:cubicBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x3, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y3, 'Y', slide._presLayout), "\" /></a:cubicBezTo>");
                                 break;
                             case 'quadBezTo':
-                                strSlideXml += "<a:quadBezTo>\n\t\t\t\t\t\t\t\t<a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t<a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" />\n\t\t\t\t\t\t\t\t</a:quadBezTo>");
+                                strSlideXml += "<a:quadBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /></a:quadBezTo>");
                                 break;
                             case 'close':
                                 strSlideXml += '<a:close />';
@@ -5503,9 +5582,19 @@ function slideObjectToXml(slide) {
                 strSlideXml += slideItemObj.options.fill ? genXmlColorSelection(slideItemObj.options.fill) : '<a:noFill/>';
                 // shape Type: LINE: line color
                 if (slideItemObj.options.line) {
-                    strSlideXml += slideItemObj.options.line.width ? "<a:ln w=\"".concat(valToPts(slideItemObj.options.line.width), "\">") : '<a:ln>';
+                    strSlideXml += '<a:ln';
+                    if (slideItemObj.options.line.width) {
+                        strSlideXml += " w=\"".concat(valToPts(slideItemObj.options.line.width), "\"");
+                    }
+                    if (slideItemObj.options.line.capType) {
+                        strSlideXml += " cap=\"".concat(slideItemObj.options.line.capType, "\"");
+                    }
+                    if (slideItemObj.options.line.joinType) {
+                        strSlideXml += " cmpd=\"".concat(slideItemObj.options.line.joinType, "\"");
+                    }
+                    strSlideXml += '>';
                     if (slideItemObj.options.line.color)
-                        strSlideXml += genXmlColorSelection(slideItemObj.options.line);
+                        strSlideXml += genXmlColorSelection(slideItemObj.options.line.color);
                     if (slideItemObj.options.line.dashType)
                         strSlideXml += "<a:prstDash val=\"".concat(slideItemObj.options.line.dashType, "\"/>");
                     if (slideItemObj.options.line.beginArrowType)
@@ -5769,10 +5858,10 @@ function slideObjectToXml(slide) {
         }
         strSlideXml += '/>';
         strSlideXml += '  <a:lstStyle><a:lvl1pPr>';
-        if (slide._slideNumberProps.fontFace || slide._slideNumberProps.fontSize || slide._slideNumberProps.color) {
+        if (slide._slideNumberProps.fontFace || slide._slideNumberProps.fontSize || slide._slideNumberProps.fontColor) {
             strSlideXml += "<a:defRPr sz=\"".concat(Math.round((slide._slideNumberProps.fontSize || 12) * 100), "\">");
-            if (slide._slideNumberProps.color)
-                strSlideXml += genXmlColorSelection(slide._slideNumberProps.color);
+            if (slide._slideNumberProps.fontColor)
+                strSlideXml += genXmlColorSelection(slide._slideNumberProps.fontColor);
             if (slide._slideNumberProps.fontFace) {
                 strSlideXml += "<a:latin typeface=\"".concat(slide._slideNumberProps.fontFace, "\"/><a:ea typeface=\"").concat(slide._slideNumberProps.fontFace, "\"/><a:cs typeface=\"").concat(slide._slideNumberProps.fontFace, "\"/>");
             }
@@ -6027,16 +6116,20 @@ function genXmlTextRunProperties(opts, isDefault) {
     runProps += opts.charSpacing ? " spc=\"".concat(Math.round(opts.charSpacing * 100), "\" kern=\"0\"") : ''; // IMPORTANT: Also disable kerning; otherwise text won't actually expand
     runProps += ' dirty="0">';
     // Color / Font / Highlight / Outline are children of <a:rPr>, so add them now before closing the runProperties tag
-    if (opts.color || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
+    if (opts.fontColor || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
         if (opts.outline && typeof opts.outline === 'object') {
-            runProps += "<a:ln w=\"".concat(valToPts(opts.outline.size || 0.75), "\">").concat(genXmlColorSelection({ color: opts.outline.color || 'FFFFFF', colorConfig: opts.outline.colorConfig }), "</a:ln>");
+            runProps += "<a:ln w=\"".concat(valToPts(opts.outline.size || 0.75), "\">").concat(opts.outline.color ? genXmlColorSelection(opts.outline.color) : genXmlColorSelection('FFFFFF'), "</a:ln>");
         }
-        if (opts.color)
-            runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig });
+        if (opts.fontColor) {
+            runProps += genXmlColorSelection(opts.fontColor);
+        }
+        else {
+            runProps += genXmlColorSelection('FFFFFF');
+        }
         if (opts.highlight)
             runProps += "<a:highlight>".concat(createColorElement(opts.highlight), "</a:highlight>");
         if (typeof opts.underline === 'object' && opts.underline.color)
-            runProps += "<a:uFill>".concat(genXmlColorSelection({ color: opts.underline.color, colorConfig: opts.underline.colorConfig }), "</a:uFill>");
+            runProps += "<a:uFill>".concat(genXmlColorSelection(opts.underline.color), "</a:uFill>");
         if (opts.glow)
             runProps += "<a:effectLst>".concat(createGlowElement(opts.glow, DEF_TEXT_GLOW), "</a:effectLst>");
         if (opts.fontFace) {
@@ -6052,12 +6145,12 @@ function genXmlTextRunProperties(opts, isDefault) {
             throw new Error("ERROR: 'hyperlink requires either `url` or `slide`'");
         else if (opts.hyperlink.url) {
             // runProps += '<a:uFill>'+ genXmlColorSelection('0000FF') +'</a:uFill>'; // Breaks PPT2010! (Issue#74)
-            runProps += "<a:hlinkClick r:id=\"rId".concat(opts.hyperlink._rId, "\" invalidUrl=\"\" action=\"\" tgtFrame=\"\" tooltip=\"").concat(opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : '', "\" history=\"1\" highlightClick=\"0\" endSnd=\"0\"").concat(opts.color ? '>' : '/>');
+            runProps += "<a:hlinkClick r:id=\"rId".concat(opts.hyperlink._rId, "\" invalidUrl=\"\" action=\"\" tgtFrame=\"\" tooltip=\"").concat(opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : '', "\" history=\"1\" highlightClick=\"0\" endSnd=\"0\"").concat(opts.fontColor ? '>' : '/>');
         }
         else if (opts.hyperlink.slide) {
-            runProps += "<a:hlinkClick r:id=\"rId".concat(opts.hyperlink._rId, "\" action=\"ppaction://hlinksldjump\" tooltip=\"").concat(opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : '', "\"").concat(opts.color ? '>' : '/>');
+            runProps += "<a:hlinkClick r:id=\"rId".concat(opts.hyperlink._rId, "\" action=\"ppaction://hlinksldjump\" tooltip=\"").concat(opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : '', "\"").concat(opts.fontColor ? '>' : '/>');
         }
-        if (opts.color) {
+        if (opts.fontColor) {
             runProps += ' <a:extLst>';
             runProps += '  <a:ext uri="{A12FA001-AC4F-418D-AE19-62706E023703}">';
             runProps += '   <ahyp:hlinkClr xmlns:ahyp="http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor" val="tx"/>';

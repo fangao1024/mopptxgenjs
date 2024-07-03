@@ -610,8 +610,11 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					align: null,
 					bold: !!(window.getComputedStyle(cell).getPropertyValue('font-weight') === 'bold' || Number(window.getComputedStyle(cell).getPropertyValue('font-weight')) >= 500),
 					border: null,
-					color: rgbToHex(Number(arrRGB1[0]), Number(arrRGB1[1]), Number(arrRGB1[2])),
-					fill: { color: rgbToHex(Number(arrRGB2[0]), Number(arrRGB2[1]), Number(arrRGB2[2])) },
+					fontColor: {
+						type: 'solid',
+						color: rgbToHex(Number(arrRGB1[0]), Number(arrRGB1[1]), Number(arrRGB1[2]))
+					},
+					fill: { type: 'solid', color: rgbToHex(Number(arrRGB2[0]), Number(arrRGB2[1]), Number(arrRGB2[2])) },
 					fontFace: (window.getComputedStyle(cell).getPropertyValue('font-family') || '').split(',')[0].replace(/"/g, '').replace('inherit', '').replace('initial', '') || null,
 					fontSize: Number(window.getComputedStyle(cell).getPropertyValue('font-size').replace(/[a-z]/gi, '')),
 					margin: null,

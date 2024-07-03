@@ -314,8 +314,14 @@ export function addChartDefinition(target: PresSlide, type: CHART_NAME | IChartM
 		options.plotArea.border.color = DEF_CHART_BORDER.color
 	}
 	if (options.border) options.plotArea.border = options.border // @deprecated [[remove in v4.0]]
-	options.plotArea.fill = options.plotArea.fill || { color: null, colorConfig: null }
-	if (options.fill) options.plotArea.fill.color = options.fill // @deprecated [[remove in v4.0]]
+	options.plotArea.fill = options.plotArea.fill || { type: 'solid', color: null, colorConfig: null }
+	if (options.fill) {
+		// @deprecated [[remove in v4.0]]
+		options.plotArea.fill = {
+			type: 'solid',
+			color: options.fill
+		}
+	}
 	//
 	options.chartArea = options.chartArea || {}
 	options.chartArea.border = options.chartArea.border && typeof options.chartArea.border === 'object' ? options.chartArea.border : null
@@ -666,7 +672,7 @@ export function addNotesDefinition(target: PresSlide, notes: string): void {
  */
 export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opts: ShapeProps): void {
 	const options = typeof opts === 'object' ? opts : {}
-	options.line = options.line || { type: 'none' }
+	options.line = options.line || { color: { type: 'none' } }
 	const newObject: ISlideObject = {
 		_type: SLIDE_OBJECT_TYPES.text,
 		shape: shapeName || SHAPE_TYPE.RECTANGLE,
@@ -679,15 +685,18 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 
 	// 1: ShapeLineProps defaults
 	const newLineOpts: ShapeLineProps = {
-		type: options.line.type || 'solid',
-		color: options.line.color || DEF_SHAPE_LINE_COLOR,
-		colorConfig: options.line.colorConfig,
+		color: options.line.color || {
+			type: 'solid',
+			color: DEF_SHAPE_LINE_COLOR
+		},
 		width: options.line.width || 1,
 		dashType: options.line.dashType || 'solid',
 		beginArrowType: options.line.beginArrowType || null,
-		endArrowType: options.line.endArrowType || null
+		endArrowType: options.line.endArrowType || null,
+		capType: options.line.capType || null,
+		joinType: options.line.joinType || null
 	}
-	if (typeof options.line === 'object' && options.line.type !== 'none') options.line = newLineOpts
+	if (typeof options.line === 'object' && options.line.color.type !== 'none') options.line = newLineOpts
 
 	// 2: Set options defaults
 	options.x = options.x || (options.x === 0 ? 0 : 1)
@@ -699,7 +708,10 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	// 3: Handle line (lots of deprecated opts)
 	if (typeof options.line === 'string') {
 		const tmpOpts = newLineOpts
-		tmpOpts.color = String(options.line) // @deprecated `options.line` string (was line color)
+		tmpOpts.color = {
+			type: 'solid',
+			color: String(options.line)
+		}
 		options.line = tmpOpts
 	}
 	if (typeof options.lineSize === 'number') options.line.width = options.lineSize // @deprecated (part of `ShapeLineProps` now)
@@ -825,7 +837,13 @@ export function addTableDefinition(
 	opt.fontSize = opt.fontSize || DEF_FONT_SIZE
 	opt.margin = opt.margin === 0 || opt.margin ? opt.margin : DEF_CELL_MARGIN_IN
 	if (typeof opt.margin === 'number') opt.margin = [Number(opt.margin), Number(opt.margin), Number(opt.margin), Number(opt.margin)]
-	if (!opt.color) opt.color = opt.color || DEF_FONT_COLOR // Set default color if needed (table option > inherit from Slide > default to black)
+	if (!opt.fontColor) {
+		// Set default color if needed (table option > inherit from Slide > default to black)
+		opt.fontColor = {
+			type: 'solid',
+			color: DEF_FONT_COLOR
+		}
+	}
 	if (typeof opt.border === 'string') {
 		console.warn("addTable `border` option must be an object. Ex: `{border: {type:'none'}}`")
 		opt.border = null
@@ -1005,7 +1023,11 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 		{
 			// A.1: Color (placeholders should inherit their colors or override them, so don't default them)
 			if (!itemOpts.placeholder) {
-				itemOpts.color = itemOpts.color || newObject.options.color || target.color || DEF_FONT_COLOR
+				itemOpts.fontColor = itemOpts.fontColor ||
+					newObject.options.fontColor || {
+						color: target.color || DEF_FONT_COLOR,
+						type: 'solid'
+					}
 			}
 
 			// A.2: Placeholder should inherit their bullets or override them, so don't default them
@@ -1028,13 +1050,16 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 			if (itemOpts.shape === SHAPE_TYPE.LINE) {
 				// ShapeLineProps defaults
 				const newLineOpts: ShapeLineProps = {
-					type: itemOpts.line.type || 'solid',
-					color: itemOpts.line.color || DEF_SHAPE_LINE_COLOR,
-					colorConfig: itemOpts.line.colorConfig,
+					color: itemOpts.line.color || {
+						type: 'solid',
+						color: DEF_SHAPE_LINE_COLOR
+					},
 					width: itemOpts.line.width || 1,
 					dashType: itemOpts.line.dashType || 'solid',
 					beginArrowType: itemOpts.line.beginArrowType || null,
-					endArrowType: itemOpts.line.endArrowType || null
+					endArrowType: itemOpts.line.endArrowType || null,
+					capType: itemOpts.line.capType || null,
+					joinType: itemOpts.line.joinType || null
 				}
 				if (typeof itemOpts.line === 'object') itemOpts.line = newLineOpts
 
@@ -1073,7 +1098,9 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 			}
 
 			// F: Transform @deprecated props
-			if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true) itemOpts.underline = { style: 'sng' }
+			if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true) {
+				itemOpts.underline = { style: 'sng' }
+			}
 		}
 
 		// STEP 2: Transform `align`/`valign` to XML values, store in _bodyProp for XML gen
@@ -1137,14 +1164,17 @@ export function addBackgroundDefinition(props: BackgroundProps, target: SlideLay
 	if (target.bkgd) {
 		if (!target.background) target.background = {}
 
-		if (typeof target.bkgd === 'string') target.background.color = target.bkgd
-		else {
+		if (typeof target.bkgd === 'string') {
+			target.background.fill = {
+				type: 'solid',
+				color: target.bkgd
+			}
+		} else {
 			if (target.bkgd.data) target.background.data = target.bkgd.data
 			if (target.bkgd.path) target.background.path = target.bkgd.path
 			if (target.bkgd.src) target.background.path = target.bkgd.src // @deprecated (drop in 4.x)
 		}
 	}
-	if (target.background?.fill) target.background.color = target.background.fill
 
 	// B: Handle media
 	if (props && (props.path || props.data)) {

@@ -60,12 +60,11 @@ export interface DataOrPathProps {
      */
     data?: string;
 }
-export interface BackgroundProps extends DataOrPathProps, ColorSelection {
+export interface BackgroundProps extends DataOrPathProps {
     /**
-     * Color (hex format)
-     * @deprecated v3.6.0 - use `ColorSelection` instead
+     * 填充方式
      */
-    fill?: HexColor;
+    fill?: ColorSelection;
     /**
      * source URL
      * @deprecated v3.6.0 - use `DataOrPathProps` instead - remove in v4.0.0
@@ -110,13 +109,28 @@ export interface FillColor {
      */
     colorConfig?: ColorConfig;
 }
-export interface ColorSelection extends FillColor {
-    /**
-     * Fill type
-     * @default 'solid'
-     */
-    type?: 'none' | 'solid';
+export interface NoneFillColor {
+    type: 'none';
 }
+export interface SolidFillColor extends FillColor {
+    type: 'solid';
+}
+export interface GradFillColor {
+    type: 'grad';
+    gradientStopList?: {
+        pos: number;
+        color: FillColor;
+    }[];
+    gradientType?: 'radial' | 'linear';
+    gradientProps?: {
+        rot?: number;
+        left?: number;
+        right?: number;
+        bottom?: number;
+        top?: number;
+    };
+}
+export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor;
 export interface BorderProps {
     /**
      * Border type
@@ -191,9 +205,11 @@ export interface ShadowProps {
      */
     rotateWithShape?: boolean;
 }
-export interface ShapeFillProps extends ColorSelection {
-}
-export interface ShapeLineProps extends ColorSelection {
+export interface ShapeLineProps {
+    /**
+     * 字体颜色
+     */
+    color?: ColorSelection;
     /**
      * Line width (pt)
      * @default 1
@@ -214,6 +230,8 @@ export interface ShapeLineProps extends ColorSelection {
      * @since v3.3.0
      */
     endArrowType?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle';
+    capType?: string;
+    joinType?: string;
     /**
      * Dash type
      * @deprecated v3.3.0 - use `dashType`
@@ -238,7 +256,11 @@ export interface ShapeLineProps extends ColorSelection {
      */
     size?: number;
 }
-export interface TextBaseProps extends FillColor {
+export interface TextBaseProps {
+    /**
+     * 字体颜色
+     */
+    fontColor?: ColorSelection;
     /**
      * Horizontal alignment
      * @default 'left'
@@ -371,8 +393,9 @@ export interface TextBaseProps extends FillColor {
      * @default (none)
      */
     underline?: {
+        color?: ColorSelection;
         style?: 'dash' | 'dashHeavy' | 'dashLong' | 'dashLongHeavy' | 'dbl' | 'dotDash' | 'dotDashHeave' | 'dotDotDash' | 'dotDotDashHeavy' | 'dotted' | 'dottedHeavy' | 'heavy' | 'none' | 'sng' | 'wavy' | 'wavyDbl' | 'wavyHeavy';
-    } & FillColor;
+    };
     /**
      * vertical alignment
      * @default 'top'
@@ -1051,7 +1074,8 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
     margin?: Margin;
     outline?: {
         size: number;
-    } & FillColor;
+        color: ColorSelection;
+    };
     paraSpaceAfter?: number;
     paraSpaceBefore?: number;
     placeholder?: string;

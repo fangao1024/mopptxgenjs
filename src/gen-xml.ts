@@ -80,8 +80,8 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 	// STEP 1: Add background color/image (ensure only a single `<p:bg>` tag is created, ex: when master-baskground has both `color` and `path`)
 	if (slide._bkgdImgRid) {
 		strSlideXml += `<p:bg><p:bgPr><a:blipFill dpi="0" rotWithShape="1"><a:blip r:embed="rId${slide._bkgdImgRid}"><a:lum/></a:blip><a:srcRect/><a:stretch><a:fillRect/></a:stretch></a:blipFill><a:effectLst/></p:bgPr></p:bg>`
-	} else if (slide.background?.color) {
-		strSlideXml += `<p:bg><p:bgPr>${genXmlColorSelection(slide.background)}</p:bgPr></p:bg>`
+	} else if (slide.background?.fill) {
+		strSlideXml += `<p:bg><p:bgPr>${genXmlColorSelection(slide.background.fill)}</p:bgPr></p:bg>`
 	} else if (!slide.bkgd && slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
 		// NOTE: Default [white] background is needed on slideMaster1.xml to avoid gray background in Keynote (and Finder previews)
 		strSlideXml += '<p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg>'
@@ -427,14 +427,10 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					shapePath?.paths.forEach((path) => {
 						switch (path.type) {
 							case 'moveTo':
-								strSlideXml += `<a:moveTo>
-								<a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" />
-								</a:moveTo>`
+								strSlideXml += `<a:moveTo><a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" /></a:moveTo>`
 								break
 							case 'lineTo':
-								strSlideXml += `<a:lnTo>
-								<a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" />
-								</a:lnTo>`
+								strSlideXml += `<a:lnTo><a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" /></a:lnTo>`
 								break
 							case 'arcTo':
 								strSlideXml += `<a:arcTo wR="${getSmartParseNumber(path.wR, 'X', slide._presLayout)}" hR="${getSmartParseNumber(path.hR, 'Y', slide._presLayout)}" stAng="${
@@ -442,17 +438,22 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 								}" swAng="${path.swAng}" />`
 								break
 							case 'cubicBezTo':
-								strSlideXml += `<a:cubicBezTo>
-								<a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y1, 'Y', slide._presLayout)}" />
-								<a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" />
-								<a:pt x="${getSmartParseNumber(path.x3, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y3, 'Y', slide._presLayout)}" />
-								</a:cubicBezTo>`
+								strSlideXml += `<a:cubicBezTo><a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(
+									path.y1,
+									'Y',
+									slide._presLayout
+								)}" /><a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" /><a:pt x="${getSmartParseNumber(
+									path.x3,
+									'X',
+									slide._presLayout
+								)}" y="${getSmartParseNumber(path.y3, 'Y', slide._presLayout)}" /></a:cubicBezTo>`
 								break
 							case 'quadBezTo':
-								strSlideXml += `<a:quadBezTo>
-								<a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y1, 'Y', slide._presLayout)}" />
-								<a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" />
-								</a:quadBezTo>`
+								strSlideXml += `<a:quadBezTo><a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(
+									path.y1,
+									'Y',
+									slide._presLayout
+								)}" /><a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" /></a:quadBezTo>`
 								break
 							case 'close':
 								strSlideXml += '<a:close />'
@@ -478,8 +479,18 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 
 				// shape Type: LINE: line color
 				if (slideItemObj.options.line) {
-					strSlideXml += slideItemObj.options.line.width ? `<a:ln w="${valToPts(slideItemObj.options.line.width)}">` : '<a:ln>'
-					if (slideItemObj.options.line.color) strSlideXml += genXmlColorSelection(slideItemObj.options.line)
+					strSlideXml += '<a:ln'
+					if (slideItemObj.options.line.width) {
+						strSlideXml += ` w="${valToPts(slideItemObj.options.line.width)}"`
+					}
+					if (slideItemObj.options.line.capType) {
+						strSlideXml += ` cap="${slideItemObj.options.line.capType}"`
+					}
+					if (slideItemObj.options.line.joinType) {
+						strSlideXml += ` cmpd="${slideItemObj.options.line.joinType}"`
+					}
+					strSlideXml += '>'
+					if (slideItemObj.options.line.color) strSlideXml += genXmlColorSelection(slideItemObj.options.line.color)
 					if (slideItemObj.options.line.dashType) strSlideXml += `<a:prstDash val="${slideItemObj.options.line.dashType}"/>`
 					if (slideItemObj.options.line.beginArrowType) strSlideXml += `<a:headEnd type="${slideItemObj.options.line.beginArrowType}"/>`
 					if (slideItemObj.options.line.endArrowType) strSlideXml += `<a:tailEnd type="${slideItemObj.options.line.endArrowType}"/>`
@@ -757,9 +768,9 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 		}
 		strSlideXml += '/>'
 		strSlideXml += '  <a:lstStyle><a:lvl1pPr>'
-		if (slide._slideNumberProps.fontFace || slide._slideNumberProps.fontSize || slide._slideNumberProps.color) {
+		if (slide._slideNumberProps.fontFace || slide._slideNumberProps.fontSize || slide._slideNumberProps.fontColor) {
 			strSlideXml += `<a:defRPr sz="${Math.round((slide._slideNumberProps.fontSize || 12) * 100)}">`
-			if (slide._slideNumberProps.color) strSlideXml += genXmlColorSelection(slide._slideNumberProps.color)
+			if (slide._slideNumberProps.fontColor) strSlideXml += genXmlColorSelection(slide._slideNumberProps.fontColor)
 			if (slide._slideNumberProps.fontFace) {
 				strSlideXml += `<a:latin typeface="${slide._slideNumberProps.fontFace}"/><a:ea typeface="${slide._slideNumberProps.fontFace}"/><a:cs typeface="${slide._slideNumberProps.fontFace}"/>`
 			}
@@ -1023,14 +1034,17 @@ function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefau
 	runProps += opts.charSpacing ? ` spc="${Math.round(opts.charSpacing * 100)}" kern="0"` : '' // IMPORTANT: Also disable kerning; otherwise text won't actually expand
 	runProps += ' dirty="0">'
 	// Color / Font / Highlight / Outline are children of <a:rPr>, so add them now before closing the runProperties tag
-	if (opts.color || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
+	if (opts.fontColor || opts.fontFace || opts.outline || (typeof opts.underline === 'object' && opts.underline.color)) {
 		if (opts.outline && typeof opts.outline === 'object') {
-			runProps += `<a:ln w="${valToPts(opts.outline.size || 0.75)}">${genXmlColorSelection({ color: opts.outline.color || 'FFFFFF', colorConfig: opts.outline.colorConfig })}</a:ln>`
+			runProps += `<a:ln w="${valToPts(opts.outline.size || 0.75)}">${opts.outline.color ? genXmlColorSelection(opts.outline.color) : genXmlColorSelection('FFFFFF')}</a:ln>`
 		}
-		if (opts.color) runProps += genXmlColorSelection({ color: opts.color, colorConfig: opts.colorConfig })
+		if (opts.fontColor) {
+			runProps += genXmlColorSelection(opts.fontColor)
+		} else {
+			runProps += genXmlColorSelection('FFFFFF')
+		}
 		if (opts.highlight) runProps += `<a:highlight>${createColorElement(opts.highlight)}</a:highlight>`
-		if (typeof opts.underline === 'object' && opts.underline.color)
-			runProps += `<a:uFill>${genXmlColorSelection({ color: opts.underline.color, colorConfig: opts.underline.colorConfig })}</a:uFill>`
+		if (typeof opts.underline === 'object' && opts.underline.color) runProps += `<a:uFill>${genXmlColorSelection(opts.underline.color)}</a:uFill>`
 		if (opts.glow) runProps += `<a:effectLst>${createGlowElement(opts.glow, DEF_TEXT_GLOW)}</a:effectLst>`
 		if (opts.fontFace) {
 			// NOTE: 'cs' = Complex Script, 'ea' = East Asian (use "-120" instead of "0" - per Issue #174); ea must come first (Issue #174)
@@ -1046,13 +1060,13 @@ function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefau
 			// runProps += '<a:uFill>'+ genXmlColorSelection('0000FF') +'</a:uFill>'; // Breaks PPT2010! (Issue#74)
 			runProps += `<a:hlinkClick r:id="rId${opts.hyperlink._rId}" invalidUrl="" action="" tgtFrame="" tooltip="${
 				opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : ''
-			}" history="1" highlightClick="0" endSnd="0"${opts.color ? '>' : '/>'}`
+			}" history="1" highlightClick="0" endSnd="0"${opts.fontColor ? '>' : '/>'}`
 		} else if (opts.hyperlink.slide) {
 			runProps += `<a:hlinkClick r:id="rId${opts.hyperlink._rId}" action="ppaction://hlinksldjump" tooltip="${opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : ''}"${
-				opts.color ? '>' : '/>'
+				opts.fontColor ? '>' : '/>'
 			}`
 		}
-		if (opts.color) {
+		if (opts.fontColor) {
 			runProps += ' <a:extLst>'
 			runProps += '  <a:ext uri="{A12FA001-AC4F-418D-AE19-62706E023703}">'
 			runProps += '   <ahyp:hlinkClr xmlns:ahyp="http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor" val="tx"/>'

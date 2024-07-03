@@ -567,7 +567,10 @@ export function makeXmlCharts(rel: ISlideRelChart): string {
 			strXml += genXmlTitle(
 				{
 					title: rel.opts.title || 'Chart Title',
-					color: rel.opts.titleColor,
+					fontColor: {
+						type: 'solid',
+						color: rel.opts.titleColor
+					},
 					fontFace: rel.opts.titleFontFace,
 					fontSize: rel.opts.titleFontSize || DEF_FONT_TITLE_SIZE,
 					titleAlign: rel.opts.titleAlign,
@@ -698,7 +701,7 @@ export function makeXmlCharts(rel: ISlideRelChart): string {
 		strXml += '  <c:spPr>'
 
 		// OPTION: Fill
-		strXml += rel.opts.plotArea.fill?.color ? genXmlColorSelection(rel.opts.plotArea.fill) : '<a:noFill/>'
+		strXml += genXmlColorSelection(rel.opts.plotArea.fill)
 
 		// OPTION: Border
 		strXml += rel.opts.plotArea.border ? `<a:ln w="${valToPts(rel.opts.plotArea.border.pt)}" cap="flat">${genXmlColorSelection(rel.opts.plotArea.border.color)}</a:ln>` : '<a:ln><a:noFill/></a:ln>'
@@ -743,7 +746,7 @@ export function makeXmlCharts(rel: ISlideRelChart): string {
 
 	// D: CHARTSPACE SHAPE PROPS
 	strXml += '<c:spPr>'
-	strXml += rel.opts.chartArea.fill?.color ? genXmlColorSelection(rel.opts.chartArea.fill) : '<a:noFill/>'
+	strXml += genXmlColorSelection(rel.opts.chartArea.fill)
 	strXml += rel.opts.chartArea.border ? `<a:ln w="${valToPts(rel.opts.chartArea.border.pt)}" cap="flat">${genXmlColorSelection(rel.opts.chartArea.border.color)}</a:ln>` : '<a:ln><a:noFill/></a:ln>'
 	strXml += '  <a:effectLst/>'
 	strXml += '</c:spPr>'
@@ -1670,7 +1673,10 @@ function makeCatAxis(opts: IChartOptsLib, axisId: string, valAxisId: string): st
 	// '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
 	if (opts.showCatAxisTitle) {
 		strXml += genXmlTitle({
-			color: opts.catAxisTitleColor,
+			fontColor: {
+				type: 'solid',
+				color: opts.catAxisTitleColor
+			},
 			fontFace: opts.catAxisTitleFontFace,
 			fontSize: opts.catAxisTitleFontSize,
 			titleRotate: opts.catAxisTitleRotate,
@@ -1782,7 +1788,10 @@ function makeValAxis(opts: IChartOptsLib, valAxisId: string): string {
 	// '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
 	if (opts.showValAxisTitle) {
 		strXml += genXmlTitle({
-			color: opts.valAxisTitleColor,
+			fontColor: {
+				type: 'solid',
+				color: opts.valAxisTitleColor
+			},
 			fontFace: opts.valAxisTitleFontFace,
 			fontSize: opts.valAxisTitleFontSize,
 			titleRotate: opts.valAxisTitleRotate,
@@ -1865,7 +1874,10 @@ function makeSerAxis(opts: IChartOptsLib, axisId: string, valAxisId: string): st
 	// '<c:title>' comes between '</c:majorGridlines>' and '<c:numFmt>'
 	if (opts.showSerAxisTitle) {
 		strXml += genXmlTitle({
-			color: opts.serAxisTitleColor,
+			fontColor: {
+				type: 'solid',
+				color: opts.serAxisTitleColor
+			},
 			fontFace: opts.serAxisTitleFontFace,
 			fontSize: opts.serAxisTitleFontSize,
 			titleRotate: opts.serAxisTitleRotate,
@@ -1957,13 +1969,13 @@ function genXmlTitle(opts: IChartPropsTitle, chartX?: number, chartY?: number): 
           <a:p>
             ${align}
             <a:defRPr ${sizeAttr} b="${titleBold}" i="0" u="none" strike="noStrike">
-              <a:solidFill>${createColorElement(opts.color || DEF_FONT_COLOR)}</a:solidFill>
+				${genXmlColorSelection(Object.assign({ type: 'solid', color: DEF_FONT_COLOR }, opts.fontColor))}
               <a:latin typeface="${opts.fontFace || 'Arial'}"/>
             </a:defRPr>
           </a:pPr>
           <a:r>
             <a:rPr ${sizeAttr} b="${titleBold}" i="0" u="none" strike="noStrike">
-              <a:solidFill>${createColorElement(opts.color || DEF_FONT_COLOR)}</a:solidFill>
+				${genXmlColorSelection(Object.assign({ type: 'solid', color: DEF_FONT_COLOR }, opts.fontColor))}
               <a:latin typeface="${opts.fontFace || 'Arial'}"/>
             </a:rPr>
             <a:t>${encodeXmlEntities(opts.title) || ''}</a:t>
