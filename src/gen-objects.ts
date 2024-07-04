@@ -48,7 +48,7 @@ import {
 	TextPropsOptions
 } from './core-interfaces'
 import { getSlidesForTableRows } from './gen-tables'
-import { encodeXmlEntities, getNewRelId, getSmartParseNumber, inch2Emu, valToPts, correctShadowOptions } from './gen-utils'
+import { encodeXmlEntities, getNewRelId, getSmartParseNumber, inch2Emu, valToPts, correctShadowOptions, initColorSelection } from './gen-utils'
 
 /** counter for included charts (used for index in their filenames) */
 let _chartCounter = 0
@@ -714,6 +714,12 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 		}
 		options.line = tmpOpts
 	}
+	if (options.fill) {
+		initColorSelection(options.fill, target)
+	}
+	if (options.line?.color) {
+		initColorSelection(options.line.color, target)
+	}
 	if (typeof options.lineSize === 'number') options.line.width = options.lineSize // @deprecated (part of `ShapeLineProps` now)
 	if (typeof options.lineDash === 'string') options.line.dashType = options.lineDash // @deprecated (part of `ShapeLineProps` now)
 	if (typeof options.lineHead === 'string') options.line.beginArrowType = options.lineHead // @deprecated (part of `ShapeLineProps` now)
@@ -844,6 +850,7 @@ export function addTableDefinition(
 			color: DEF_FONT_COLOR
 		}
 	}
+	initColorSelection(opt.fontColor, target)
 	if (typeof opt.border === 'string') {
 		console.warn("addTable `border` option must be an object. Ex: `{border: {type:'none'}}`")
 		opt.border = null
@@ -1028,6 +1035,11 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 						color: target.color || DEF_FONT_COLOR,
 						type: 'solid'
 					}
+				initColorSelection(itemOpts.fontColor, target)
+				// 初始化 fill
+				if (itemOpts.fill) {
+					initColorSelection(itemOpts.fill, target)
+				}
 			}
 
 			// A.2: Placeholder should inherit their bullets or override them, so don't default them
@@ -1062,6 +1074,7 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 					joinType: itemOpts.line.joinType || null
 				}
 				if (typeof itemOpts.line === 'object') itemOpts.line = newLineOpts
+				initColorSelection(itemOpts.line.color, target)
 
 				// 3: Handle line (lots of deprecated opts)
 				if (typeof itemOpts.line === 'string') {
@@ -1100,6 +1113,11 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 			// F: Transform @deprecated props
 			if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true) {
 				itemOpts.underline = { style: 'sng' }
+			}
+
+			// 初始化 underline color
+			if (itemOpts.underline?.color) {
+				initColorSelection(itemOpts.underline.color, target)
 			}
 		}
 
@@ -1176,6 +1194,9 @@ export function addBackgroundDefinition(props: BackgroundProps, target: SlideLay
 		}
 	}
 
+	if (target.background?.fill) {
+		initColorSelection(target.background.fill)
+	}
 	// B: Handle media
 	if (props && (props.path || props.data)) {
 		// Allow the use of only the data key (`path` isnt reqd)

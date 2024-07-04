@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.12 @ 2024/7/3 19:07:00 */
+/* mopptxgenjs 0.0.13 @ 2024/7/4 18:26:35 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -780,6 +780,44 @@ function componentToHex(c) {
 function rgbToHex(r, g, b) {
     return (componentToHex(r) + componentToHex(g) + componentToHex(b)).toUpperCase();
 }
+/**
+ * 获取URL的文件类型
+ * @param url url链接
+ * @param defaultType 默认类型
+ * @returns  文件类型
+ */
+function getURLType(url, defaultType) {
+    if (defaultType === void 0) { defaultType = 'png'; }
+    if (!url) {
+        return defaultType;
+    }
+    var urlObject = new URL(url);
+    var pathname = urlObject.pathname;
+    var match = pathname.match(/\.(\w+)$/);
+    if (match) {
+        return match[1].toLowerCase();
+    }
+    else {
+        return defaultType;
+    }
+}
+/**
+ * 获取base64的文件类型
+ * @param base64 base64字符串
+ * @param defaultType 默认类型
+ * @returns 文件类型
+ */
+function getBase64Type(base64, defaultType) {
+    if (defaultType === void 0) { defaultType = 'png'; }
+    var strImgExtn = defaultType;
+    if (base64 && /image\/(\w+);/.exec(base64) && /image\/(\w+);/.exec(base64).length > 0) {
+        strImgExtn = /image\/(\w+);/.exec(base64)[1];
+    }
+    else if (base64 === null || base64 === void 0 ? void 0 : base64.toLowerCase().includes('image/svg+xml')) {
+        strImgExtn = 'svg';
+    }
+    return strImgExtn;
+}
 /**  TODO: FUTURE: TODO-4.0:
  * @date 2022-04-10
  * @tldr this s/b a private method with all current calls switched to `genXmlColorSelection()`
@@ -879,10 +917,9 @@ function createSolidFillElement(options) {
  */
 function createGradFillElement(options) {
     var _a, _b;
-    var gradientStopList = options.gradientStopList || [];
-    var gradientType = options.gradientType || 'linear';
+    var gradientStopList = options.gradientStopList, gradientType = options.gradientType, flip = options.flip, rotWithShape = options.rotWithShape;
     var element = '';
-    element += '<a:gradFill>';
+    element += "<a:gradFill flip=\"".concat(flip, "\" rotWithShape=\"").concat(rotWithShape ? '1' : '0', "\">");
     if (gradientStopList.length > 0) {
         element += "<a:gsLst>";
         element += gradientStopList
@@ -908,21 +945,115 @@ function createGradFillElement(options) {
     element += '</a:gradFill>';
     return element;
 }
+function createBlipFillElement(options) {
+    var _rid = options._rid, rotWithShape = options.rotWithShape, alpha = options.alpha, tiling = options.tiling, stretchProps = options.stretchProps, tileProps = options.tileProps;
+    var element = '';
+    element += "<a:blipFill rotWithShape=\"".concat(rotWithShape ? '1' : '0', "\">");
+    element += "<a:blip r:embed=\"rId".concat(_rid, "\">");
+    element += "<a:alphaModFix amt=\"".concat(Math.round(alpha * 1000), "\"/>");
+    element += "</a:blip>";
+    if (tiling === 'stretch') {
+        var _a = stretchProps || {}, top_2 = _a.top, left = _a.left, bottom = _a.bottom, right = _a.right;
+        element += "<a:stretch><a:fillRect";
+        if (top_2 !== undefined)
+            element += " t=\"".concat(Math.round(top_2 * 1000), "\"");
+        if (left !== undefined)
+            element += " l=\"".concat(Math.round(left * 1000), "\"");
+        if (bottom !== undefined)
+            element += " b=\"".concat(Math.round(bottom * 1000), "\"");
+        if (right !== undefined)
+            element += " r=\"".concat(Math.round(right * 1000), "\"");
+        element += "/></a:stretch>";
+    }
+    else if (tiling === 'tile') {
+        var _b = tileProps || {}, tx = _b.tx, ty = _b.ty, sx = _b.sx, sy = _b.sy, flip = _b.flip, algn = _b.algn;
+        element += "<a:tile";
+        if (tx !== undefined)
+            element += " tx=\"".concat(inch2Emu(tx), "\"");
+        if (ty !== undefined)
+            element += " ty=\"".concat(inch2Emu(ty), "\"");
+        if (sx !== undefined)
+            element += " sx=\"".concat(Math.round(sx * 1000), "\"");
+        if (sy !== undefined)
+            element += " sy=\"".concat(Math.round(sy * 1000), "\"");
+        if (flip !== undefined)
+            element += " flip=\"".concat(flip, "\"");
+        if (algn !== undefined)
+            element += " algn=\"".concat(algn, "\"");
+        element += '/>';
+    }
+    element += '</a:blipFill>';
+    return element;
+}
 function genXmlColorSelection(props) {
-    var options = typeof props === 'string' ? { type: 'solid', color: props } : props;
-    if (options) {
-        switch (options.type) {
-            case 'solid':
-                return createSolidFillElement(options);
-            case 'grad':
-                return createGradFillElement(options);
-            case 'none':
-                return '<a:noFill/>';
-            default:
-                // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
-                return '';
+    if (props) {
+        var options = typeof props === 'string' ? { type: 'solid', color: props } : props;
+        if (options) {
+            switch (options.type) {
+                case 'solid':
+                    return createSolidFillElement(options);
+                case 'grad':
+                    return createGradFillElement(options);
+                case 'blip':
+                    return createBlipFillElement(options);
+                case 'none':
+                    return '<a:noFill/>';
+                default:
+                    // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
+                    return '';
+            }
         }
     }
+    return '';
+}
+/**
+ * 初始化颜色选择 现阶段只有grad和blip需要初始化 为了方便统一处理 其他类型还是统一加入
+ * @param {ColorSelection} options  颜色选择
+ * @param {PresSlide} target 幻灯片 用于blip填充时需要传入
+ * @returns {ColorSelection} 颜色选择
+ */
+function initColorSelection(options, target) {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    switch (options.type) {
+        case 'grad': {
+            // 初始化渐变填充参数
+            options.gradientStopList = (_a = options.gradientStopList) !== null && _a !== void 0 ? _a : [];
+            options.gradientType = (_b = options.gradientType) !== null && _b !== void 0 ? _b : 'linear';
+            options.flip = (_c = options.flip) !== null && _c !== void 0 ? _c : 'y';
+            options.rotWithShape = (_d = options.rotWithShape) !== null && _d !== void 0 ? _d : true;
+            break;
+        }
+        case 'blip': {
+            if (!target) {
+                console.warn('blip填充需要传入target参数');
+                return options;
+            }
+            // 初始化图片填充参数
+            options.rotWithShape = (_e = options.rotWithShape) !== null && _e !== void 0 ? _e : true;
+            options.alpha = (_f = options.alpha) !== null && _f !== void 0 ? _f : 100;
+            options.tiling = (_g = options.tiling) !== null && _g !== void 0 ? _g : 'stretch';
+            // 初始化图片填充参数
+            var relId = getNewRelId(target);
+            options._rid = (_h = options._rid) !== null && _h !== void 0 ? _h : relId;
+            var data = options.data, path_1 = options.path;
+            var strImgExtn_1 = getURLType(path_1);
+            if (data) {
+                strImgExtn_1 = getBase64Type(data);
+            }
+            var dupeItem = target._relsMedia.find(function (rel) { return rel.path === path_1 && rel.type === 'image/' + strImgExtn_1 && !rel.isDuplicate; });
+            target._relsMedia.push({
+                path: path_1 || 'preencoded.' + strImgExtn_1,
+                type: 'image/' + strImgExtn_1,
+                extn: strImgExtn_1,
+                data: data || '',
+                rId: relId,
+                isDuplicate: !!(dupeItem === null || dupeItem === void 0 ? void 0 : dupeItem.Target),
+                Target: (dupeItem === null || dupeItem === void 0 ? void 0 : dupeItem.Target) ? dupeItem.Target : "../media/image-".concat(target._slideNum, "-").concat(target._relsMedia.length + 1, ".").concat(strImgExtn_1)
+            });
+            break;
+        }
+    }
+    return options;
 }
 /**
  * Get a new rel ID (rId) for charts, media, etc.
@@ -1587,6 +1718,9 @@ function genTableToSlides(pptx, tabEleId, options, masterSlide) {
                     rowspan: Number(cell.getAttribute('rowspan')) || null,
                     valign: null
                 };
+                // 这里确定了类型均为solid 所以为了统一 还是加了初始化函数
+                initColorSelection(cellOpts.fontColor);
+                initColorSelection(cellOpts.fill);
                 if (['left', 'center', 'right', 'start', 'end'].includes(window.getComputedStyle(cell).getPropertyValue('text-align'))) {
                     var align = window.getComputedStyle(cell).getPropertyValue('text-align').replace('start', 'left').replace('end', 'right');
                     cellOpts.align = align === 'center' ? 'center' : align === 'left' ? 'left' : align === 'right' ? 'right' : null;
@@ -2312,6 +2446,7 @@ function addNotesDefinition(target, notes) {
  * @param {ShapeProps} opts shape options
  */
 function addShapeDefinition(target, shapeName, opts) {
+    var _a;
     var options = typeof opts === 'object' ? opts : {};
     options.line = options.line || { color: { type: 'none' } };
     var newObject = {
@@ -2352,6 +2487,12 @@ function addShapeDefinition(target, shapeName, opts) {
             color: String(options.line)
         };
         options.line = tmpOpts;
+    }
+    if (options.fill) {
+        initColorSelection(options.fill, target);
+    }
+    if ((_a = options.line) === null || _a === void 0 ? void 0 : _a.color) {
+        initColorSelection(options.line.color, target);
     }
     if (typeof options.lineSize === 'number')
         options.line.width = options.lineSize; // @deprecated (part of `ShapeLineProps` now)
@@ -2474,6 +2615,7 @@ function addTableDefinition(target, tableRows, options, slideLayout, presLayout,
             color: DEF_FONT_COLOR
         };
     }
+    initColorSelection(opt.fontColor, target);
     if (typeof opt.border === 'string') {
         console.warn("addTable `border` option must be an object. Ex: `{border: {type:'none'}}`");
         opt.border = null;
@@ -2650,6 +2792,7 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
         options: opts || {}
     };
     function cleanOpts(itemOpts) {
+        var _a;
         // STEP 1: Set some options
         {
             // A.1: Color (placeholders should inherit their colors or override them, so don't default them)
@@ -2659,6 +2802,11 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
                     color: target.color || DEF_FONT_COLOR,
                     type: 'solid'
                 };
+                initColorSelection(itemOpts.fontColor, target);
+                // 初始化 fill
+                if (itemOpts.fill) {
+                    initColorSelection(itemOpts.fill, target);
+                }
             }
             // A.2: Placeholder should inherit their bullets or override them, so don't default them
             if (itemOpts.placeholder || isPlaceholder) {
@@ -2689,6 +2837,7 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
                 };
                 if (typeof itemOpts.line === 'object')
                     itemOpts.line = newLineOpts;
+                initColorSelection(itemOpts.line.color, target);
                 // 3: Handle line (lots of deprecated opts)
                 if (typeof itemOpts.line === 'string') {
                     var tmpOpts = newLineOpts;
@@ -2727,6 +2876,10 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
             // F: Transform @deprecated props
             if (typeof itemOpts.underline === 'boolean' && itemOpts.underline === true) {
                 itemOpts.underline = { style: 'sng' };
+            }
+            // 初始化 underline color
+            if ((_a = itemOpts.underline) === null || _a === void 0 ? void 0 : _a.color) {
+                initColorSelection(itemOpts.underline.color, target);
             }
         }
         // STEP 2: Transform `align`/`valign` to XML values, store in _bodyProp for XML gen
@@ -2782,6 +2935,7 @@ function addPlaceholdersToSlideLayouts(slide) {
  * @param {PresSlide} target - slide object that the background is set to
  */
 function addBackgroundDefinition(props, target) {
+    var _a;
     // A: @deprecated
     if (target.bkgd) {
         if (!target.background)
@@ -2800,6 +2954,9 @@ function addBackgroundDefinition(props, target) {
             if (target.bkgd.src)
                 target.background.path = target.bkgd.src; // @deprecated (drop in 4.x)
         }
+    }
+    if ((_a = target.background) === null || _a === void 0 ? void 0 : _a.fill) {
+        initColorSelection(target.background.fill);
     }
     // B: Handle media
     if (props && (props.path || props.data)) {
@@ -2922,11 +3079,15 @@ var Slide = /** @class */ (function () {
         },
         set: function (value) {
             this._bkgd = value;
-            if (!this._background || !this._background.color) {
+            if (!this._background || !this._background.fill) {
                 if (!this._background)
                     this._background = {};
-                if (typeof value === 'string')
-                    this._background.color = value;
+                if (typeof value === 'string') {
+                    this._background.fill = {
+                        type: 'solid',
+                        color: value
+                    };
+                }
             }
         },
         enumerable: false,
@@ -5506,10 +5667,10 @@ function slideObjectToXml(slide) {
                 if (!slideItemObj.options._bodyProp)
                     slideItemObj.options._bodyProp = {};
                 if (slideItemObj.options.margin && Array.isArray(slideItemObj.options.margin)) {
-                    slideItemObj.options._bodyProp.lIns = valToPts(slideItemObj.options.margin[0] || 0);
+                    slideItemObj.options._bodyProp.tIns = valToPts(slideItemObj.options.margin[0] || 0);
                     slideItemObj.options._bodyProp.rIns = valToPts(slideItemObj.options.margin[1] || 0);
                     slideItemObj.options._bodyProp.bIns = valToPts(slideItemObj.options.margin[2] || 0);
-                    slideItemObj.options._bodyProp.tIns = valToPts(slideItemObj.options.margin[3] || 0);
+                    slideItemObj.options._bodyProp.lIns = valToPts(slideItemObj.options.margin[3] || 0);
                 }
                 else if (typeof slideItemObj.options.margin === 'number') {
                     slideItemObj.options._bodyProp.lIns = valToPts(slideItemObj.options.margin);
@@ -7195,6 +7356,8 @@ var PptxGenJS = /** @class */ (function () {
             addShape: null,
             addTable: null,
             addText: null,
+            startGroup: null,
+            endGroup: null,
             //
             _name: null,
             _presLayout: this._presLayout,

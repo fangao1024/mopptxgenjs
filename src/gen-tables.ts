@@ -4,7 +4,7 @@
 
 import { DEF_FONT_SIZE, DEF_SLIDE_MARGIN_IN, EMU, LINEH_MODIFIER, ONEPT, SLIDE_OBJECT_TYPES } from './core-enums'
 import { PresLayout, SlideLayout, TableCell, TableToSlidesProps, TableRow, TableRowSlide, TableCellProps } from './core-interfaces'
-import { getSmartParseNumber, inch2Emu, rgbToHex, valToPts } from './gen-utils'
+import { getSmartParseNumber, inch2Emu, initColorSelection, rgbToHex, valToPts } from './gen-utils'
 import PptxGenJS from './pptxgen'
 
 /**
@@ -622,6 +622,9 @@ export function genTableToSlides(pptx: PptxGenJS, tabEleId: string, options: Tab
 					rowspan: Number(cell.getAttribute('rowspan')) || null,
 					valign: null
 				}
+				// 这里确定了类型均为solid 所以为了统一 还是加了初始化函数
+				initColorSelection(cellOpts.fontColor)
+				initColorSelection(cellOpts.fill)
 
 				if (['left', 'center', 'right', 'start', 'end'].includes(window.getComputedStyle(cell).getPropertyValue('text-align'))) {
 					const align = window.getComputedStyle(cell).getPropertyValue('text-align').replace('start', 'left').replace('end', 'right')

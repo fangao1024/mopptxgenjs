@@ -2,7 +2,7 @@
  * PptxGenJS: Utility Methods
  */
 import { SCHEME_COLORS } from './core-enums';
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor } from './core-interfaces';
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor } from './core-interfaces';
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
  * - guaranteed to return a result regardless of undefined, null, etc. (0)
@@ -61,6 +61,20 @@ export declare function componentToHex(c: number): string;
  * @returns {string} XML string
  */
 export declare function rgbToHex(r: number, g: number, b: number): string;
+/**
+ * 获取URL的文件类型
+ * @param url url链接
+ * @param defaultType 默认类型
+ * @returns  文件类型
+ */
+export declare function getURLType(url: string, defaultType?: string): string;
+/**
+ * 获取base64的文件类型
+ * @param base64 base64字符串
+ * @param defaultType 默认类型
+ * @returns 文件类型
+ */
+export declare function getBase64Type(base64: string, defaultType?: string): string;
 /**  TODO: FUTURE: TODO-4.0:
  * @date 2022-04-10
  * @tldr this s/b a private method with all current calls switched to `genXmlColorSelection()`
@@ -99,6 +113,7 @@ export declare function createSolidFillElement(options: SolidFillColor): string;
  * @param {GradFillColor} options 渐变填充参数
  */
 export declare function createGradFillElement(options: GradFillColor): string;
+export declare function createBlipFillElement(options: BlipFillColor): string;
 /**
  * Create color selection
  * @param {Color | ColorSelection} props fill props
@@ -106,6 +121,13 @@ export declare function createGradFillElement(options: GradFillColor): string;
  */
 export declare function genXmlColorSelection(props: Color): string;
 export declare function genXmlColorSelection(props: ColorSelection): string;
+/**
+ * 初始化颜色选择 现阶段只有grad和blip需要初始化 为了方便统一处理 其他类型还是统一加入
+ * @param {ColorSelection} options  颜色选择
+ * @param {PresSlide} target 幻灯片 用于blip填充时需要传入
+ * @returns {ColorSelection} 颜色选择
+ */
+export declare function initColorSelection(options: ColorSelection, target?: PresSlide): ColorSelection;
 /**
  * Get a new rel ID (rId) for charts, media, etc.
  * @param {PresSlide} target - the slide to use

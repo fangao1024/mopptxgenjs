@@ -3,7 +3,7 @@
  */
 
 import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor } from './core-interfaces'
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor } from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -122,6 +122,41 @@ export function rgbToHex(r: number, g: number, b: number): string {
 	return (componentToHex(r) + componentToHex(g) + componentToHex(b)).toUpperCase()
 }
 
+/**
+ * 获取URL的文件类型
+ * @param url url链接
+ * @param defaultType 默认类型
+ * @returns  文件类型
+ */
+export function getURLType(url: string, defaultType: string = 'png'): string {
+	if (!url) {
+		return defaultType
+	}
+	const urlObject = new URL(url)
+	const pathname: string = urlObject.pathname
+	const match = pathname.match(/\.(\w+)$/)
+	if (match) {
+		return match[1].toLowerCase()
+	} else {
+		return defaultType
+	}
+}
+/**
+ * 获取base64的文件类型
+ * @param base64 base64字符串
+ * @param defaultType 默认类型
+ * @returns 文件类型
+ */
+export function getBase64Type(base64: string, defaultType: string = 'png') {
+	let strImgExtn = defaultType
+	if (base64 && /image\/(\w+);/.exec(base64) && /image\/(\w+);/.exec(base64).length > 0) {
+		strImgExtn = /image\/(\w+);/.exec(base64)[1]
+	} else if (base64?.toLowerCase().includes('image/svg+xml')) {
+		strImgExtn = 'svg'
+	}
+	return strImgExtn
+}
+
 /**  TODO: FUTURE: TODO-4.0:
  * @date 2022-04-10
  * @tldr this s/b a private method with all current calls switched to `genXmlColorSelection()`
@@ -229,10 +264,9 @@ export function createSolidFillElement(options: SolidFillColor) {
  * @param {GradFillColor} options 渐变填充参数
  */
 export function createGradFillElement(options: GradFillColor) {
-	const gradientStopList = options.gradientStopList || []
-	const gradientType = options.gradientType || 'linear'
+	const { gradientStopList, gradientType, flip, rotWithShape } = options
 	let element = ''
-	element += '<a:gradFill>'
+	element += `<a:gradFill flip="${flip}" rotWithShape="${rotWithShape ? '1' : '0'}">`
 	if (gradientStopList.length > 0) {
 		element += `<a:gsLst>`
 		element += gradientStopList
@@ -262,6 +296,36 @@ export function createGradFillElement(options: GradFillColor) {
 	return element
 }
 
+export function createBlipFillElement(options: BlipFillColor) {
+	const { _rid, rotWithShape, alpha, tiling, stretchProps, tileProps } = options
+	let element = ''
+	element += `<a:blipFill rotWithShape="${rotWithShape ? '1' : '0'}">`
+	element += `<a:blip r:embed="rId${_rid}">`
+	element += `<a:alphaModFix amt="${Math.round(alpha * 1000)}"/>`
+	element += `</a:blip>`
+	if (tiling === 'stretch') {
+		const { top, left, bottom, right } = stretchProps || {}
+		element += `<a:stretch><a:fillRect`
+		if (top !== undefined) element += ` t="${Math.round(top * 1000)}"`
+		if (left !== undefined) element += ` l="${Math.round(left * 1000)}"`
+		if (bottom !== undefined) element += ` b="${Math.round(bottom * 1000)}"`
+		if (right !== undefined) element += ` r="${Math.round(right * 1000)}"`
+		element += `/></a:stretch>`
+	} else if (tiling === 'tile') {
+		const { tx, ty, sx, sy, flip, algn } = tileProps || {}
+		element += `<a:tile`
+		if (tx !== undefined) element += ` tx="${inch2Emu(tx)}"`
+		if (ty !== undefined) element += ` ty="${inch2Emu(ty)}"`
+		if (sx !== undefined) element += ` sx="${Math.round(sx * 1000)}"`
+		if (sy !== undefined) element += ` sy="${Math.round(sy * 1000)}"`
+		if (flip !== undefined) element += ` flip="${flip}"`
+		if (algn !== undefined) element += ` algn="${algn}"`
+		element += '/>'
+	}
+	element += '</a:blipFill>'
+	return element
+}
+
 /**
  * Create color selection
  * @param {Color | ColorSelection} props fill props
@@ -270,20 +334,78 @@ export function createGradFillElement(options: GradFillColor) {
 export function genXmlColorSelection(props: Color): string
 export function genXmlColorSelection(props: ColorSelection): string
 export function genXmlColorSelection(props: Color | ColorSelection): string {
-	const options: ColorSelection = typeof props === 'string' ? { type: 'solid', color: props } : props
-	if (options) {
-		switch (options.type) {
-			case 'solid':
-				return createSolidFillElement(options)
-			case 'grad':
-				return createGradFillElement(options)
-			case 'none':
-				return '<a:noFill/>'
-			default:
-				// @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
-				return ''
+	if (props) {
+		const options: ColorSelection = typeof props === 'string' ? { type: 'solid', color: props } : props
+		if (options) {
+			switch (options.type) {
+				case 'solid':
+					return createSolidFillElement(options)
+				case 'grad':
+					return createGradFillElement(options)
+				case 'blip':
+					return createBlipFillElement(options)
+				case 'none':
+					return '<a:noFill/>'
+				default:
+					// @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
+					return ''
+			}
 		}
 	}
+	return ''
+}
+
+/**
+ * 初始化颜色选择 现阶段只有grad和blip需要初始化 为了方便统一处理 其他类型还是统一加入
+ * @param {ColorSelection} options  颜色选择
+ * @param {PresSlide} target 幻灯片 用于blip填充时需要传入
+ * @returns {ColorSelection} 颜色选择
+ */
+export function initColorSelection(options: ColorSelection, target?: PresSlide): ColorSelection {
+	switch (options.type) {
+		case 'grad': {
+			// 初始化渐变填充参数
+			options.gradientStopList = options.gradientStopList ?? []
+			options.gradientType = options.gradientType ?? 'linear'
+			options.flip = options.flip ?? 'y'
+			options.rotWithShape = options.rotWithShape ?? true
+			break
+		}
+		case 'blip': {
+			if (!target) {
+				console.warn('blip填充需要传入target参数')
+				return options
+			}
+			// 初始化图片填充参数
+			options.rotWithShape = options.rotWithShape ?? true
+			options.alpha = options.alpha ?? 100
+			options.tiling = options.tiling ?? 'stretch'
+			// 初始化图片填充参数
+			const relId = getNewRelId(target)
+			options._rid = options._rid ?? relId
+			const { data, path } = options
+			let strImgExtn = getURLType(path)
+			if (data) {
+				strImgExtn = getBase64Type(data)
+			}
+			const dupeItem = target._relsMedia.find((rel) => rel.path === path && rel.type === 'image/' + strImgExtn && !rel.isDuplicate)
+			target._relsMedia.push({
+				path: path || 'preencoded.' + strImgExtn,
+				type: 'image/' + strImgExtn,
+				extn: strImgExtn,
+				data: data || '',
+				rId: relId,
+				isDuplicate: !!dupeItem?.Target,
+				Target: dupeItem?.Target ? dupeItem.Target : `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${strImgExtn}`
+			})
+			break
+		}
+		case 'solid':
+		case 'none':
+		default:
+			break
+	}
+	return options
 }
 
 /**

@@ -121,6 +121,8 @@ export interface GradFillColor {
         pos: number;
         color: FillColor;
     }[];
+    rotWithShape?: boolean;
+    flip?: 'x' | 'y' | 'xy';
     gradientType?: 'radial' | 'linear';
     gradientProps?: {
         rot?: number;
@@ -130,7 +132,28 @@ export interface GradFillColor {
         top?: number;
     };
 }
-export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor;
+export interface BlipFillColor extends DataOrPathProps {
+    _rid: number;
+    type: 'blip';
+    rotWithShape?: boolean;
+    alpha?: number;
+    tiling?: 'tile' | 'stretch';
+    tileProps?: {
+        tx?: number;
+        ty?: number;
+        sx?: number;
+        sy?: number;
+        flip?: string;
+        algn?: string;
+    };
+    stretchProps?: {
+        left?: number;
+        right?: number;
+        bottom?: number;
+        top?: number;
+    };
+}
+export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor | BlipFillColor;
 export interface BorderProps {
     /**
      * Border type
@@ -1781,6 +1804,8 @@ export interface PresSlide extends SlideBaseProps {
     addShape: (shapeName: SHAPE_NAME, options?: ShapeProps) => PresSlide;
     addTable: (tableRows: TableRow[], options?: TableProps) => PresSlide;
     addText: (text: string | TextProps[], options?: TextPropsOptions) => PresSlide;
+    startGroup: (options?: GroupProps) => PresSlide;
+    endGroup: () => PresSlide;
     /**
      * Background color or image (`color` | `path` | `data`)
      * @example { color: 'FF3399' } - hex color

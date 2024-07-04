@@ -130,11 +130,31 @@ export interface SolidFillColor extends FillColor {
 export interface GradFillColor {
 	type: 'grad'
 	gradientStopList?: { pos: number; color: FillColor }[]
+	rotWithShape?: boolean
+	flip?: 'x' | 'y' | 'xy'
 	gradientType?: 'radial' | 'linear'
 	gradientProps?: { rot?: number; left?: number; right?: number; bottom?: number; top?: number }
 }
 
-export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor
+//图片或纹理填充
+export interface BlipFillColor extends DataOrPathProps {
+	// 私有属性
+	_rid: number
+	// 类型
+	type: 'blip'
+	/* 是否跟随形状旋转 */
+	rotWithShape?: boolean
+	/* 图片不透明度 取值范围 0 ~ 100  0表示完全透明 100 表示完全不透明 默认 100 */
+	alpha?: number
+	/* 图片填充方式 默认 tile */
+	tiling?: 'tile' | 'stretch'
+	/* 图片填充方式tile的配置项 */
+	tileProps?: { tx?: number; ty?: number; sx?: number; sy?: number; flip?: string; algn?: string }
+	/* 图片填充方式stretch的配置项 */
+	stretchProps?: { left?: number; right?: number; bottom?: number; top?: number }
+}
+
+export type ColorSelection = NoneFillColor | SolidFillColor | GradFillColor | BlipFillColor
 
 // used by charts, shape, text
 export interface BorderProps {
@@ -1868,6 +1888,8 @@ export interface PresSlide extends SlideBaseProps {
 	addShape: (shapeName: SHAPE_NAME, options?: ShapeProps) => PresSlide
 	addTable: (tableRows: TableRow[], options?: TableProps) => PresSlide
 	addText: (text: string | TextProps[], options?: TextPropsOptions) => PresSlide
+	startGroup: (options?: GroupProps) => PresSlide
+	endGroup: () => PresSlide
 
 	/**
 	 * Background color or image (`color` | `path` | `data`)
