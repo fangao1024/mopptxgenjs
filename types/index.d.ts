@@ -1456,6 +1456,10 @@ declare namespace PptxGenJS {
 			adjusting?: Record<string, number>
 		}
 		/**
+		 * 图片描边
+		 */
+		line?: ShapeLineProps
+		/**
 		 * Shadow Props
 		 * - MS-PPT > Format Picture > Shadow
 		 * @example

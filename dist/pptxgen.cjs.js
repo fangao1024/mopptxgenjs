@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.13 @ 2024/7/4 18:26:35 */
+/* mopptxgenjs 0.0.14 @ 2024/7/5 10:34:08 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -744,7 +744,7 @@ function inch2Emu(inches) {
     return Math.round(EMU * inches);
 }
 /**
- * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
+ *  Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -1054,6 +1054,38 @@ function initColorSelection(options, target) {
         }
     }
     return options;
+}
+/**
+ * 生成线条元素
+ * @param {ShapeLineProps} line  线条参数
+ * @returns {string}  线条元素
+ */
+function genLineElementXML(line) {
+    var element = '';
+    if (line) {
+        element += '<a:ln';
+        if (line.width) {
+            element += " w=\"".concat(valToPts(line.width), "\"");
+        }
+        if (line.capType) {
+            element += " cap=\"".concat(line.capType, "\"");
+        }
+        if (line.joinType) {
+            element += " cmpd=\"".concat(line.joinType, "\"");
+        }
+        element += '>';
+        if (line.color)
+            element += genXmlColorSelection(line.color);
+        if (line.dashType)
+            element += "<a:prstDash val=\"".concat(line.dashType, "\"/>");
+        if (line.beginArrowType)
+            element += "<a:headEnd type=\"".concat(line.beginArrowType, "\"/>");
+        if (line.endArrowType)
+            element += "<a:tailEnd type=\"".concat(line.endArrowType, "\"/>");
+        // FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
+        element += '</a:ln>';
+    }
+    return element;
 }
 /**
  * Get a new rel ID (rId) for charts, media, etc.
@@ -2251,7 +2283,8 @@ function addImageDefinition(target, opt) {
         opacity: opt.opacity || 0,
         objectName: objectName,
         shadow: correctShadowOptions(opt.shadow),
-        clipShape: opt.clipShape || null
+        clipShape: opt.clipShape || null,
+        line: opt.line || null
     };
     // STEP 4: Add this image to this Slide Rels (rId/rels count spans all slides! Count all images to get next rId)
     if (strImgExtn === 'svg') {
@@ -5749,27 +5782,7 @@ function slideObjectToXml(slide) {
                 strSlideXml += slideItemObj.options.fill ? genXmlColorSelection(slideItemObj.options.fill) : '<a:noFill/>';
                 // shape Type: LINE: line color
                 if (slideItemObj.options.line) {
-                    strSlideXml += '<a:ln';
-                    if (slideItemObj.options.line.width) {
-                        strSlideXml += " w=\"".concat(valToPts(slideItemObj.options.line.width), "\"");
-                    }
-                    if (slideItemObj.options.line.capType) {
-                        strSlideXml += " cap=\"".concat(slideItemObj.options.line.capType, "\"");
-                    }
-                    if (slideItemObj.options.line.joinType) {
-                        strSlideXml += " cmpd=\"".concat(slideItemObj.options.line.joinType, "\"");
-                    }
-                    strSlideXml += '>';
-                    if (slideItemObj.options.line.color)
-                        strSlideXml += genXmlColorSelection(slideItemObj.options.line.color);
-                    if (slideItemObj.options.line.dashType)
-                        strSlideXml += "<a:prstDash val=\"".concat(slideItemObj.options.line.dashType, "\"/>");
-                    if (slideItemObj.options.line.beginArrowType)
-                        strSlideXml += "<a:headEnd type=\"".concat(slideItemObj.options.line.beginArrowType, "\"/>");
-                    if (slideItemObj.options.line.endArrowType)
-                        strSlideXml += "<a:tailEnd type=\"".concat(slideItemObj.options.line.endArrowType, "\"/>");
-                    // FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
-                    strSlideXml += '</a:ln>';
+                    strSlideXml += genLineElementXML(slideItemObj.options.line);
                 }
                 // EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
                 if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
@@ -5877,6 +5890,9 @@ function slideObjectToXml(slide) {
                     strSlideXml += '<a:avLst/>';
                 }
                 strSlideXml += '</a:prstGeom>';
+                if (slideItemObj.options.line) {
+                    strSlideXml += genLineElementXML(slideItemObj.options.line);
+                }
                 // EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
                 if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
                     slideItemObj.options.shadow.type = slideItemObj.options.shadow.type || 'outer';

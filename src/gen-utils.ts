@@ -3,7 +3,7 @@
  */
 
 import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor } from './core-interfaces'
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps } from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -82,7 +82,7 @@ export function inch2Emu(inches: number | string): number {
 }
 
 /**
- * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
+ *  Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -221,7 +221,7 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
  * @param {ColorConfig} colorConfig
  * @returns {string} elements XML
  */
-export function createColorConfigElement(colorConfig?: ColorConfig) {
+export function createColorConfigElement(colorConfig?: ColorConfig): string {
 	let elements = ''
 	if (colorConfig) {
 		if (colorConfig.alpha) {
@@ -406,6 +406,34 @@ export function initColorSelection(options: ColorSelection, target?: PresSlide):
 			break
 	}
 	return options
+}
+/**
+ * 生成线条元素
+ * @param {ShapeLineProps} line  线条参数
+ * @returns {string}  线条元素
+ */
+export function genLineElementXML(line: ShapeLineProps): string {
+	let element = ''
+	if (line) {
+		element += '<a:ln'
+		if (line.width) {
+			element += ` w="${valToPts(line.width)}"`
+		}
+		if (line.capType) {
+			element += ` cap="${line.capType}"`
+		}
+		if (line.joinType) {
+			element += ` cmpd="${line.joinType}"`
+		}
+		element += '>'
+		if (line.color) element += genXmlColorSelection(line.color)
+		if (line.dashType) element += `<a:prstDash val="${line.dashType}"/>`
+		if (line.beginArrowType) element += `<a:headEnd type="${line.beginArrowType}"/>`
+		if (line.endArrowType) element += `<a:tailEnd type="${line.endArrowType}"/>`
+		// FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
+		element += '</a:ln>'
+	}
+	return element
 }
 
 /**

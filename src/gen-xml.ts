@@ -32,7 +32,18 @@ import {
 	TextProps,
 	TextPropsOptions
 } from './core-interfaces'
-import { convertRotationDegrees, createColorElement, createGlowElement, encodeXmlEntities, genXmlColorSelection, getSmartParseNumber, getUuid, inch2Emu, valToPts } from './gen-utils'
+import {
+	convertRotationDegrees,
+	createColorElement,
+	createGlowElement,
+	encodeXmlEntities,
+	genLineElementXML,
+	genXmlColorSelection,
+	getSmartParseNumber,
+	getUuid,
+	inch2Emu,
+	valToPts
+} from './gen-utils'
 
 const ImageSizingXml = {
 	cover: function (imgSize: { w: number; h: number }, boxDim: { w: number; h: number; x: number; y: number }) {
@@ -479,23 +490,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 
 				// shape Type: LINE: line color
 				if (slideItemObj.options.line) {
-					strSlideXml += '<a:ln'
-					if (slideItemObj.options.line.width) {
-						strSlideXml += ` w="${valToPts(slideItemObj.options.line.width)}"`
-					}
-					if (slideItemObj.options.line.capType) {
-						strSlideXml += ` cap="${slideItemObj.options.line.capType}"`
-					}
-					if (slideItemObj.options.line.joinType) {
-						strSlideXml += ` cmpd="${slideItemObj.options.line.joinType}"`
-					}
-					strSlideXml += '>'
-					if (slideItemObj.options.line.color) strSlideXml += genXmlColorSelection(slideItemObj.options.line.color)
-					if (slideItemObj.options.line.dashType) strSlideXml += `<a:prstDash val="${slideItemObj.options.line.dashType}"/>`
-					if (slideItemObj.options.line.beginArrowType) strSlideXml += `<a:headEnd type="${slideItemObj.options.line.beginArrowType}"/>`
-					if (slideItemObj.options.line.endArrowType) strSlideXml += `<a:tailEnd type="${slideItemObj.options.line.endArrowType}"/>`
-					// FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
-					strSlideXml += '</a:ln>'
+					strSlideXml += genLineElementXML(slideItemObj.options.line)
 				}
 
 				// EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
@@ -612,6 +607,10 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				}
 
 				strSlideXml += '</a:prstGeom>'
+
+				if (slideItemObj.options.line) {
+					strSlideXml += genLineElementXML(slideItemObj.options.line)
+				}
 
 				// EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
 				if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {

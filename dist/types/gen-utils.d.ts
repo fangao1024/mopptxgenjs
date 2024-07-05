@@ -2,7 +2,7 @@
  * PptxGenJS: Utility Methods
  */
 import { SCHEME_COLORS } from './core-enums';
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor } from './core-interfaces';
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps } from './core-interfaces';
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
  * - guaranteed to return a result regardless of undefined, null, etc. (0)
@@ -36,7 +36,7 @@ export declare function encodeXmlEntities(xml: string): string;
  */
 export declare function inch2Emu(inches: number | string): number;
 /**
- * TODO: 暂未 Convert `pt` into points (using `ONEPT`)
+ *  Convert `pt` into points (using `ONEPT`)
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
@@ -128,6 +128,12 @@ export declare function genXmlColorSelection(props: ColorSelection): string;
  * @returns {ColorSelection} 颜色选择
  */
 export declare function initColorSelection(options: ColorSelection, target?: PresSlide): ColorSelection;
+/**
+ * 生成线条元素
+ * @param {ShapeLineProps} line  线条参数
+ * @returns {string}  线条元素
+ */
+export declare function genLineElementXML(line: ShapeLineProps): string;
 /**
  * Get a new rel ID (rId) for charts, media, etc.
  * @param {PresSlide} target - the slide to use
