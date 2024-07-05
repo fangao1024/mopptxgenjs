@@ -14,6 +14,7 @@ import {
 	DEF_SHAPE_LINE_COLOR,
 	DEF_SLIDE_MARGIN_IN,
 	EMU,
+	ElementType,
 	IMG_PLAYBTN,
 	MASTER_OBJECTS,
 	PIECHART_COLORS,
@@ -64,39 +65,36 @@ export function createSlideMaster(props: SlideMasterProps, target: SlideLayout):
 	if (props.bkgd) target.bkgd = props.bkgd // DEPRECATED: (remove in v4.0.0)
 
 	// STEP 2: Add all Slide Master objects in the order they were given
-	if (props.objects && Array.isArray(props.objects) && props.objects.length > 0) {
-		props.objects.forEach((object, idx) => {
-			const key = Object.keys(object)[0]
-			const tgt = target as PresSlide
-			if (MASTER_OBJECTS[key] && key === 'chart') addChartDefinition(tgt, object[key].type, object[key].data, object[key].opts)
-			else if (MASTER_OBJECTS[key] && key === 'image') addImageDefinition(tgt, object[key])
-			else if (MASTER_OBJECTS[key] && key === 'line') addShapeDefinition(tgt, SHAPE_TYPE.LINE, object[key])
-			else if (MASTER_OBJECTS[key] && key === 'rect') addShapeDefinition(tgt, SHAPE_TYPE.RECTANGLE, object[key])
-			else if (MASTER_OBJECTS[key] && key === 'text') addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, false)
-			else if (MASTER_OBJECTS[key] && key === 'placeholder') {
-				// TODO: 20180820: Check for existing `name`?
-				object[key].options.placeholder = object[key].options.name
-				delete object[key].options.name // remap name for earier handling internally
-				object[key].options._placeholderType = object[key].options.type
-				delete object[key].options.type // remap name for earier handling internally
-				object[key].options._placeholderIdx = 100 + idx
-				addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, true)
-				// TODO: ISSUE#599 - only text is suported now (add more below)
-				// else if (object[key].image) addImageDefinition(tgt, object[key].image)
-				/* 20200120: So... image placeholders go into the "slideLayoutN.xml" file and addImage doesnt do this yet...
-					<p:sp>
-				  <p:nvSpPr>
-					<p:cNvPr id="7" name="Picture Placeholder 6">
-					  <a:extLst>
-						<a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
-						  <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{CE1AE45D-8641-0F4F-BDB5-080E69CCB034}"/>
-						</a:ext>
-					  </a:extLst>
-					</p:cNvPr>
-					<p:cNvSpPr>
-				*/
+	const tgt = target as PresSlide
+	if (props.elements && Array.isArray(props.elements) && props.elements.length > 0) {
+		for (const option of props.elements) {
+			switch (option.type) {
+				case ElementType.chart:
+					addChartDefinition(tgt, ...option.arguments)
+					break
+				case ElementType.image:
+					addImageDefinition(tgt, ...option.arguments)
+					break
+				case ElementType.media:
+					addMediaDefinition(tgt, ...option.arguments)
+					break
+				case ElementType.shape:
+					addShapeDefinition(tgt, ...option.arguments)
+					break
+				case ElementType.text: {
+					const [text, options, ...other] = option.arguments
+					const textParam = typeof text === 'string' || typeof text === 'number' ? [{ text, options }] : text
+					addTextDefinition(tgt, textParam, options, ...other, false)
+					break
+				}
+				case ElementType.startGroup:
+					startGroupDefinition(tgt, ...option.arguments)
+					break
+				case ElementType.endGroup:
+					endGroupDefinition(tgt)
+					break
 			}
-		})
+		}
 	}
 
 	// STEP 3: Add Slide Numbers (NOTE: Do this last so numbers are not covered by objects!)

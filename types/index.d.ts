@@ -825,6 +825,16 @@ declare namespace PptxGenJS {
 		| 'wedgeRectCallout'
 		| 'wedgeRoundRectCallout'
 
+	export enum ElementType {
+		chart = 'chart',
+		image = 'image',
+		text = 'text',
+		shape = 'shape',
+		media = 'media',
+		startGroup = 'startGroup',
+		endGroup = 'endGroup'
+	}
+
 	export enum SLIDE_OBJECT_TYPES {
 		'chart' = 'chart',
 		'hyperlink' = 'hyperlink',
@@ -2605,6 +2615,42 @@ declare namespace PptxGenJS {
 		 */
 		margin?: Margin // TODO: convert to inches in 4.0 (valid values are 0-22)
 	}
+	export interface TextElementOptions {
+		type: ElementType.text
+		arguments: Parameters<Slide['addText']>
+	}
+
+	export interface ChartElementOptions {
+		type: ElementType.chart
+		arguments: Parameters<Slide['addChart']>
+	}
+
+	export interface ImageElementOptions {
+		type: ElementType.image
+		arguments: Parameters<Slide['addImage']>
+	}
+
+	export interface MediaElementOptions {
+		type: ElementType.media
+		arguments: Parameters<Slide['addMedia']>
+	}
+
+	export interface ShapeElementOptions {
+		type: ElementType.shape
+		arguments: Parameters<Slide['addShape']>
+	}
+
+	export interface GroupElementOptions {
+		type: ElementType.startGroup
+		arguments: Parameters<Slide['startGroup']>
+	}
+
+	export interface SlideElementOptions {
+		type: ElementType.endGroup
+		arguments: Parameters<Slide['endGroup']>
+	}
+
+	export type ElementOptions = TextElementOptions | ChartElementOptions | ImageElementOptions | MediaElementOptions | ShapeElementOptions | GroupElementOptions | SlideElementOptions
 	export interface SlideMasterProps {
 		/**
 		 * Unique name for this master
@@ -2613,24 +2659,7 @@ declare namespace PptxGenJS {
 		background?: BackgroundProps
 		margin?: Margin
 		slideNumber?: SlideNumberProps
-		objects?: Array<
-			| { chart: IChartOpts }
-			| { image: ImageProps }
-			| { line: ShapeProps }
-			| { rect: ShapeProps }
-			| { text: TextProps }
-			| {
-					placeholder: {
-						options: PlaceholderProps
-						/**
-						 * Text to be shown in placeholder (shown until user focuses textbox or adds text)
-						 * - Leave blank to have powerpoint show default phrase (ex: "Click to add title")
-						 */
-						text?: string
-					}
-			  }
-		>
-
+		elements: ElementOptions[]
 		/**
 		 * @deprecated v3.3.0 - use `background`
 		 */

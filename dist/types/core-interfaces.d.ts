@@ -1,7 +1,7 @@
 /**
  * PptxGenJS Interfaces
  */
-import { CHART_NAME, CLR_SCHEME_COLOR, PLACEHOLDER_TYPE, SHAPE_NAME, SLIDE_OBJECT_TYPES, TEXT_HALIGN, TEXT_VALIGN, WRITE_OUTPUT_TYPE } from './core-enums';
+import { CHART_NAME, CLR_SCHEME_COLOR, ElementType, PLACEHOLDER_TYPE, SHAPE_NAME, SLIDE_OBJECT_TYPES, TEXT_HALIGN, TEXT_VALIGN, WRITE_OUTPUT_TYPE } from './core-enums';
 /**
  * Coordinate number - either:
  * - Inches (0-n)
@@ -1730,6 +1730,35 @@ export interface SlideNumberProps extends PositionProps, TextBaseProps {
      */
     margin?: Margin;
 }
+export interface TextElementOptions {
+    type: ElementType.text;
+    arguments: Parameters<PresSlide['addText']>;
+}
+export interface ChartElementOptions {
+    type: ElementType.chart;
+    arguments: Parameters<PresSlide['addChart']>;
+}
+export interface ImageElementOptions {
+    type: ElementType.image;
+    arguments: Parameters<PresSlide['addImage']>;
+}
+export interface MediaElementOptions {
+    type: ElementType.media;
+    arguments: Parameters<PresSlide['addMedia']>;
+}
+export interface ShapeElementOptions {
+    type: ElementType.shape;
+    arguments: Parameters<PresSlide['addShape']>;
+}
+export interface GroupElementOptions {
+    type: ElementType.startGroup;
+    arguments: Parameters<PresSlide['startGroup']>;
+}
+export interface SlideElementOptions {
+    type: ElementType.endGroup;
+    arguments: Parameters<PresSlide['endGroup']>;
+}
+export type ElementOptions = TextElementOptions | ChartElementOptions | ImageElementOptions | MediaElementOptions | ShapeElementOptions | GroupElementOptions | SlideElementOptions;
 export interface SlideMasterProps {
     /**
      * Unique name for this master
@@ -1738,26 +1767,7 @@ export interface SlideMasterProps {
     background?: BackgroundProps;
     margin?: Margin;
     slideNumber?: SlideNumberProps;
-    objects?: Array<{
-        chart: IChartOpts;
-    } | {
-        image: ImageProps;
-    } | {
-        line: ShapeProps;
-    } | {
-        rect: ShapeProps;
-    } | {
-        text: TextProps;
-    } | {
-        placeholder: {
-            options: PlaceholderProps;
-            /**
-             * Text to be shown in placeholder (shown until user focuses textbox or adds text)
-             * - Leave blank to have powerpoint show default phrase (ex: "Click to add title")
-             */
-            text?: string;
-        };
-    }>;
+    elements: ElementOptions[];
     /**
      * @deprecated v3.3.0 - use `background`
      */

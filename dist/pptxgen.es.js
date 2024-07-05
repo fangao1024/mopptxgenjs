@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.15 @ 2024/7/5 11:34:05 */
+/* mopptxgenjs 0.0.16 @ 2024/7/5 15:57:30 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -632,6 +632,16 @@ var MASTER_OBJECTS;
     MASTER_OBJECTS["text"] = "text";
     MASTER_OBJECTS["placeholder"] = "placeholder";
 })(MASTER_OBJECTS || (MASTER_OBJECTS = {}));
+var ElementType;
+(function (ElementType) {
+    ElementType["chart"] = "chart";
+    ElementType["image"] = "image";
+    ElementType["text"] = "text";
+    ElementType["shape"] = "shape";
+    ElementType["media"] = "media";
+    ElementType["startGroup"] = "startGroup";
+    ElementType["endGroup"] = "endGroup";
+})(ElementType || (ElementType = {}));
 var SLIDE_OBJECT_TYPES;
 (function (SLIDE_OBJECT_TYPES) {
     SLIDE_OBJECT_TYPES["chart"] = "chart";
@@ -1870,44 +1880,37 @@ function createSlideMaster(props, target) {
     if (props.bkgd)
         target.bkgd = props.bkgd; // DEPRECATED: (remove in v4.0.0)
     // STEP 2: Add all Slide Master objects in the order they were given
-    if (props.objects && Array.isArray(props.objects) && props.objects.length > 0) {
-        props.objects.forEach(function (object, idx) {
-            var key = Object.keys(object)[0];
-            var tgt = target;
-            if (MASTER_OBJECTS[key] && key === 'chart')
-                addChartDefinition(tgt, object[key].type, object[key].data, object[key].opts);
-            else if (MASTER_OBJECTS[key] && key === 'image')
-                addImageDefinition(tgt, object[key]);
-            else if (MASTER_OBJECTS[key] && key === 'line')
-                addShapeDefinition(tgt, SHAPE_TYPE.LINE, object[key]);
-            else if (MASTER_OBJECTS[key] && key === 'rect')
-                addShapeDefinition(tgt, SHAPE_TYPE.RECTANGLE, object[key]);
-            else if (MASTER_OBJECTS[key] && key === 'text')
-                addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, false);
-            else if (MASTER_OBJECTS[key] && key === 'placeholder') {
-                // TODO: 20180820: Check for existing `name`?
-                object[key].options.placeholder = object[key].options.name;
-                delete object[key].options.name; // remap name for earier handling internally
-                object[key].options._placeholderType = object[key].options.type;
-                delete object[key].options.type; // remap name for earier handling internally
-                object[key].options._placeholderIdx = 100 + idx;
-                addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, true);
-                // TODO: ISSUE#599 - only text is suported now (add more below)
-                // else if (object[key].image) addImageDefinition(tgt, object[key].image)
-                /* 20200120: So... image placeholders go into the "slideLayoutN.xml" file and addImage doesnt do this yet...
-                    <p:sp>
-                  <p:nvSpPr>
-                    <p:cNvPr id="7" name="Picture Placeholder 6">
-                      <a:extLst>
-                        <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">
-                          <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="{CE1AE45D-8641-0F4F-BDB5-080E69CCB034}"/>
-                        </a:ext>
-                      </a:extLst>
-                    </p:cNvPr>
-                    <p:cNvSpPr>
-                */
+    var tgt = target;
+    if (props.elements && Array.isArray(props.elements) && props.elements.length > 0) {
+        for (var _i = 0, _a = props.elements; _i < _a.length; _i++) {
+            var option = _a[_i];
+            switch (option.type) {
+                case ElementType.chart:
+                    addChartDefinition.apply(void 0, __spreadArray([tgt], option.arguments, false));
+                    break;
+                case ElementType.image:
+                    addImageDefinition.apply(void 0, __spreadArray([tgt], option.arguments, false));
+                    break;
+                case ElementType.media:
+                    addMediaDefinition.apply(void 0, __spreadArray([tgt], option.arguments, false));
+                    break;
+                case ElementType.shape:
+                    addShapeDefinition.apply(void 0, __spreadArray([tgt], option.arguments, false));
+                    break;
+                case ElementType.text: {
+                    var _b = option.arguments, text = _b[0], options = _b[1], other = _b.slice(2);
+                    var textParam = typeof text === 'string' || typeof text === 'number' ? [{ text: text, options: options }] : text;
+                    addTextDefinition.apply(void 0, __spreadArray(__spreadArray([tgt, textParam, options], other, false), [false], false));
+                    break;
+                }
+                case ElementType.startGroup:
+                    startGroupDefinition.apply(void 0, __spreadArray([tgt], option.arguments, false));
+                    break;
+                case ElementType.endGroup:
+                    endGroupDefinition(tgt);
+                    break;
             }
-        });
+        }
     }
     // STEP 3: Add Slide Numbers (NOTE: Do this last so numbers are not covered by objects!)
     if (props.slideNumber && typeof props.slideNumber === 'object')

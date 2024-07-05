@@ -529,6 +529,15 @@ export declare enum MASTER_OBJECTS {
     'text' = "text",
     'placeholder' = "placeholder"
 }
+export declare enum ElementType {
+    chart = "chart",
+    image = "image",
+    text = "text",
+    shape = "shape",
+    media = "media",
+    startGroup = "startGroup",
+    endGroup = "endGroup"
+}
 export declare enum SLIDE_OBJECT_TYPES {
     'chart' = "chart",
     'hyperlink' = "hyperlink",
