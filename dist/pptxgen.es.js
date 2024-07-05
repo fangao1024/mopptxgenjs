@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.14 @ 2024/7/5 10:34:08 */
+/* mopptxgenjs 0.0.15 @ 2024/7/5 11:34:05 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -3149,6 +3149,16 @@ var Slide = /** @class */ (function () {
         },
         set: function (value) {
             this._hidden = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(Slide.prototype, "transition", {
+        get: function () {
+            return this._transition;
+        },
+        set: function (value) {
+            this._transition = value;
         },
         enumerable: false,
         configurable: true
@@ -6780,6 +6790,22 @@ function makeXmlPresentationRels(slides) {
             '</Relationships>';
     return strXml;
 }
+/**
+ * 创建幻灯片过渡动画
+ * @param {PresSlide} slide 幻灯片
+ * @returns {string} XML
+ */
+function makeXmlSlideTransition(slide) {
+    var transtionXML = '';
+    if (slide.transition) {
+        var bindAttrs = Object.keys(slide.transition)
+            .filter(function (key) { return key !== 'type'; })
+            .map(function (key) { return "".concat(key, "=\"").concat(slide.transition[key], "\""); })
+            .join(' ');
+        transtionXML = "<p:transition xmlns:p=\"http://schemas.openxmlformats.org/presentationml/2006/main\"><p:".concat(slide.transition.type, " ").concat(bindAttrs, " /></p:transition>");
+    }
+    return transtionXML;
+}
 // XML-GEN: Functions that run 1-N times (once for each Slide)
 /**
  * Generates XML for the slide file (`ppt/slides/slide1.xml`)
@@ -6792,7 +6818,7 @@ function makeXmlSlide(slide) {
         'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' +
         "".concat((slide === null || slide === void 0 ? void 0 : slide.hidden) ? ' show="0"' : '', ">") +
         "".concat(slideObjectToXml(slide)) +
-        '<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>');
+        "<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>".concat(makeXmlSlideTransition(slide), "</p:sld>"));
 }
 /**
  * Get text content of Notes from Slide

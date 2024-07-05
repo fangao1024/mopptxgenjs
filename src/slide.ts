@@ -23,6 +23,7 @@ import {
 	ShapeProps,
 	SlideLayout,
 	SlideNumberProps,
+	SlideTransition,
 	TableProps,
 	TableRow,
 	TextProps,
@@ -144,6 +145,18 @@ export default class Slide {
 
 	public get hidden(): boolean {
 		return this._hidden
+	}
+
+	/**
+	 * @type {SlideTransition}
+	 */
+	private _transition: SlideTransition
+	public set transition(value: SlideTransition) {
+		this._transition = value
+	}
+
+	public get transition(): SlideTransition {
+		return this._transition
 	}
 
 	/**

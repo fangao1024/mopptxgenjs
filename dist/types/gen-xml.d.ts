@@ -67,6 +67,12 @@ export declare function makeXmlCore(title: string, subject: string, author: stri
  */
 export declare function makeXmlPresentationRels(slides: PresSlide[]): string;
 /**
+ * 创建幻灯片过渡动画
+ * @param {PresSlide} slide 幻灯片
+ * @returns {string} XML
+ */
+export declare function makeXmlSlideTransition(slide: PresSlide): string;
+/**
  * Generates XML for the slide file (`ppt/slides/slide1.xml`)
  * @param {PresSlide} slide - the slide object to transform into XML
  * @return {string} XML

@@ -1797,6 +1797,71 @@ export interface SlideLayout extends SlideBaseProps {
         hidden?: boolean;
     };
 }
+type TransitionDirection = 'l' | 'r' | 'u' | 'd';
+type TransitionOrientation = 'vert' | 'horz';
+type TransitionSpokes = 2 | 3 | 4 | 8;
+interface BaseTransition {
+    type: string;
+}
+interface FadeTransition extends BaseTransition {
+    type: 'fade';
+}
+interface PushTransition extends BaseTransition {
+    type: 'push';
+    dir: TransitionDirection;
+}
+interface WipeTransition extends BaseTransition {
+    type: 'wipe';
+    dir: TransitionDirection;
+}
+interface SplitTransition extends BaseTransition {
+    type: 'split';
+    orient: TransitionOrientation;
+    dir: 'in' | 'out';
+}
+interface BlindsTransition extends BaseTransition {
+    type: 'blinds';
+    dir: TransitionOrientation;
+}
+interface CheckerTransition extends BaseTransition {
+    type: 'checker';
+    dir: TransitionOrientation;
+}
+interface RandomTransition extends BaseTransition {
+    type: 'random';
+}
+interface WheelTransition extends BaseTransition {
+    type: 'wheel';
+    spokes: TransitionSpokes;
+}
+interface CutTransition extends BaseTransition {
+    type: 'cut';
+}
+interface CoverTransition extends BaseTransition {
+    type: 'cover';
+    dir: TransitionDirection;
+}
+interface PageCurlTransition extends BaseTransition {
+    type: 'pageCurl';
+    dir: TransitionDirection;
+}
+interface HoneycombTransition extends BaseTransition {
+    type: 'honeycomb';
+}
+interface FractureTransition extends BaseTransition {
+    type: 'fracture';
+}
+interface CombTransition extends BaseTransition {
+    type: 'comb';
+    dir: TransitionOrientation;
+}
+interface PrestigeTransition extends BaseTransition {
+    type: 'prestige';
+}
+interface ShapeTransition extends BaseTransition {
+    type: 'shape';
+}
+export type SlideTransition = FadeTransition | PushTransition | WipeTransition | SplitTransition | BlindsTransition | CheckerTransition | RandomTransition | WheelTransition | CutTransition | CoverTransition | PageCurlTransition | HoneycombTransition | FractureTransition | CombTransition | PrestigeTransition | ShapeTransition;
 export interface PresSlide extends SlideBaseProps {
     _rId: number;
     _slideLayout: SlideLayout;
@@ -1835,6 +1900,10 @@ export interface PresSlide extends SlideBaseProps {
      * Slide number options
      */
     slideNumber?: SlideNumberProps;
+    /**
+     * Transition options
+     */
+    transition?: SlideTransition;
 }
 export interface AddSlideProps {
     masterName?: string;
@@ -1865,3 +1934,4 @@ export interface IPresentationProps extends PresentationProps {
     slideLayouts: SlideLayout[];
     slides: PresSlide[];
 }
+export {};

@@ -1594,6 +1594,22 @@ export function makeXmlPresentationRels(slides: PresSlide[]): string {
 
 	return strXml
 }
+/**
+ * 创建幻灯片过渡动画
+ * @param {PresSlide} slide 幻灯片
+ * @returns {string} XML
+ */
+export function makeXmlSlideTransition(slide: PresSlide): string {
+	let transtionXML = ''
+	if (slide.transition) {
+		const bindAttrs = Object.keys(slide.transition)
+			.filter((key) => key !== 'type')
+			.map((key) => `${key}="${slide.transition[key]}"`)
+			.join(' ')
+		transtionXML = `<p:transition xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:${slide.transition.type} ${bindAttrs} /></p:transition>`
+	}
+	return transtionXML
+}
 
 // XML-GEN: Functions that run 1-N times (once for each Slide)
 
@@ -1609,7 +1625,7 @@ export function makeXmlSlide(slide: PresSlide): string {
 		'xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"' +
 		`${slide?.hidden ? ' show="0"' : ''}>` +
 		`${slideObjectToXml(slide)}` +
-		'<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>'
+		`<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr>${makeXmlSlideTransition(slide)}</p:sld>`
 	)
 }
 
