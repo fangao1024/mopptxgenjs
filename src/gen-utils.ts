@@ -56,6 +56,14 @@ export function getUuid(uuidFormat: string): string {
 		return v.toString(16)
 	})
 }
+/**
+ * 是否是空值
+ * @param value 值
+ * @returns 是否是空值
+ */
+export function isNil(value: any): value is null | undefined {
+	return value === null || value === undefined
+}
 
 /**
  * Replace special XML characters with HTML-encoded strings
@@ -224,28 +232,28 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
 export function createColorConfigElement(colorConfig?: ColorConfig): string {
 	let elements = ''
 	if (colorConfig) {
-		if (colorConfig.alpha) {
+		if (!isNil(colorConfig.alpha)) {
 			elements += `<a:alpha val="${Math.round(colorConfig.alpha * 1000)}"/>`
 		}
-		if (colorConfig.hueMod) {
+		if (!isNil(colorConfig.hueMod)) {
 			elements += `<a:hueMod val="${Math.round(colorConfig.hueMod * 1000)}"/>`
 		}
-		if (colorConfig.lumMod) {
+		if (!isNil(colorConfig.lumMod)) {
 			elements += `<a:lumMod val="${Math.round(colorConfig.lumMod * 1000)}"/>`
 		}
-		if (colorConfig.lumOff) {
+		if (!isNil(colorConfig.lumOff)) {
 			elements += `<a:lumOff val="${Math.round(colorConfig.lumOff * 1000)}"/>`
 		}
-		if (colorConfig.satMod) {
+		if (!isNil(colorConfig.satMod)) {
 			elements += `<a:satMod val="${Math.round(colorConfig.satMod * 1000)}"/>`
 		}
-		if (colorConfig.satOff) {
+		if (!isNil(colorConfig.satOff)) {
 			elements += `<a:satOff val="${Math.round(colorConfig.satOff * 1000)}"/>`
 		}
-		if (colorConfig.shade) {
+		if (!isNil(colorConfig.shade)) {
 			elements += `<a:shade val="${Math.round(colorConfig.shade * 1000)}"/>`
 		}
-		if (colorConfig.tint) {
+		if (!isNil(colorConfig.tint)) {
 			elements += `<a:tint val="${Math.round(colorConfig.tint * 1000)}"/>`
 		}
 	}
@@ -306,20 +314,20 @@ export function createBlipFillElement(options: BlipFillColor) {
 	if (tiling === 'stretch') {
 		const { top, left, bottom, right } = stretchProps || {}
 		element += `<a:stretch><a:fillRect`
-		if (top !== undefined) element += ` t="${Math.round(top * 1000)}"`
-		if (left !== undefined) element += ` l="${Math.round(left * 1000)}"`
-		if (bottom !== undefined) element += ` b="${Math.round(bottom * 1000)}"`
-		if (right !== undefined) element += ` r="${Math.round(right * 1000)}"`
+		if (!isNil(top)) element += ` t="${Math.round(top * 1000)}"`
+		if (!isNil(left)) element += ` l="${Math.round(left * 1000)}"`
+		if (!isNil(bottom)) element += ` b="${Math.round(bottom * 1000)}"`
+		if (!isNil(right)) element += ` r="${Math.round(right * 1000)}"`
 		element += `/></a:stretch>`
 	} else if (tiling === 'tile') {
 		const { tx, ty, sx, sy, flip, algn } = tileProps || {}
 		element += `<a:tile`
-		if (tx !== undefined) element += ` tx="${inch2Emu(tx)}"`
-		if (ty !== undefined) element += ` ty="${inch2Emu(ty)}"`
-		if (sx !== undefined) element += ` sx="${Math.round(sx * 1000)}"`
-		if (sy !== undefined) element += ` sy="${Math.round(sy * 1000)}"`
-		if (flip !== undefined) element += ` flip="${flip}"`
-		if (algn !== undefined) element += ` algn="${algn}"`
+		if (!isNil(tx)) element += ` tx="${inch2Emu(tx)}"`
+		if (!isNil(ty)) element += ` ty="${inch2Emu(ty)}"`
+		if (!isNil(sx)) element += ` sx="${Math.round(sx * 1000)}"`
+		if (!isNil(sy)) element += ` sy="${Math.round(sy * 1000)}"`
+		if (!isNil(flip)) element += ` flip="${flip}"`
+		if (!isNil(algn)) element += ` algn="${algn}"`
 		element += '/>'
 	}
 	element += '</a:blipFill>'

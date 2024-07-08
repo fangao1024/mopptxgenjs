@@ -24,6 +24,12 @@ export declare function getSmartParseNumber(size: Coord, xyDir: 'X' | 'Y', layou
  */
 export declare function getUuid(uuidFormat: string): string;
 /**
+ * 是否是空值
+ * @param value 值
+ * @returns 是否是空值
+ */
+export declare function isNil(value: any): value is null | undefined;
+/**
  * Replace special XML characters with HTML-encoded strings
  * @param {string} xml - XML string to encode
  * @returns {string} escaped XML

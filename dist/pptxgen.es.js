@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.16 @ 2024/7/5 15:57:30 */
+/* mopptxgenjs 0.0.17 @ 2024/7/8 15:14:42 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -723,6 +723,14 @@ function getUuid(uuidFormat) {
     });
 }
 /**
+ * 是否是空值
+ * @param value 值
+ * @returns 是否是空值
+ */
+function isNil(value) {
+    return value === null || value === undefined;
+}
+/**
  * Replace special XML characters with HTML-encoded strings
  * @param {string} xml - XML string to encode
  * @returns {string} escaped XML
@@ -881,28 +889,28 @@ function createGlowElement(options, defaults) {
 function createColorConfigElement(colorConfig) {
     var elements = '';
     if (colorConfig) {
-        if (colorConfig.alpha) {
+        if (!isNil(colorConfig.alpha)) {
             elements += "<a:alpha val=\"".concat(Math.round(colorConfig.alpha * 1000), "\"/>");
         }
-        if (colorConfig.hueMod) {
+        if (!isNil(colorConfig.hueMod)) {
             elements += "<a:hueMod val=\"".concat(Math.round(colorConfig.hueMod * 1000), "\"/>");
         }
-        if (colorConfig.lumMod) {
+        if (!isNil(colorConfig.lumMod)) {
             elements += "<a:lumMod val=\"".concat(Math.round(colorConfig.lumMod * 1000), "\"/>");
         }
-        if (colorConfig.lumOff) {
+        if (!isNil(colorConfig.lumOff)) {
             elements += "<a:lumOff val=\"".concat(Math.round(colorConfig.lumOff * 1000), "\"/>");
         }
-        if (colorConfig.satMod) {
+        if (!isNil(colorConfig.satMod)) {
             elements += "<a:satMod val=\"".concat(Math.round(colorConfig.satMod * 1000), "\"/>");
         }
-        if (colorConfig.satOff) {
+        if (!isNil(colorConfig.satOff)) {
             elements += "<a:satOff val=\"".concat(Math.round(colorConfig.satOff * 1000), "\"/>");
         }
-        if (colorConfig.shade) {
+        if (!isNil(colorConfig.shade)) {
             elements += "<a:shade val=\"".concat(Math.round(colorConfig.shade * 1000), "\"/>");
         }
-        if (colorConfig.tint) {
+        if (!isNil(colorConfig.tint)) {
             elements += "<a:tint val=\"".concat(Math.round(colorConfig.tint * 1000), "\"/>");
         }
     }
@@ -959,30 +967,30 @@ function createBlipFillElement(options) {
     if (tiling === 'stretch') {
         var _a = stretchProps || {}, top_2 = _a.top, left = _a.left, bottom = _a.bottom, right = _a.right;
         element += "<a:stretch><a:fillRect";
-        if (top_2 !== undefined)
+        if (!isNil(top_2))
             element += " t=\"".concat(Math.round(top_2 * 1000), "\"");
-        if (left !== undefined)
+        if (!isNil(left))
             element += " l=\"".concat(Math.round(left * 1000), "\"");
-        if (bottom !== undefined)
+        if (!isNil(bottom))
             element += " b=\"".concat(Math.round(bottom * 1000), "\"");
-        if (right !== undefined)
+        if (!isNil(right))
             element += " r=\"".concat(Math.round(right * 1000), "\"");
         element += "/></a:stretch>";
     }
     else if (tiling === 'tile') {
         var _b = tileProps || {}, tx = _b.tx, ty = _b.ty, sx = _b.sx, sy = _b.sy, flip = _b.flip, algn = _b.algn;
         element += "<a:tile";
-        if (tx !== undefined)
+        if (!isNil(tx))
             element += " tx=\"".concat(inch2Emu(tx), "\"");
-        if (ty !== undefined)
+        if (!isNil(ty))
             element += " ty=\"".concat(inch2Emu(ty), "\"");
-        if (sx !== undefined)
+        if (!isNil(sx))
             element += " sx=\"".concat(Math.round(sx * 1000), "\"");
-        if (sy !== undefined)
+        if (!isNil(sy))
             element += " sy=\"".concat(Math.round(sy * 1000), "\"");
-        if (flip !== undefined)
+        if (!isNil(flip))
             element += " flip=\"".concat(flip, "\"");
-        if (algn !== undefined)
+        if (!isNil(algn))
             element += " algn=\"".concat(algn, "\"");
         element += '/>';
     }
