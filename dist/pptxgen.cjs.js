@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.17 @ 2024/7/8 15:14:42 */
+/* mopptxgenjs 0.0.17 @ 2024/7/10 15:04:15 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -697,12 +697,16 @@ function getSmartParseNumber(size, xyDir, layout) {
         size = Number(size);
     // CASE 1: Number in inches
     // Assume any number less than 100 is inches
-    if (typeof size === 'number' && size < 100)
+    // 这里没有考虑负数 暂时规定英寸的取值范围为 (-100,100)
+    if (typeof size === 'number' && (size < 100 || size > -100)) {
         return inch2Emu(size);
+    }
     // CASE 2: Number is already converted to something other than inches
     // Assume any number greater than 100 sure isnt inches! Just return it (assume value is EMU already).
-    if (typeof size === 'number' && size >= 100)
+    // 这里同理 没有考虑负数 取值范围是 (-Infinity,-100] [100,Infinity)
+    if (typeof size === 'number' && (size >= 100 || size <= -100)) {
         return size;
+    }
     // CASE 3: Percentage (ex: '50%')
     if (typeof size === 'string' && size.includes('%')) {
         if (xyDir && xyDir === 'X')
@@ -755,8 +759,10 @@ function encodeXmlEntities(xml) {
 function inch2Emu(inches) {
     // NOTE: Provide Caller Safety: Numbers may get conv<->conv during flight, so be kind and do some simple checks to ensure inches were passed
     // Any value over 100 damn sure isnt inches, so lets assume its in EMU already, therefore, just return the same value
-    if (typeof inches === 'number' && inches > 100)
+    // 这里没有考虑负数 暂时规定英寸的取值范围为 (-100,100)
+    if (typeof inches === 'number' && (inches > 100 || inches < -100)) {
         return inches;
+    }
     if (typeof inches === 'string')
         inches = Number(inches.replace(/in*/gi, ''));
     return Math.round(EMU * inches);
