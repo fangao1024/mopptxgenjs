@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.20 @ 2024/7/12 11:52:56 */
+/* mopptxgenjs 0.0.21 @ 2024/7/12 14:33:24 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -5425,7 +5425,7 @@ function slideObjectToXml(slide) {
     strSlideXml += '<a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr>';
     // STEP 3: Loop over all Slide.data objects and add them to this slide
     slide._slideObjects.forEach(function (slideItemObj, idx) {
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _l, _m, _o;
         var x = 0;
         var y = 0;
         var cx = getSmartParseNumber('75%', 'X', slide._presLayout);
@@ -5890,7 +5890,7 @@ function slideObjectToXml(slide) {
                     var adjustingList = Object.entries(clipShape.adjusting);
                     strSlideXml += '<a:avLst>';
                     for (var _i = 0, adjustingList_1 = adjustingList; _i < adjustingList_1.length; _i++) {
-                        var _j = adjustingList_1[_i], name_1 = _j[0], adj = _j[1];
+                        var _p = adjustingList_1[_i], name_1 = _p[0], adj = _p[1];
                         strSlideXml += "<a:gd name=\"".concat(name_1, "\" fmla=\"val ").concat(getSmartParseNumber(adj), "\"/>");
                     }
                     strSlideXml += '</a:avLst>';
@@ -5905,10 +5905,10 @@ function slideObjectToXml(slide) {
                 // EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
                 if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
                     slideItemObj.options.shadow.type = slideItemObj.options.shadow.type || 'outer';
-                    slideItemObj.options.shadow.blur = valToPts(slideItemObj.options.shadow.blur || 8);
-                    slideItemObj.options.shadow.offset = valToPts(slideItemObj.options.shadow.offset || 4);
-                    slideItemObj.options.shadow.angle = Math.round((slideItemObj.options.shadow.angle || 270) * 60000);
-                    slideItemObj.options.shadow.opacity = Math.round((slideItemObj.options.shadow.opacity || 0.75) * 100000);
+                    slideItemObj.options.shadow.blur = valToPts((_j = slideItemObj.options.shadow.blur) !== null && _j !== void 0 ? _j : 8);
+                    slideItemObj.options.shadow.offset = valToPts((_l = slideItemObj.options.shadow.offset) !== null && _l !== void 0 ? _l : 4);
+                    slideItemObj.options.shadow.angle = Math.round(((_m = slideItemObj.options.shadow.angle) !== null && _m !== void 0 ? _m : 270) * 60000);
+                    slideItemObj.options.shadow.opacity = Math.round(((_o = slideItemObj.options.shadow.opacity) !== null && _o !== void 0 ? _o : 0.75) * 100000);
                     slideItemObj.options.shadow.color = slideItemObj.options.shadow.color || DEF_TEXT_SHADOW.color;
                     strSlideXml += '<a:effectLst>';
                     strSlideXml += "<a:".concat(slideItemObj.options.shadow.type, "Shdw ").concat(slideItemObj.options.shadow.type === 'outer' ? 'sx="100000" sy="100000" kx="0" ky="0" algn="bl" rotWithShape="0"' : '', " blurRad=\"").concat(slideItemObj.options.shadow.blur, "\" dist=\"").concat(slideItemObj.options.shadow.offset, "\" dir=\"").concat(slideItemObj.options.shadow.angle, "\">");
@@ -6553,6 +6553,7 @@ function genXmlTextBody(slideObj) {
     var arrLines = [];
     var arrTexts = [];
     arrTextObjects.forEach(function (textObj, idx) {
+        // A: Align or Bullet trigger new line
         if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
             // Only start a new paragraph when align *changes*
             if (textObj.options.align !== arrTextObjects[idx - 1].options.align) {

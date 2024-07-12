@@ -615,10 +615,10 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				// EFFECTS > SHADOW: REF: @see http://officeopenxml.com/drwSp-effects.php
 				if (slideItemObj.options.shadow && slideItemObj.options.shadow.type !== 'none') {
 					slideItemObj.options.shadow.type = slideItemObj.options.shadow.type || 'outer'
-					slideItemObj.options.shadow.blur = valToPts(slideItemObj.options.shadow.blur || 8)
-					slideItemObj.options.shadow.offset = valToPts(slideItemObj.options.shadow.offset || 4)
-					slideItemObj.options.shadow.angle = Math.round((slideItemObj.options.shadow.angle || 270) * 60000)
-					slideItemObj.options.shadow.opacity = Math.round((slideItemObj.options.shadow.opacity || 0.75) * 100000)
+					slideItemObj.options.shadow.blur = valToPts(slideItemObj.options.shadow.blur ?? 8)
+					slideItemObj.options.shadow.offset = valToPts(slideItemObj.options.shadow.offset ?? 4)
+					slideItemObj.options.shadow.angle = Math.round((slideItemObj.options.shadow.angle ?? 270) * 60000)
+					slideItemObj.options.shadow.opacity = Math.round((slideItemObj.options.shadow.opacity ?? 0.75) * 100000)
 					slideItemObj.options.shadow.color = slideItemObj.options.shadow.color || DEF_TEXT_SHADOW.color
 
 					strSlideXml += '<a:effectLst>'
