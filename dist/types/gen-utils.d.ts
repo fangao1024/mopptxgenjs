@@ -4,9 +4,8 @@
 import { SCHEME_COLORS } from './core-enums';
 import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps } from './core-interfaces';
 /**
- * Translates any type of `x`/`y`/`w`/`h` prop to EMU
+ * Translates any type of `x`/`y`/`w`/`h` prop to EMU 这里不在兼容 emu单位 全面使用英寸单位
  * - guaranteed to return a result regardless of undefined, null, etc. (0)
- * - {number} - 12800 (EMU)
  * - {number} - 0.5 (inches)
  * - {string} - "75%"
  * @param {number|string} size - numeric ("5.5") or percentage ("90%")
@@ -36,7 +35,7 @@ export declare function isNil(value: any): value is null | undefined;
  */
 export declare function encodeXmlEntities(xml: string): string;
 /**
- * Convert inches into EMU
+ * Convert inches into EMU 这里不在兼容 emu单位 全面使用英寸单位
  * @param {number|string} inches - as string or number
  * @returns {number} EMU value
  */
