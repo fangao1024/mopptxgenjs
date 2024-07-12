@@ -30,14 +30,6 @@ export default class Slide {
         slideLayout?: SlideLayout;
     });
     /**
-     * Background color
-     * @type {string|BackgroundProps}
-     * @deprecated in v3.3.0 - use `background` instead
-     */
-    private _bkgd;
-    set bkgd(value: string | BackgroundProps);
-    get bkgd(): string | BackgroundProps;
-    /**
      * Background color or image
      * @type {BackgroundProps}
      * @example solid color `background: { color:'FF0000' }`

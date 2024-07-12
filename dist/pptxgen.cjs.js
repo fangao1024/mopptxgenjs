@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.21 @ 2024/7/12 14:33:24 */
+/* mopptxgenjs 0.0.22 @ 2024/7/12 16:52:42 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -1884,9 +1884,8 @@ var _chartCounter = 0;
  */
 function createSlideMaster(props, target) {
     // STEP 1: Add background if either the slide or layout has background props
-    // if (props.background || target.background) addBackgroundDefinition(props.background, target)
-    if (props.bkgd)
-        target.bkgd = props.bkgd; // DEPRECATED: (remove in v4.0.0)
+    if (props.background || target.background)
+        addBackgroundDefinition(props.background, target);
     // STEP 2: Add all Slide Master objects in the order they were given
     var tgt = target;
     if (props.elements && Array.isArray(props.elements) && props.elements.length > 0) {
@@ -2973,48 +2972,13 @@ function addPlaceholdersToSlideLayouts(slide) {
  * @param {PresSlide} target - slide object that the background is set to
  */
 function addBackgroundDefinition(props, target) {
-    var _a;
     // A: @deprecated
-    if (target.bkgd) {
-        if (!target.background)
-            target.background = {};
-        if (typeof target.bkgd === 'string') {
-            target.background.fill = {
-                type: 'solid',
-                color: target.bkgd
-            };
-        }
-        else {
-            if (target.bkgd.data)
-                target.background.data = target.bkgd.data;
-            if (target.bkgd.path)
-                target.background.path = target.bkgd.path;
-            if (target.bkgd.src)
-                target.background.path = target.bkgd.src; // @deprecated (drop in 4.x)
-        }
+    var _a;
+    if (!target.background) {
+        target.background = props;
     }
     if ((_a = target.background) === null || _a === void 0 ? void 0 : _a.fill) {
-        initColorSelection(target.background.fill);
-    }
-    // B: Handle media
-    if (props && (props.path || props.data)) {
-        // Allow the use of only the data key (`path` isnt reqd)
-        props.path = props.path || 'preencoded.png';
-        var strImgExtn = (props.path.split('.').pop() || 'png').split('?')[0]; // Handle "blah.jpg?width=540" etc.
-        if (strImgExtn === 'jpg')
-            strImgExtn = 'jpeg'; // base64-encoded jpg's come out as "data:image/jpeg;base64,/9j/[...]", so correct exttnesion to avoid content warnings at PPT startup
-        target._relsMedia = target._relsMedia || [];
-        var intRels = target._relsMedia.length + 1;
-        // NOTE: `Target` cannot have spaces (eg:"Slide 1-image-1.jpg") or a "presentation is corrupt" warning comes up
-        target._relsMedia.push({
-            path: props.path,
-            type: SLIDE_OBJECT_TYPES.image,
-            extn: strImgExtn,
-            data: props.data || null,
-            rId: intRels,
-            Target: "../media/".concat((target._name || '').replace(/\s+/gi, '-'), "-image-").concat(target._relsMedia.length + 1, ".").concat(strImgExtn)
-        });
-        target._bkgdImgRid = intRels;
+        initColorSelection(target.background.fill, target);
     }
 }
 /**
@@ -3111,26 +3075,6 @@ var Slide = /** @class */ (function () {
          */
         this._slideNumberProps = ((_a = this._slideLayout) === null || _a === void 0 ? void 0 : _a._slideNumberProps) ? this._slideLayout._slideNumberProps : null;
     }
-    Object.defineProperty(Slide.prototype, "bkgd", {
-        get: function () {
-            return this._bkgd;
-        },
-        set: function (value) {
-            this._bkgd = value;
-            if (!this._background || !this._background.fill) {
-                if (!this._background)
-                    this._background = {};
-                if (typeof value === 'string') {
-                    this._background.fill = {
-                        type: 'solid',
-                        color: value
-                    };
-                }
-            }
-        },
-        enumerable: false,
-        configurable: true
-    });
     Object.defineProperty(Slide.prototype, "background", {
         get: function () {
             return this._background;
@@ -5414,13 +5358,10 @@ function slideObjectToXml(slide) {
     var strSlideXml = slide._name ? '<p:cSld name="' + slide._name + '">' : '<p:cSld>';
     var intTableNum = 1;
     // STEP 1: Add background color/image (ensure only a single `<p:bg>` tag is created, ex: when master-baskground has both `color` and `path`)
-    if (slide._bkgdImgRid) {
-        strSlideXml += "<p:bg><p:bgPr><a:blipFill dpi=\"0\" rotWithShape=\"1\"><a:blip r:embed=\"rId".concat(slide._bkgdImgRid, "\"><a:lum/></a:blip><a:srcRect/><a:stretch><a:fillRect/></a:stretch></a:blipFill><a:effectLst/></p:bgPr></p:bg>");
-    }
-    else if ((_a = slide.background) === null || _a === void 0 ? void 0 : _a.fill) {
+    if ((_a = slide.background) === null || _a === void 0 ? void 0 : _a.fill) {
         strSlideXml += "<p:bg><p:bgPr>".concat(genXmlColorSelection(slide.background.fill), "</p:bgPr></p:bg>");
     }
-    else if (!slide.bkgd && slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
+    else if (slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
         // NOTE: Default [white] background is needed on slideMaster1.xml to avoid gray background in Keynote (and Finder previews)
         strSlideXml += '<p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg>';
     }
@@ -7122,7 +7063,7 @@ function makeXmlViewProps() {
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-var VERSION = '3.13.0-beta.0-20230416-2140';
+var VERSION = '1.0.0';
 var PptxGenJS = /** @class */ (function () {
     function PptxGenJS() {
         var _this = this;
@@ -7825,15 +7766,14 @@ var PptxGenJS = /** @class */ (function () {
             _slideNum: 1000 + this.slideLayouts.length + 1,
             _slideNumberProps: props.slideNumber || null,
             _slideObjects: [],
-            background: props.background || null,
-            bkgd: props.bkgd || null
+            background: props.background || null
         };
         // STEP 1: Create the Slide Master/Layout
         createSlideMaster(props, newLayout);
         // STEP 2: Add it to layout defs
         this.slideLayouts.push(newLayout);
         // STEP 3: Add background (image data/path must be captured before `exportPresentation()` is called)
-        if (props.background || props.bkgd)
+        if (props.background)
             addBackgroundDefinition(props.background, newLayout);
         // STEP 4: Add slideNumber to master slide (if any)
         if (newLayout._slideNumberProps && !this.masterSlide._slideNumberProps)

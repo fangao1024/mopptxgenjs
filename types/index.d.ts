@@ -921,17 +921,11 @@ declare namespace PptxGenJS {
 		 */
 		data?: string
 	}
-	export interface BackgroundProps extends DataOrPathProps {
+	export interface BackgroundProps {
 		/**
 		 * 填充方式
 		 */
 		fill?: ColorSelection
-
-		/**
-		 * source URL
-		 * @deprecated v3.6.0 - use `DataOrPathProps` instead - remove in v4.0.0
-		 */
-		src?: string
 	}
 	/**
 	 * Color in Hex format
@@ -2660,10 +2654,6 @@ declare namespace PptxGenJS {
 		margin?: Margin
 		slideNumber?: SlideNumberProps
 		elements: ElementOptions[]
-		/**
-		 * @deprecated v3.3.0 - use `background`
-		 */
-		bkgd?: string | BackgroundProps
 	}
 	export interface ObjectOptions extends ImageProps, PositionProps, ShapeProps, TableCellProps, TextPropsOptions {
 		//_placeholderIdx?: number
@@ -2936,10 +2926,5 @@ declare namespace PptxGenJS {
 		 * 结束添加组 用于添加组 注意：添加组后，需要调用endGroup结束添加组
 		 */
 		endGroup(): Slide
-		/**
-		 * Background color
-		 * @deprecated in 3.3.0 - use `background` instead
-		 */
-		bkgd: string
 	}
 }

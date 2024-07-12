@@ -61,8 +61,7 @@ let _chartCounter = 0
  */
 export function createSlideMaster(props: SlideMasterProps, target: SlideLayout): void {
 	// STEP 1: Add background if either the slide or layout has background props
-	// if (props.background || target.background) addBackgroundDefinition(props.background, target)
-	if (props.bkgd) target.bkgd = props.bkgd // DEPRECATED: (remove in v4.0.0)
+	if (props.background || target.background) addBackgroundDefinition(props.background, target)
 
 	// STEP 2: Add all Slide Master objects in the order they were given
 	const tgt = target as PresSlide
@@ -1178,43 +1177,13 @@ export function addPlaceholdersToSlideLayouts(slide: PresSlide): void {
  */
 export function addBackgroundDefinition(props: BackgroundProps, target: SlideLayout): void {
 	// A: @deprecated
-	if (target.bkgd) {
-		if (!target.background) target.background = {}
 
-		if (typeof target.bkgd === 'string') {
-			target.background.fill = {
-				type: 'solid',
-				color: target.bkgd
-			}
-		} else {
-			if (target.bkgd.data) target.background.data = target.bkgd.data
-			if (target.bkgd.path) target.background.path = target.bkgd.path
-			if (target.bkgd.src) target.background.path = target.bkgd.src // @deprecated (drop in 4.x)
-		}
+	if (!target.background) {
+		target.background = props
 	}
 
 	if (target.background?.fill) {
-		initColorSelection(target.background.fill)
-	}
-	// B: Handle media
-	if (props && (props.path || props.data)) {
-		// Allow the use of only the data key (`path` isnt reqd)
-		props.path = props.path || 'preencoded.png'
-		let strImgExtn = (props.path.split('.').pop() || 'png').split('?')[0] // Handle "blah.jpg?width=540" etc.
-		if (strImgExtn === 'jpg') strImgExtn = 'jpeg' // base64-encoded jpg's come out as "data:image/jpeg;base64,/9j/[...]", so correct exttnesion to avoid content warnings at PPT startup
-
-		target._relsMedia = target._relsMedia || []
-		const intRels = target._relsMedia.length + 1
-		// NOTE: `Target` cannot have spaces (eg:"Slide 1-image-1.jpg") or a "presentation is corrupt" warning comes up
-		target._relsMedia.push({
-			path: props.path,
-			type: SLIDE_OBJECT_TYPES.image,
-			extn: strImgExtn,
-			data: props.data || null,
-			rId: intRels,
-			Target: `../media/${(target._name || '').replace(/\s+/gi, '-')}-image-${target._relsMedia.length + 1}.${strImgExtn}`
-		})
-		target._bkgdImgRid = intRels
+		initColorSelection(target.background.fill, target as PresSlide)
 	}
 }
 

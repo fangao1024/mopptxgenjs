@@ -60,16 +60,11 @@ export interface DataOrPathProps {
      */
     data?: string;
 }
-export interface BackgroundProps extends DataOrPathProps {
+export interface BackgroundProps {
     /**
      * 填充方式
      */
     fill?: ColorSelection;
-    /**
-     * source URL
-     * @deprecated v3.6.0 - use `DataOrPathProps` instead - remove in v4.0.0
-     */
-    src?: string;
 }
 /**
  * Color in Hex format
@@ -1768,10 +1763,6 @@ export interface SlideMasterProps {
     margin?: Margin;
     slideNumber?: SlideNumberProps;
     elements: ElementOptions[];
-    /**
-     * @deprecated v3.3.0 - use `background`
-     */
-    bkgd?: string | BackgroundProps;
 }
 export interface ObjectOptions extends ImageProps, PositionProps, ShapeProps, TableCellProps, TextPropsOptions {
     _placeholderIdx?: number;
@@ -1783,7 +1774,6 @@ export interface ObjectOptions extends ImageProps, PositionProps, ShapeProps, Ta
     rowH?: number | number[];
 }
 export interface SlideBaseProps {
-    _bkgdImgRid?: number;
     _margin?: Margin;
     _name?: string;
     _presLayout: PresLayout;
@@ -1794,10 +1784,6 @@ export interface SlideBaseProps {
     _slideNumberProps?: SlideNumberProps;
     _slideObjects?: ISlideObject[];
     background?: BackgroundProps;
-    /**
-     * @deprecated v3.3.0 - use `background`
-     */
-    bkgd?: string | BackgroundProps;
 }
 export interface SlideLayout extends SlideBaseProps {
     _slide?: {
