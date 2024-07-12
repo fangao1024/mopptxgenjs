@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.18 @ 2024/7/12 09:42:16 */
+/* mopptxgenjs 0.0.20 @ 2024/7/12 11:52:56 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -6559,13 +6559,7 @@ function genXmlTextBody(slideObj) {
     var arrLines = [];
     var arrTexts = [];
     arrTextObjects.forEach(function (textObj, idx) {
-        // A: Align or Bullet trigger new line 先判断是否有bullet，再判断是否有align 如果aligin和bullet同时存在，先处理bullet
-        if (arrTexts.length > 0 && textObj.options.bullet && arrTexts.length > 0) {
-            arrLines.push(arrTexts);
-            arrTexts = [];
-            textObj.options.breakLine = false; // For cases with both `bullet` and `brekaLine` - prevent double lineBreak
-        }
-        else if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
+        if (arrTexts.length > 0 && (textObj.options.align || opts.align)) {
             // Only start a new paragraph when align *changes*
             if (textObj.options.align !== arrTextObjects[idx - 1].options.align) {
                 arrLines.push(arrTexts);
