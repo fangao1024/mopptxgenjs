@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.24 @ 2024/7/13 13:26:32 */
+/* mopptxgenjs 0.0.25 @ 2024/7/13 14:25:54 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -6101,6 +6101,7 @@ function slideObjectRelationsToXml(slide, defaultRels) {
  */
 function genXmlParagraphProperties(textObj, isDefault) {
     var _a, _b;
+    console.log(textObj, '==============');
     var strXmlBullet = '';
     var strXmlLnSpc = '';
     var strXmlParaSpc = '';
@@ -6524,8 +6525,12 @@ function genXmlTextBody(slideObj) {
         // A: Start paragraph, add paraProps
         strSlideXml += '<a:p>';
         // NOTE:  its propagated up to each text:options, so just check the 1st one
-        var paragraphPropXml = genXmlParagraphProperties(Object.assign({}, line[0], opts), false);
-        strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', ''); // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
+        if (line[0]) {
+            var newOpts = Object.assign({}, line[0].options, opts);
+            line[0].options = newOpts;
+            var paragraphPropXml = genXmlParagraphProperties(line[0], false);
+            strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', ''); // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
+        }
         // B: Start paragraph, loop over lines and add text runs
         line.forEach(function (textObj, idx) {
             // A: Set line index

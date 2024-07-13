@@ -796,6 +796,8 @@ function slideObjectRelationsToXml(slide: PresSlide | SlideLayout, defaultRels: 
  * @return {string} XML
  */
 function genXmlParagraphProperties(textObj: ISlideObject | TextProps, isDefault: boolean): string {
+	console.log(textObj, '==============')
+
 	let strXmlBullet = ''
 	let strXmlLnSpc = ''
 	let strXmlParaSpc = ''
@@ -1241,8 +1243,13 @@ export function genXmlTextBody(slideObj: ISlideObject | TableCell): string {
 		// A: Start paragraph, add paraProps
 		strSlideXml += '<a:p>'
 		// NOTE:  its propagated up to each text:options, so just check the 1st one
-		let paragraphPropXml = genXmlParagraphProperties(Object.assign({}, line[0], opts), false)
-		strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '') // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
+		if (line[0]) {
+			const newOpts = Object.assign({}, line[0].options, opts)
+			line[0].options = newOpts
+			let paragraphPropXml = genXmlParagraphProperties(line[0], false)
+			strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '') // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
+		}
+
 		// B: Start paragraph, loop over lines and add text runs
 		line.forEach((textObj, idx) => {
 			// A: Set line index
