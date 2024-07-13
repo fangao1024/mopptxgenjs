@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.27 @ 2024/7/13 15:32:29 */
+/* mopptxgenjs 0.0.28 @ 2024/7/13 15:50:24 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -5803,7 +5803,9 @@ function slideObjectToXml(slide) {
                 // NOTE: This works for both cases: either `path` or `data` contains the SVG
                 if ((slide._relsMedia || []).filter(function (rel) { return rel.rId === slideItemObj.imageRid; })[0] && (slide._relsMedia || []).filter(function (rel) { return rel.rId === slideItemObj.imageRid; })[0].extn === 'svg') {
                     strSlideXml += "<a:blip r:embed=\"rId".concat(slideItemObj.imageRid - 1, "\">");
-                    strSlideXml += slideItemObj.options.opacity ? " <a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.opacity) * 1000), "\"/>") : '';
+                    if (!isNil(slideItemObj.options.opacity)) {
+                        strSlideXml += " <a:alphaModFix amt=\"".concat(Math.round(slideItemObj.options.opacity * 1000), "\"/>");
+                    }
                     strSlideXml += ' <a:extLst>';
                     strSlideXml += '  <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">';
                     strSlideXml += "   <asvg:svgBlip xmlns:asvg=\"http://schemas.microsoft.com/office/drawing/2016/SVG/main\" r:embed=\"rId".concat(slideItemObj.imageRid, "\"/>");
@@ -5813,7 +5815,9 @@ function slideObjectToXml(slide) {
                 }
                 else {
                     strSlideXml += "<a:blip r:embed=\"rId".concat(slideItemObj.imageRid, "\">");
-                    strSlideXml += slideItemObj.options.opacity ? "<a:alphaModFix amt=\"".concat(Math.round((100 - slideItemObj.options.opacity) * 1000), "\"/>") : '';
+                    if (!isNil(slideItemObj.options.opacity)) {
+                        strSlideXml += "<a:alphaModFix amt=\"".concat(Math.round(slideItemObj.options.opacity * 1000), "\"/>");
+                    }
                     strSlideXml += '</a:blip>';
                 }
                 if (sizing === null || sizing === void 0 ? void 0 : sizing.type) {
