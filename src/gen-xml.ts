@@ -796,8 +796,6 @@ function slideObjectRelationsToXml(slide: PresSlide | SlideLayout, defaultRels: 
  * @return {string} XML
  */
 function genXmlParagraphProperties(textObj: ISlideObject | TextProps, isDefault: boolean): string {
-	console.log(textObj, '==============')
-
 	let strXmlBullet = ''
 	let strXmlLnSpc = ''
 	let strXmlParaSpc = ''

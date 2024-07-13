@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.25 @ 2024/7/13 14:25:54 */
+/* mopptxgenjs 0.0.26 @ 2024/7/13 14:53:20 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -6095,7 +6095,6 @@ function slideObjectRelationsToXml(slide, defaultRels) {
  */
 function genXmlParagraphProperties(textObj, isDefault) {
     var _a, _b;
-    console.log(textObj, '==============');
     var strXmlBullet = '';
     var strXmlLnSpc = '';
     var strXmlParaSpc = '';
