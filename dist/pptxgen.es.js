@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.28 @ 2024/7/13 15:50:24 */
+/* mopptxgenjs 0.0.29 @ 2024/7/13 17:51:27 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -944,7 +944,8 @@ function createGradFillElement(options) {
             var left = (options === null || options === void 0 ? void 0 : options.gradientProps.left) || 0;
             var bottom = (options === null || options === void 0 ? void 0 : options.gradientProps.bottom) || 0;
             var right = (options === null || options === void 0 ? void 0 : options.gradientProps.right) || 0;
-            element += "<a:path path=\"circle\"><a:fillToRect l=\"".concat(left, "\" t=\"").concat(top_1, "\" r=\"").concat(right, "\" b=\"").concat(bottom, "\"/></a:path>");
+            var type = (options === null || options === void 0 ? void 0 : options.gradientProps.type) || 'shape';
+            element += "<a:path path=\"".concat(type, "\"><a:fillToRect l=\"").concat(left, "\" t=\"").concat(top_1, "\" r=\"").concat(right, "\" b=\"").concat(bottom, "\"/></a:path>");
             break;
         }
     }

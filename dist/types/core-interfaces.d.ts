@@ -125,6 +125,7 @@ export interface GradFillColor {
         right?: number;
         bottom?: number;
         top?: number;
+        type?: string;
     };
 }
 export interface BlipFillColor extends DataOrPathProps {

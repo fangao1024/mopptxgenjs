@@ -303,7 +303,8 @@ export function createGradFillElement(options: GradFillColor) {
 			const left = options?.gradientProps.left || 0
 			const bottom = options?.gradientProps.bottom || 0
 			const right = options?.gradientProps.right || 0
-			element += `<a:path path="circle"><a:fillToRect l="${left}" t="${top}" r="${right}" b="${bottom}"/></a:path>`
+			const type = options?.gradientProps.type || 'shape'
+			element += `<a:path path="${type}"><a:fillToRect l="${left}" t="${top}" r="${right}" b="${bottom}"/></a:path>`
 			break
 		}
 		default:

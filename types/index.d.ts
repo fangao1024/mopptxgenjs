@@ -985,7 +985,7 @@ declare namespace PptxGenJS {
 		rotWithShape?: boolean
 		flip?: 'x' | 'y' | 'xy'
 		gradientType?: 'radial' | 'linear'
-		gradientProps?: { rot?: number; left?: number; right?: number; bottom?: number; top?: number }
+		gradientProps?: { rot?: number; left?: number; right?: number; bottom?: number; top?: number; type?: string }
 	}
 
 	//图片或纹理填充
