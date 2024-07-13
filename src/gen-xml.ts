@@ -119,7 +119,7 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 		let strXml: string = null
 		const sizing: ObjectOptions['sizing'] = slideItemObj.options?.sizing
 		const rounding = slideItemObj.options?.rounding
-		const clipShape = slideItemObj.options?.clipShape
+		const clipShape = slideItemObj.options?.clipShape || {}
 
 		if ((slide as PresSlide)._slideLayout !== undefined && (slide as PresSlide)._slideLayout._slideObjects !== undefined && slideItemObj.options && slideItemObj.options.placeholder) {
 			placeholderObj = (slide as PresSlide)._slideLayout._slideObjects.filter((object: ISlideObject) => object.options.placeholder === slideItemObj.options.placeholder)[0]
@@ -422,13 +422,11 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				strSlideXml += `<a:off x="${x}" y="${y}"/>`
 				strSlideXml += `<a:ext cx="${cx}" cy="${cy}"/></a:xfrm>`
 
-				if (slideItemObj.shape) {
-					strSlideXml += genGeometryElementXML(slideItemObj.shape, {
-						paths: slideItemObj.options.shapePaths,
-						adjusting: slideItemObj.options.shapeAdjusting,
-						slide: slide
-					})
-				}
+				strSlideXml += genGeometryElementXML(slideItemObj.shape, {
+					paths: slideItemObj.options.shapePaths,
+					adjusting: slideItemObj.options.shapeAdjusting,
+					slide: slide
+				})
 
 				// Option: FILL
 				strSlideXml += slideItemObj.options.fill ? genXmlColorSelection(slideItemObj.options.fill) : '<a:noFill/>'
@@ -528,13 +526,11 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				strSlideXml += `  <a:off x="${x}" y="${y}"/>`
 				strSlideXml += `  <a:ext cx="${imgWidth}" cy="${imgHeight}"/>`
 				strSlideXml += ' </a:xfrm>'
-				if (clipShape) {
-					strSlideXml += genGeometryElementXML(clipShape.name, {
-						adjusting: clipShape.adjusting,
-						paths: clipShape.paths,
-						slide: slide
-					})
-				}
+				strSlideXml += genGeometryElementXML(clipShape?.name, {
+					adjusting: clipShape?.adjusting,
+					paths: clipShape?.paths,
+					slide: slide
+				})
 
 				if (slideItemObj.options.line) {
 					strSlideXml += genLineElementXML(slideItemObj.options.line)
@@ -1240,13 +1236,6 @@ export function genXmlTextBody(slideObj: ISlideObject | TableCell): string {
 
 		// A: Start paragraph, add paraProps
 		strSlideXml += '<a:p>'
-		// NOTE:  its propagated up to each text:options, so just check the 1st one
-		if (line[0]) {
-			const newOpts = Object.assign({}, line[0].options, opts)
-			line[0].options = newOpts
-			let paragraphPropXml = genXmlParagraphProperties(line[0], false)
-			strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '') // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
-		}
 
 		// B: Start paragraph, loop over lines and add text runs
 		line.forEach((textObj, idx) => {
@@ -1265,6 +1254,11 @@ export function genXmlTextBody(slideObj: ISlideObject | TableCell): string {
 			textObj.options.indentLevel = textObj.options.indentLevel || opts.indentLevel
 			textObj.options.paraSpaceBefore = textObj.options.paraSpaceBefore || opts.paraSpaceBefore
 			textObj.options.paraSpaceAfter = textObj.options.paraSpaceAfter || opts.paraSpaceAfter
+			// NOTE:  its propagated up to each text:options, so just check the 1st one
+			if (idx === 0) {
+				let paragraphPropXml = genXmlParagraphProperties(textObj, false)
+				strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '')
+			}
 
 			// C: Inherit any main options (color, fontSize, etc.)
 			// NOTE: We only pass the text.options to genXmlTextRun (not the Slide.options),

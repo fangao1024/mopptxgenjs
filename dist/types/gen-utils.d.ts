@@ -151,7 +151,7 @@ interface GeometryElementXMLOptions {
     paths?: ShapePath[];
     slide?: PresSlide | SlideLayout;
 }
-export declare function genGeometryElementXML(name: SHAPE_NAME, { adjusting, paths, slide }?: GeometryElementXMLOptions): string;
+export declare function genGeometryElementXML(name?: SHAPE_NAME, { adjusting, paths, slide }?: GeometryElementXMLOptions): string;
 /**
  * Get a new rel ID (rId) for charts, media, etc.
  * @param {PresSlide} target - the slide to use

@@ -465,7 +465,7 @@ interface GeometryElementXMLOptions {
 	paths?: ShapePath[]
 	slide?: PresSlide | SlideLayout
 }
-export function genGeometryElementXML(name: SHAPE_NAME, { adjusting, paths, slide }: GeometryElementXMLOptions = {}): string {
+export function genGeometryElementXML(name: SHAPE_NAME = 'rect', { adjusting, paths, slide }: GeometryElementXMLOptions = {}): string {
 	let element = ''
 	if (name === 'custGeom') {
 		element += '<a:custGeom><a:avLst />'
@@ -521,7 +521,7 @@ export function genGeometryElementXML(name: SHAPE_NAME, { adjusting, paths, slid
 		element += '</a:custGeom>'
 	} else {
 		const shapeAdjusting = adjusting
-		element += '<a:prstGeom prst="' + (name || 'rect') + '"><a:avLst>'
+		element += '<a:prstGeom prst="' + name + '"><a:avLst>'
 		if (shapeAdjusting && Object.keys(shapeAdjusting).length > 0) {
 			Object.entries(shapeAdjusting).forEach(([key, value]) => {
 				element += `<a:gd name="${key}" fmla="val ${getSmartParseNumber(value)}" />`

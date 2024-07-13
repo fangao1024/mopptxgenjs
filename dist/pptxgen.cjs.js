@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.26 @ 2024/7/13 14:53:20 */
+/* mopptxgenjs 0.0.27 @ 2024/7/13 15:32:29 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -1100,6 +1100,7 @@ function genLineElementXML(line) {
     return element;
 }
 function genGeometryElementXML(name, _a) {
+    if (name === void 0) { name = 'rect'; }
     var _b = _a === void 0 ? {} : _a, adjusting = _b.adjusting, paths = _b.paths, slide = _b.slide;
     var element = '';
     if (name === 'custGeom') {
@@ -1143,7 +1144,7 @@ function genGeometryElementXML(name, _a) {
     }
     else {
         var shapeAdjusting = adjusting;
-        element += '<a:prstGeom prst="' + (name || 'rect') + '"><a:avLst>';
+        element += '<a:prstGeom prst="' + name + '"><a:avLst>';
         if (shapeAdjusting && Object.keys(shapeAdjusting).length > 0) {
             Object.entries(shapeAdjusting).forEach(function (_a) {
                 var key = _a[0], value = _a[1];
@@ -5442,7 +5443,7 @@ function slideObjectToXml(slide) {
         var strXml = null;
         var sizing = (_a = slideItemObj.options) === null || _a === void 0 ? void 0 : _a.sizing;
         (_b = slideItemObj.options) === null || _b === void 0 ? void 0 : _b.rounding;
-        var clipShape = (_c = slideItemObj.options) === null || _c === void 0 ? void 0 : _c.clipShape;
+        var clipShape = ((_c = slideItemObj.options) === null || _c === void 0 ? void 0 : _c.clipShape) || {};
         if (slide._slideLayout !== undefined && slide._slideLayout._slideObjects !== undefined && slideItemObj.options && slideItemObj.options.placeholder) {
             placeholderObj = slide._slideLayout._slideObjects.filter(function (object) { return object.options.placeholder === slideItemObj.options.placeholder; })[0];
         }
@@ -5741,13 +5742,11 @@ function slideObjectToXml(slide) {
                 strSlideXml += "<a:xfrm".concat(locationAttr, ">");
                 strSlideXml += "<a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
                 strSlideXml += "<a:ext cx=\"".concat(cx, "\" cy=\"").concat(cy, "\"/></a:xfrm>");
-                if (slideItemObj.shape) {
-                    strSlideXml += genGeometryElementXML(slideItemObj.shape, {
-                        paths: slideItemObj.options.shapePaths,
-                        adjusting: slideItemObj.options.shapeAdjusting,
-                        slide: slide
-                    });
-                }
+                strSlideXml += genGeometryElementXML(slideItemObj.shape, {
+                    paths: slideItemObj.options.shapePaths,
+                    adjusting: slideItemObj.options.shapeAdjusting,
+                    slide: slide
+                });
                 // Option: FILL
                 strSlideXml += slideItemObj.options.fill ? genXmlColorSelection(slideItemObj.options.fill) : '<a:noFill/>';
                 // shape Type: LINE: line color
@@ -5835,13 +5834,11 @@ function slideObjectToXml(slide) {
                 strSlideXml += "  <a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
                 strSlideXml += "  <a:ext cx=\"".concat(imgWidth, "\" cy=\"").concat(imgHeight, "\"/>");
                 strSlideXml += ' </a:xfrm>';
-                if (clipShape) {
-                    strSlideXml += genGeometryElementXML(clipShape.name, {
-                        adjusting: clipShape.adjusting,
-                        paths: clipShape.paths,
-                        slide: slide
-                    });
-                }
+                strSlideXml += genGeometryElementXML(clipShape === null || clipShape === void 0 ? void 0 : clipShape.name, {
+                    adjusting: clipShape === null || clipShape === void 0 ? void 0 : clipShape.adjusting,
+                    paths: clipShape === null || clipShape === void 0 ? void 0 : clipShape.paths,
+                    slide: slide
+                });
                 if (slideItemObj.options.line) {
                     strSlideXml += genLineElementXML(slideItemObj.options.line);
                 }
@@ -6523,13 +6520,6 @@ function genXmlTextBody(slideObj) {
         var reqsClosingFontSize = false;
         // A: Start paragraph, add paraProps
         strSlideXml += '<a:p>';
-        // NOTE:  its propagated up to each text:options, so just check the 1st one
-        if (line[0]) {
-            var newOpts = Object.assign({}, line[0].options, opts);
-            line[0].options = newOpts;
-            var paragraphPropXml = genXmlParagraphProperties(line[0], false);
-            strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', ''); // IMPORTANT: Empty "pPr" blocks will generate needs-repair/corrupt msg
-        }
         // B: Start paragraph, loop over lines and add text runs
         line.forEach(function (textObj, idx) {
             // A: Set line index
@@ -6545,6 +6535,11 @@ function genXmlTextBody(slideObj) {
             textObj.options.indentLevel = textObj.options.indentLevel || opts.indentLevel;
             textObj.options.paraSpaceBefore = textObj.options.paraSpaceBefore || opts.paraSpaceBefore;
             textObj.options.paraSpaceAfter = textObj.options.paraSpaceAfter || opts.paraSpaceAfter;
+            // NOTE:  its propagated up to each text:options, so just check the 1st one
+            if (idx === 0) {
+                var paragraphPropXml = genXmlParagraphProperties(textObj, false);
+                strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '');
+            }
             // C: Inherit any main options (color, fontSize, etc.)
             // NOTE: We only pass the text.options to genXmlTextRun (not the Slide.options),
             // so the run building function cant just fallback to Slide.color, therefore, we need to do that here before passing options below.
