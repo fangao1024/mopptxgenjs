@@ -602,6 +602,10 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 		 *  { adj1: 10000, adj2: 10000 },
 		 */
 		adjusting?: Record<string, number>
+		/**
+		 * 	形状配置 只有类型是 CUSTOM_GEOMETRY 时才需要这个配置项
+		 */
+		paths?: ShapePath[]
 	}
 	/**
 	 * 图片描边
@@ -701,7 +705,18 @@ export interface MediaProps extends PositionProps, DataOrPathProps, ObjectNamePr
 }
 
 // shapes =========================================================================================
-
+export interface ShapePath {
+	w: number
+	h: number
+	paths: Array<
+		| { type: 'moveTo'; x: Coord; y: Coord }
+		| { type: 'lineTo'; x: Coord; y: Coord }
+		| { type: 'cubicBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord; x3: Coord; y3: Coord }
+		| { type: 'arcTo'; wR: Coord; hR: Coord; stAng: number; swAng: number }
+		| { type: 'quadBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord }
+		| { type: 'close' }
+	>
+}
 export interface ShapeProps extends PositionProps, ObjectNameProps {
 	/**
 	 * Horizontal alignment
@@ -749,18 +764,7 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	/**
 	 * 	形状配置 只有类型是 CUSTOM_GEOMETRY 时才需要这个配置项
 	 */
-	shapePath?: {
-		w: number
-		h: number
-		paths: Array<
-			| { type: 'moveTo'; x: Coord; y: Coord }
-			| { type: 'lineTo'; x: Coord; y: Coord }
-			| { type: 'cubicBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord; x3: Coord; y3: Coord }
-			| { type: 'arcTo'; wR: Coord; hR: Coord; stAng: number; swAng: number }
-			| { type: 'quadBezTo'; x1: Coord; y1: Coord; x2: Coord; y2: Coord }
-			| { type: 'close' }
-		>
-	}
+	shapePaths?: ShapePath[]
 	/**
 	 * 形状控制点
 	 * @example

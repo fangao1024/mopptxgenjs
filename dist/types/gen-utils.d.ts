@@ -1,8 +1,8 @@
 /**
  * PptxGenJS: Utility Methods
  */
-import { SCHEME_COLORS } from './core-enums';
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps } from './core-interfaces';
+import { SCHEME_COLORS, SHAPE_NAME } from './core-enums';
+import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps, ShapePath, SlideLayout } from './core-interfaces';
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU 这里不在兼容 emu单位 全面使用英寸单位
  * - guaranteed to return a result regardless of undefined, null, etc. (0)
@@ -140,6 +140,19 @@ export declare function initColorSelection(options: ColorSelection, target?: Pre
  */
 export declare function genLineElementXML(line: ShapeLineProps): string;
 /**
+ * 生成几何形状元素
+ * @param {SHAPE_NAME} name 几何形状名称
+ * @param {Record<string, number>} options.path 几何形状路径
+ * @param {ShapePath} options.adjusting 调整参数
+ * @returns {string} 几何形状元素
+ */
+interface GeometryElementXMLOptions {
+    adjusting?: Record<string, number>;
+    paths?: ShapePath[];
+    slide?: PresSlide | SlideLayout;
+}
+export declare function genGeometryElementXML(name: SHAPE_NAME, { adjusting, paths, slide }?: GeometryElementXMLOptions): string;
+/**
  * Get a new rel ID (rId) for charts, media, etc.
  * @param {PresSlide} target - the slide to use
  * @returns {number} count of all current rels plus 1 for the caller to use as its "rId"
@@ -150,3 +163,4 @@ export declare function getNewRelId(target: PresSlide): number;
  * @param {ShadowProps} ShadowProps - shadow options
  */
 export declare function correctShadowOptions(ShadowProps: ShadowProps): ShadowProps | undefined;
+export {};

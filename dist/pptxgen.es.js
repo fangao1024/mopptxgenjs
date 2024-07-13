@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.23 @ 2024/7/13 10:37:55 */
+/* mopptxgenjs 0.0.24 @ 2024/7/13 13:26:32 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -1090,6 +1090,61 @@ function genLineElementXML(line) {
             element += "<a:tailEnd type=\"".concat(line.endArrowType, "\"/>");
         // FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
         element += '</a:ln>';
+    }
+    return element;
+}
+function genGeometryElementXML(name, _a) {
+    var _b = _a === void 0 ? {} : _a, adjusting = _b.adjusting, paths = _b.paths, slide = _b.slide;
+    var element = '';
+    if (name === 'custGeom') {
+        element += '<a:custGeom><a:avLst />';
+        element += '<a:gdLst>';
+        element += '</a:gdLst>';
+        element += '<a:ahLst />';
+        element += '<a:cxnLst>';
+        element += '</a:cxnLst>';
+        element += '<a:rect l="l" t="t" r="r" b="b" />';
+        element += '<a:pathLst>';
+        for (var _i = 0, paths_1 = paths; _i < paths_1.length; _i++) {
+            var path = paths_1[_i];
+            element += "<a:path w=\"".concat(getSmartParseNumber(path === null || path === void 0 ? void 0 : path.w), "\" h=\"").concat(getSmartParseNumber(path === null || path === void 0 ? void 0 : path.h), "\">");
+            path === null || path === void 0 ? void 0 : path.paths.forEach(function (path) {
+                switch (path.type) {
+                    case 'moveTo':
+                        element += "<a:moveTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:moveTo>");
+                        break;
+                    case 'lineTo':
+                        element += "<a:lnTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:lnTo>");
+                        break;
+                    case 'arcTo':
+                        element += "<a:arcTo wR=\"".concat(getSmartParseNumber(path.wR, 'X', slide._presLayout), "\" hR=\"").concat(getSmartParseNumber(path.hR, 'Y', slide._presLayout), "\" stAng=\"").concat(path.stAng, "\" swAng=\"").concat(path.swAng, "\" />");
+                        break;
+                    case 'cubicBezTo':
+                        element += "<a:cubicBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x3, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y3, 'Y', slide._presLayout), "\" /></a:cubicBezTo>");
+                        break;
+                    case 'quadBezTo':
+                        element += "<a:quadBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /></a:quadBezTo>");
+                        break;
+                    case 'close':
+                        element += '<a:close />';
+                        break;
+                }
+            });
+            element += '</a:path>';
+        }
+        element += '</a:pathLst>';
+        element += '</a:custGeom>';
+    }
+    else {
+        var shapeAdjusting = adjusting;
+        element += '<a:prstGeom prst="' + (name || 'rect') + '"><a:avLst>';
+        if (shapeAdjusting && Object.keys(shapeAdjusting).length > 0) {
+            Object.entries(shapeAdjusting).forEach(function (_a) {
+                var key = _a[0], value = _a[1];
+                element += "<a:gd name=\"".concat(key, "\" fmla=\"val ").concat(getSmartParseNumber(value), "\" />");
+            });
+        }
+        element += '</a:avLst></a:prstGeom>';
     }
     return element;
 }
@@ -5380,7 +5435,7 @@ function slideObjectToXml(slide) {
         var cellOpts = null;
         var strXml = null;
         var sizing = (_a = slideItemObj.options) === null || _a === void 0 ? void 0 : _a.sizing;
-        var rounding = (_b = slideItemObj.options) === null || _b === void 0 ? void 0 : _b.rounding;
+        (_b = slideItemObj.options) === null || _b === void 0 ? void 0 : _b.rounding;
         var clipShape = (_c = slideItemObj.options) === null || _c === void 0 ? void 0 : _c.clipShape;
         if (slide._slideLayout !== undefined && slide._slideLayout._slideObjects !== undefined && slideItemObj.options && slideItemObj.options.placeholder) {
             placeholderObj = slide._slideLayout._slideObjects.filter(function (object) { return object.options.placeholder === slideItemObj.options.placeholder; })[0];
@@ -5680,53 +5735,12 @@ function slideObjectToXml(slide) {
                 strSlideXml += "<a:xfrm".concat(locationAttr, ">");
                 strSlideXml += "<a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
                 strSlideXml += "<a:ext cx=\"".concat(cx, "\" cy=\"").concat(cy, "\"/></a:xfrm>");
-                if (slideItemObj.shape === 'custGeom') {
-                    strSlideXml += '<a:custGeom><a:avLst />';
-                    strSlideXml += '<a:gdLst>';
-                    strSlideXml += '</a:gdLst>';
-                    strSlideXml += '<a:ahLst />';
-                    strSlideXml += '<a:cxnLst>';
-                    strSlideXml += '</a:cxnLst>';
-                    strSlideXml += '<a:rect l="l" t="t" r="r" b="b" />';
-                    strSlideXml += '<a:pathLst>';
-                    var shapePath = slideItemObj.options.shapePath;
-                    strSlideXml += "<a:path w=\"".concat((shapePath === null || shapePath === void 0 ? void 0 : shapePath.w) ? getSmartParseNumber(shapePath === null || shapePath === void 0 ? void 0 : shapePath.w) : cx, "\" h=\"").concat((shapePath === null || shapePath === void 0 ? void 0 : shapePath.h) ? getSmartParseNumber(shapePath === null || shapePath === void 0 ? void 0 : shapePath.h) : cy, "\">");
-                    shapePath === null || shapePath === void 0 ? void 0 : shapePath.paths.forEach(function (path) {
-                        switch (path.type) {
-                            case 'moveTo':
-                                strSlideXml += "<a:moveTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:moveTo>");
-                                break;
-                            case 'lineTo':
-                                strSlideXml += "<a:lnTo><a:pt x=\"".concat(getSmartParseNumber(path.x, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y, 'Y', slide._presLayout), "\" /></a:lnTo>");
-                                break;
-                            case 'arcTo':
-                                strSlideXml += "<a:arcTo wR=\"".concat(getSmartParseNumber(path.wR, 'X', slide._presLayout), "\" hR=\"").concat(getSmartParseNumber(path.hR, 'Y', slide._presLayout), "\" stAng=\"").concat(path.stAng, "\" swAng=\"").concat(path.swAng, "\" />");
-                                break;
-                            case 'cubicBezTo':
-                                strSlideXml += "<a:cubicBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x3, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y3, 'Y', slide._presLayout), "\" /></a:cubicBezTo>");
-                                break;
-                            case 'quadBezTo':
-                                strSlideXml += "<a:quadBezTo><a:pt x=\"".concat(getSmartParseNumber(path.x1, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y1, 'Y', slide._presLayout), "\" /><a:pt x=\"").concat(getSmartParseNumber(path.x2, 'X', slide._presLayout), "\" y=\"").concat(getSmartParseNumber(path.y2, 'Y', slide._presLayout), "\" /></a:quadBezTo>");
-                                break;
-                            case 'close':
-                                strSlideXml += '<a:close />';
-                                break;
-                        }
+                if (slideItemObj.shape) {
+                    strSlideXml += genGeometryElementXML(slideItemObj.shape, {
+                        paths: slideItemObj.options.shapePaths,
+                        adjusting: slideItemObj.options.shapeAdjusting,
+                        slide: slide
                     });
-                    strSlideXml += '</a:path>';
-                    strSlideXml += '</a:pathLst>';
-                    strSlideXml += '</a:custGeom>';
-                }
-                else {
-                    strSlideXml += '<a:prstGeom prst="' + slideItemObj.shape + '"><a:avLst>';
-                    // 这里删除了老的配置 改为使用统一的配置项 v0.0.6
-                    if (slideItemObj.options.shapeAdjusting && Object.keys(slideItemObj.options.shapeAdjusting).length > 0) {
-                        Object.entries(slideItemObj.options.shapeAdjusting).forEach(function (_a) {
-                            var key = _a[0], value = _a[1];
-                            strSlideXml += "<a:gd name=\"".concat(key, "\" fmla=\"val ").concat(getSmartParseNumber(value), "\" />");
-                        });
-                    }
-                    strSlideXml += '</a:avLst></a:prstGeom>';
                 }
                 // Option: FILL
                 strSlideXml += slideItemObj.options.fill ? genXmlColorSelection(slideItemObj.options.fill) : '<a:noFill/>';
@@ -5815,31 +5829,13 @@ function slideObjectToXml(slide) {
                 strSlideXml += "  <a:off x=\"".concat(x, "\" y=\"").concat(y, "\"/>");
                 strSlideXml += "  <a:ext cx=\"".concat(imgWidth, "\" cy=\"").concat(imgHeight, "\"/>");
                 strSlideXml += ' </a:xfrm>';
-                strSlideXml += ' <a:prstGeom';
-                // Clip shape or rounding
-                if (clipShape && clipShape.name) {
-                    strSlideXml += " prst=\"".concat(clipShape.name, "\">");
+                if (clipShape) {
+                    strSlideXml += genGeometryElementXML(clipShape.name, {
+                        adjusting: clipShape.adjusting,
+                        paths: clipShape.paths,
+                        slide: slide
+                    });
                 }
-                else if (rounding) {
-                    strSlideXml += ' prst="ellipse">';
-                }
-                else {
-                    strSlideXml += ' prst="rect">';
-                }
-                // 控制点
-                if (clipShape && clipShape.adjusting && Object.entries(clipShape.adjusting).length > 0) {
-                    var adjustingList = Object.entries(clipShape.adjusting);
-                    strSlideXml += '<a:avLst>';
-                    for (var _i = 0, adjustingList_1 = adjustingList; _i < adjustingList_1.length; _i++) {
-                        var _p = adjustingList_1[_i], name_1 = _p[0], adj = _p[1];
-                        strSlideXml += "<a:gd name=\"".concat(name_1, "\" fmla=\"val ").concat(getSmartParseNumber(adj), "\"/>");
-                    }
-                    strSlideXml += '</a:avLst>';
-                }
-                else {
-                    strSlideXml += '<a:avLst/>';
-                }
-                strSlideXml += '</a:prstGeom>';
                 if (slideItemObj.options.line) {
                     strSlideXml += genLineElementXML(slideItemObj.options.line);
                 }

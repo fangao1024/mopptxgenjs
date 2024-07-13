@@ -2,8 +2,23 @@
  * PptxGenJS: Utility Methods
  */
 
-import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, Color, Coord, ShadowProps, ColorSelection, ColorConfig, GradFillColor, SolidFillColor, BlipFillColor, ShapeLineProps } from './core-interfaces'
+import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS, SHAPE_NAME } from './core-enums'
+import {
+	PresLayout,
+	TextGlowProps,
+	PresSlide,
+	Color,
+	Coord,
+	ShadowProps,
+	ColorSelection,
+	ColorConfig,
+	GradFillColor,
+	SolidFillColor,
+	BlipFillColor,
+	ShapeLineProps,
+	ShapePath,
+	SlideLayout
+} from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU 这里不在兼容 emu单位 全面使用英寸单位
@@ -435,6 +450,84 @@ export function genLineElementXML(line: ShapeLineProps): string {
 		if (line.endArrowType) element += `<a:tailEnd type="${line.endArrowType}"/>`
 		// FUTURE: `endArrowSize` < a: headEnd type = "arrow" w = "lg" len = "lg" /> 'sm' | 'med' | 'lg'(values are 1 - 9, making a 3x3 grid of w / len possibilities)
 		element += '</a:ln>'
+	}
+	return element
+}
+/**
+ * 生成几何形状元素
+ * @param {SHAPE_NAME} name 几何形状名称
+ * @param {Record<string, number>} options.path 几何形状路径
+ * @param {ShapePath} options.adjusting 调整参数
+ * @returns {string} 几何形状元素
+ */
+interface GeometryElementXMLOptions {
+	adjusting?: Record<string, number>
+	paths?: ShapePath[]
+	slide?: PresSlide | SlideLayout
+}
+export function genGeometryElementXML(name: SHAPE_NAME, { adjusting, paths, slide }: GeometryElementXMLOptions = {}): string {
+	let element = ''
+	if (name === 'custGeom') {
+		element += '<a:custGeom><a:avLst />'
+		element += '<a:gdLst>'
+		element += '</a:gdLst>'
+		element += '<a:ahLst />'
+		element += '<a:cxnLst>'
+		element += '</a:cxnLst>'
+		element += '<a:rect l="l" t="t" r="r" b="b" />'
+		element += '<a:pathLst>'
+		for (const path of paths) {
+			element += `<a:path w="${getSmartParseNumber(path?.w)}" h="${getSmartParseNumber(path?.h)}">`
+			path?.paths.forEach((path) => {
+				switch (path.type) {
+					case 'moveTo':
+						element += `<a:moveTo><a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" /></a:moveTo>`
+						break
+					case 'lineTo':
+						element += `<a:lnTo><a:pt x="${getSmartParseNumber(path.x, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y, 'Y', slide._presLayout)}" /></a:lnTo>`
+						break
+					case 'arcTo':
+						element += `<a:arcTo wR="${getSmartParseNumber(path.wR, 'X', slide._presLayout)}" hR="${getSmartParseNumber(path.hR, 'Y', slide._presLayout)}" stAng="${path.stAng}" swAng="${
+							path.swAng
+						}" />`
+						break
+					case 'cubicBezTo':
+						element += `<a:cubicBezTo><a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(
+							path.y1,
+							'Y',
+							slide._presLayout
+						)}" /><a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" /><a:pt x="${getSmartParseNumber(
+							path.x3,
+							'X',
+							slide._presLayout
+						)}" y="${getSmartParseNumber(path.y3, 'Y', slide._presLayout)}" /></a:cubicBezTo>`
+						break
+					case 'quadBezTo':
+						element += `<a:quadBezTo><a:pt x="${getSmartParseNumber(path.x1, 'X', slide._presLayout)}" y="${getSmartParseNumber(
+							path.y1,
+							'Y',
+							slide._presLayout
+						)}" /><a:pt x="${getSmartParseNumber(path.x2, 'X', slide._presLayout)}" y="${getSmartParseNumber(path.y2, 'Y', slide._presLayout)}" /></a:quadBezTo>`
+						break
+					case 'close':
+						element += '<a:close />'
+						break
+				}
+			})
+			element += '</a:path>'
+		}
+
+		element += '</a:pathLst>'
+		element += '</a:custGeom>'
+	} else {
+		const shapeAdjusting = adjusting
+		element += '<a:prstGeom prst="' + (name || 'rect') + '"><a:avLst>'
+		if (shapeAdjusting && Object.keys(shapeAdjusting).length > 0) {
+			Object.entries(shapeAdjusting).forEach(([key, value]) => {
+				element += `<a:gd name="${key}" fmla="val ${getSmartParseNumber(value)}" />`
+			})
+		}
+		element += '</a:avLst></a:prstGeom>'
 	}
 	return element
 }
