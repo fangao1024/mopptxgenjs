@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.30 @ 2024/7/13 17:58:16 */
+/* mopptxgenjs 0.0.31 @ 2024/7/15 13:59:04 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -6210,6 +6210,27 @@ function genXmlParagraphProperties(textObj, isDefault) {
     return paragraphPropXml;
 }
 /**
+ * 生成 XML 段落结束属性
+ * @param {TextProps | ISlideObject | TableCell} textObj - text object
+ * @return {string} XML
+ */
+function genXmlEndParagraphProperties(textObj) {
+    var opts = textObj.options || {};
+    var fontSize = opts.fontSize;
+    var fontFace = opts.fontFace;
+    var endParagraphPropXml = "<a:endParaRPr lang=\"".concat(opts.lang || 'en-US', "\"");
+    if (fontSize) {
+        endParagraphPropXml += " sz=\"".concat(Math.round(fontSize * 100), "\" dirty=\"0\">");
+    }
+    if (fontFace) {
+        endParagraphPropXml += "<a:latin typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
+        endParagraphPropXml += "<a:ea typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
+        endParagraphPropXml += "<a:cs typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
+    }
+    endParagraphPropXml += '</a:endParaRPr>';
+    return endParagraphPropXml;
+}
+/**
  * Generate XML Text Run Properties (`a:rPr`)
  * @param {ObjectOptions|TextPropsOptions} opts - text options
  * @param {boolean} isDefault - whether these are the default text run properties
@@ -6440,6 +6461,10 @@ function genXmlTextBody(slideObj) {
         else
             strSlideXml += '<a:lstStyle/>';
     }
+    /**
+     * 生成 XML 段落结束属性
+     * @param textObj
+     */
     /* STEP 3: Modify slideObj.text to array
         CASES:
         addText( 'string' ) // string
@@ -6516,11 +6541,10 @@ function genXmlTextBody(slideObj) {
     });
     // STEP 6: Loop over each line and create paragraph props, text run, etc.
     arrLines.forEach(function (line) {
-        var reqsClosingFontSize = false;
         // A: Start paragraph, add paraProps
         strSlideXml += '<a:p>';
         // B: Start paragraph, loop over lines and add text runs
-        line.forEach(function (textObj, idx) {
+        line.forEach(function (textObj, idx, lineArr) {
             // A: Set line index
             textObj.options._lineIdx = idx;
             // A.1: Add soft break if not the first run of the line.
@@ -6534,12 +6558,12 @@ function genXmlTextBody(slideObj) {
             textObj.options.indentLevel = textObj.options.indentLevel || opts.indentLevel;
             textObj.options.paraSpaceBefore = textObj.options.paraSpaceBefore || opts.paraSpaceBefore;
             textObj.options.paraSpaceAfter = textObj.options.paraSpaceAfter || opts.paraSpaceAfter;
-            // NOTE:  its propagated up to each text:options, so just check the 1st one
+            // C:  its propagated up to each text:options, so just check the 1st one
             if (idx === 0) {
                 var paragraphPropXml = genXmlParagraphProperties(textObj, false);
                 strSlideXml += paragraphPropXml.replace('<a:pPr></a:pPr>', '');
             }
-            // C: Inherit any main options (color, fontSize, etc.)
+            // D: Inherit any main options (color, fontSize, etc.)
             // NOTE: We only pass the text.options to genXmlTextRun (not the Slide.options),
             // so the run building function cant just fallback to Slide.color, therefore, we need to do that here before passing options below.
             // FILTER RULE: Hyperlinks should not inherit `color` from main options (let PPT default to local color, eg: blue on MacOS)
@@ -6555,36 +6579,16 @@ function genXmlTextBody(slideObj) {
                 if (key !== 'bullet' && !textObj.options[key])
                     textObj.options[key] = val;
             });
-            // D: Add formatted textrun
+            // E: Add formatted textrun
             strSlideXml += genXmlTextRun(textObj);
-            // E: Flag close fontSize for empty [lineBreak] elements
-            if ((!textObj.text && opts.fontSize) || textObj.options.fontSize) {
-                reqsClosingFontSize = true;
-                opts.fontSize = opts.fontSize || textObj.options.fontSize;
+            // F: 设置textObj 的配置项
+            textObj.options.fontSize = textObj.options.fontSize || opts.fontSize;
+            textObj.options.fontFace = textObj.options.fontFace || opts.fontFace;
+            // G: 如果是最后一个元素，生成 endParaRPr 标签
+            if (idx === lineArr.length - 1) {
+                strSlideXml += genXmlEndParagraphProperties(textObj);
             }
         });
-        /* C: Append 'endParaRPr' (when needed) and close current open paragraph
-         * NOTE: (ISSUE#20, ISSUE#193): Add 'endParaRPr' with font/size props or PPT default (Arial/18pt en-us) is used making row "too tall"/not honoring options
-         */
-        if (slideObj._type === SLIDE_OBJECT_TYPES.tablecell && (opts.fontSize || opts.fontFace)) {
-            if (opts.fontFace) {
-                strSlideXml += "<a:endParaRPr lang=\"".concat(opts.lang || 'en-US', "\"") + (opts.fontSize ? " sz=\"".concat(Math.round(opts.fontSize * 100), "\"") : '') + ' dirty="0">';
-                strSlideXml += "<a:latin typeface=\"".concat(opts.fontFace, "\" charset=\"0\"/>");
-                strSlideXml += "<a:ea typeface=\"".concat(opts.fontFace, "\" charset=\"0\"/>");
-                strSlideXml += "<a:cs typeface=\"".concat(opts.fontFace, "\" charset=\"0\"/>");
-                strSlideXml += '</a:endParaRPr>';
-            }
-            else {
-                strSlideXml += "<a:endParaRPr lang=\"".concat(opts.lang || 'en-US', "\"") + (opts.fontSize ? " sz=\"".concat(Math.round(opts.fontSize * 100), "\"") : '') + ' dirty="0"/>';
-            }
-        }
-        else if (reqsClosingFontSize) {
-            // Empty [lineBreak] lines should not contain runProp, however, they need to specify fontSize in `endParaRPr`
-            strSlideXml += "<a:endParaRPr lang=\"".concat(opts.lang || 'en-US', "\"") + (opts.fontSize ? " sz=\"".concat(Math.round(opts.fontSize * 100), "\"") : '') + ' dirty="0"/>';
-        }
-        else {
-            strSlideXml += "<a:endParaRPr lang=\"".concat(opts.lang || 'en-US', "\" dirty=\"0\"/>"); // Added 20180101 to address PPT-2007 issues
-        }
         // D: End paragraph
         strSlideXml += '</a:p>';
     });
