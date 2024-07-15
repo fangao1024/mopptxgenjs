@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.31 @ 2024/7/15 13:59:04 */
+/* mopptxgenjs 0.0.32 @ 2024/7/15 14:24:32 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -2341,7 +2341,7 @@ function addImageDefinition(target, opt) {
         rotate: opt.rotate || 0,
         flipV: opt.flipV || false,
         flipH: opt.flipH || false,
-        opacity: opt.opacity || 0,
+        opacity: opt.opacity,
         objectName: objectName,
         shadow: correctShadowOptions(opt.shadow),
         clipShape: opt.clipShape || null,

@@ -456,7 +456,7 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		rotate: opt.rotate || 0,
 		flipV: opt.flipV || false,
 		flipH: opt.flipH || false,
-		opacity: opt.opacity || 0,
+		opacity: opt.opacity,
 		objectName,
 		shadow: correctShadowOptions(opt.shadow),
 		clipShape: opt.clipShape || null,

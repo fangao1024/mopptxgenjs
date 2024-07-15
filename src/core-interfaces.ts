@@ -661,7 +661,6 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	 * opacity (percent)
 	 * - MS-PPT > Format Picture > Picture > Picture opacity > opacity
 	 * - range: 0-100
-	 * @default 0
 	 * @example 25 // 25% opacity
 	 */
 	opacity?: number
