@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.32 @ 2024/7/15 14:24:32 */
+/* mopptxgenjs 0.0.33 @ 2024/7/15 15:37:48 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -795,15 +795,27 @@ function rgbToHex(r, g, b) {
 function getURLType(url, defaultType) {
     if (defaultType === void 0) { defaultType = 'png'; }
     if (!url) {
+        console.warn('getURLType error: urlType set defaultType is png', "error url : ".concat(url));
         return defaultType;
     }
-    var urlObject = new URL(url);
-    var pathname = urlObject.pathname;
-    var match = pathname.match(/\.(\w+)$/);
-    if (match) {
-        return match[1].toLowerCase();
+    // 补充协议头
+    if (!url.startsWith('http') && url.startsWith('//')) {
+        url = 'https:' + url;
     }
-    else {
+    try {
+        var urlObject = new URL(url);
+        var pathname = urlObject.pathname;
+        var match = pathname.match(/\.(\w+)$/);
+        if (match) {
+            return match[1].toLowerCase();
+        }
+        else {
+            console.warn('getURLType error: urlType set defaultType is png', "error url : ".concat(url));
+            return defaultType;
+        }
+    }
+    catch (error) {
+        console.warn('getURLType error: urlType set defaultType is png', "error url : ".concat(url), error);
         return defaultType;
     }
 }

@@ -148,14 +148,25 @@ export function rgbToHex(r: number, g: number, b: number): string {
  */
 export function getURLType(url: string, defaultType: string = 'png'): string {
 	if (!url) {
+		console.warn('getURLType error: urlType set defaultType is png', `error url : ${url}`)
 		return defaultType
 	}
-	const urlObject = new URL(url)
-	const pathname: string = urlObject.pathname
-	const match = pathname.match(/\.(\w+)$/)
-	if (match) {
-		return match[1].toLowerCase()
-	} else {
+	// 补充协议头
+	if (!url.startsWith('http') && url.startsWith('//')) {
+		url = 'https:' + url
+	}
+	try {
+		const urlObject = new URL(url)
+		const pathname: string = urlObject.pathname
+		const match = pathname.match(/\.(\w+)$/)
+		if (match) {
+			return match[1].toLowerCase()
+		} else {
+			console.warn('getURLType error: urlType set defaultType is png', `error url : ${url}`)
+			return defaultType
+		}
+	} catch (error) {
+		console.warn('getURLType error: urlType set defaultType is png', `error url : ${url}`, error)
 		return defaultType
 	}
 }
