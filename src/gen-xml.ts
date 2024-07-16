@@ -943,9 +943,9 @@ function genXmlEndParagraphProperties(textObj: TextProps | ISlideObject | TableC
 	}
 
 	if (fontFace) {
-		endParagraphPropXml += `<a:latin typeface="${fontFace}" pitchFamily="34" charset="0"/>`
-		endParagraphPropXml += `<a:ea typeface="${fontFace}" pitchFamily="34" charset="0"/>`
-		endParagraphPropXml += `<a:cs typeface="${fontFace}" pitchFamily="34" charset="0"/>`
+		endParagraphPropXml += `<a:latin typeface="${fontFace}" pitchFamily="34" charset="-120"/>`
+		endParagraphPropXml += `<a:ea typeface="${fontFace}" pitchFamily="34" charset="-122"/>`
+		endParagraphPropXml += `<a:cs typeface="${fontFace}" pitchFamily="34" charset="-120"/>`
 	}
 
 	endParagraphPropXml += '</a:endParaRPr>'
@@ -1000,8 +1000,7 @@ function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefau
 		if (typeof opts.underline === 'object' && opts.underline.color) runProps += `<a:uFill>${genXmlColorSelection(opts.underline.color)}</a:uFill>`
 		if (opts.glow) runProps += `<a:effectLst>${createGlowElement(opts.glow, DEF_TEXT_GLOW)}</a:effectLst>`
 		if (opts.fontFace) {
-			// NOTE: 'cs' = Complex Script, 'ea' = East Asian (use "-120" instead of "0" - per Issue #174); ea must come first (Issue #174)
-			runProps += `<a:latin typeface="${opts.fontFace}" pitchFamily="34" charset="0"/><a:ea typeface="${opts.fontFace}" pitchFamily="34" charset="-122"/><a:cs typeface="${opts.fontFace}" pitchFamily="34" charset="-120"/>`
+			runProps += `<a:latin typeface="${opts.fontFace}" pitchFamily="34" charset="-120"/><a:ea typeface="${opts.fontFace}" pitchFamily="34" charset="-122"/><a:cs typeface="${opts.fontFace}" pitchFamily="34" charset="-120"/>`
 		}
 	}
 

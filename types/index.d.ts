@@ -1122,7 +1122,7 @@ declare namespace PptxGenJS {
 		// FUTURE: beginArrowSize (1-9)
 		// FUTURE: endArrowSize (1-9)
 
-		capType?: string
+		capType?: 'rnd' | 'sq' | 'flat'
 
 		joinType?: string
 		/**

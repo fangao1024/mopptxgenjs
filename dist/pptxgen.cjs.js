@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.34 @ 2024/7/16 11:44:58 */
+/* mopptxgenjs 0.0.35 @ 2024/7/16 16:56:30 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -955,7 +955,8 @@ function createGradFillElement(options) {
     var _a, _b;
     var gradientStopList = options.gradientStopList, gradientType = options.gradientType, flip = options.flip, rotWithShape = options.rotWithShape;
     var element = '';
-    element += "<a:gradFill flip=\"".concat(flip, "\" rotWithShape=\"").concat(rotWithShape ? '1' : '0', "\">");
+    console.log(flip, 'flip=================');
+    element += "<a:gradFill flip=\"".concat(flip !== null && flip !== void 0 ? flip : 'y', "\" rotWithShape=\"").concat(rotWithShape ? '1' : '0', "\">");
     if (gradientStopList.length > 0) {
         element += "<a:gsLst>";
         element += gradientStopList
@@ -1053,11 +1054,13 @@ function initColorSelection(options, target) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     switch (options.type) {
         case 'grad': {
+            console.log(options, 'options=================');
             // 初始化渐变填充参数
             options.gradientStopList = (_a = options.gradientStopList) !== null && _a !== void 0 ? _a : [];
             options.gradientType = (_b = options.gradientType) !== null && _b !== void 0 ? _b : 'linear';
             options.flip = (_c = options.flip) !== null && _c !== void 0 ? _c : 'y';
             options.rotWithShape = (_d = options.rotWithShape) !== null && _d !== void 0 ? _d : true;
+            console.log(options, 'options to=================');
             break;
         }
         case 'blip': {
@@ -2910,7 +2913,7 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
         options: opts || {}
     };
     function cleanOpts(itemOpts) {
-        var _a;
+        var _a, _b;
         // STEP 1: Set some options
         {
             // A.1: Color (placeholders should inherit their colors or override them, so don't default them)
@@ -2975,6 +2978,10 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
             }
             // C: Line opts
             itemOpts.line = itemOpts.line || {};
+            // 初始化 line color
+            if ((_a = itemOpts.line) === null || _a === void 0 ? void 0 : _a.color) {
+                initColorSelection(itemOpts.line.color, target);
+            }
             itemOpts.lineSpacing = itemOpts.lineSpacing && !isNaN(itemOpts.lineSpacing) ? itemOpts.lineSpacing : null;
             itemOpts.lineSpacingMultiple = itemOpts.lineSpacingMultiple && !isNaN(itemOpts.lineSpacingMultiple) ? itemOpts.lineSpacingMultiple : null;
             // D: Transform text options to bodyProperties as thats how we build XML
@@ -2996,7 +3003,7 @@ function addTextDefinition(target, text, opts, isPlaceholder) {
                 itemOpts.underline = { style: 'sng' };
             }
             // 初始化 underline color
-            if ((_a = itemOpts.underline) === null || _a === void 0 ? void 0 : _a.color) {
+            if ((_b = itemOpts.underline) === null || _b === void 0 ? void 0 : _b.color) {
                 initColorSelection(itemOpts.underline.color, target);
             }
         }
@@ -6253,9 +6260,9 @@ function genXmlEndParagraphProperties(textObj) {
         endParagraphPropXml += " sz=\"".concat(Math.round(fontSize * 100), "\" dirty=\"0\">");
     }
     if (fontFace) {
-        endParagraphPropXml += "<a:latin typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
-        endParagraphPropXml += "<a:ea typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
-        endParagraphPropXml += "<a:cs typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"0\"/>");
+        endParagraphPropXml += "<a:latin typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"-120\"/>");
+        endParagraphPropXml += "<a:ea typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"-122\"/>");
+        endParagraphPropXml += "<a:cs typeface=\"".concat(fontFace, "\" pitchFamily=\"34\" charset=\"-120\"/>");
     }
     endParagraphPropXml += '</a:endParaRPr>';
     return endParagraphPropXml;
@@ -6315,8 +6322,7 @@ function genXmlTextRunProperties(opts, isDefault) {
         if (opts.glow)
             runProps += "<a:effectLst>".concat(createGlowElement(opts.glow, DEF_TEXT_GLOW), "</a:effectLst>");
         if (opts.fontFace) {
-            // NOTE: 'cs' = Complex Script, 'ea' = East Asian (use "-120" instead of "0" - per Issue #174); ea must come first (Issue #174)
-            runProps += "<a:latin typeface=\"".concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"0\"/><a:ea typeface=\"").concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"-122\"/><a:cs typeface=\"").concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"-120\"/>");
+            runProps += "<a:latin typeface=\"".concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"-120\"/><a:ea typeface=\"").concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"-122\"/><a:cs typeface=\"").concat(opts.fontFace, "\" pitchFamily=\"34\" charset=\"-120\"/>");
         }
     }
     // Hyperlink support

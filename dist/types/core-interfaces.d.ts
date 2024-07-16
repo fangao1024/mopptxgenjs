@@ -249,7 +249,7 @@ export interface ShapeLineProps {
      * @since v3.3.0
      */
     endArrowType?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle';
-    capType?: string;
+    capType?: 'rnd' | 'sq' | 'flat';
     joinType?: string;
     /**
      * Dash type

@@ -1089,6 +1089,10 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 
 			// C: Line opts
 			itemOpts.line = itemOpts.line || {}
+			// 初始化 line color
+			if (itemOpts.line?.color) {
+				initColorSelection(itemOpts.line.color, target)
+			}
 			itemOpts.lineSpacing = itemOpts.lineSpacing && !isNaN(itemOpts.lineSpacing) ? itemOpts.lineSpacing : null
 			itemOpts.lineSpacingMultiple = itemOpts.lineSpacingMultiple && !isNaN(itemOpts.lineSpacingMultiple) ? itemOpts.lineSpacingMultiple : null
 

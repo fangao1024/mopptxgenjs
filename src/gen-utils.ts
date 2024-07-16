@@ -301,7 +301,7 @@ export function createSolidFillElement(options: SolidFillColor) {
 export function createGradFillElement(options: GradFillColor) {
 	const { gradientStopList, gradientType, flip, rotWithShape } = options
 	let element = ''
-	element += `<a:gradFill flip="${flip}" rotWithShape="${rotWithShape ? '1' : '0'}">`
+	element += `<a:gradFill flip="${flip ?? 'y'}" rotWithShape="${rotWithShape ? '1' : '0'}">`
 	if (gradientStopList.length > 0) {
 		element += `<a:gsLst>`
 		element += gradientStopList
