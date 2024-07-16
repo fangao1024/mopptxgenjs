@@ -22,7 +22,9 @@
 		"defs": "gulp defs",
 		"watch": "rollup -cw",
 		"fr": "gulp frontend",
-		"doctoc": "./node_modules/doctoc/doctoc.js README.md"
+		"doctoc": "./node_modules/doctoc/doctoc.js README.md",
+		"publish:miz": "npm publish --registry http://npm.miz.com/",
+		"publish:all": "npm publish && npm run publish:miz"
 	},
 	"browser": {
 		"express": false,
