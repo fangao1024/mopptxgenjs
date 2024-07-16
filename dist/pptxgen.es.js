@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.33 @ 2024/7/15 15:37:48 */
+/* mopptxgenjs 0.0.34 @ 2024/7/16 11:44:58 */
 import JSZip from 'jszip';
 
 /******************************************************************************
@@ -371,6 +371,10 @@ var ShapeType;
  */
 var SchemeColor;
 (function (SchemeColor) {
+    SchemeColor["dk1"] = "dk1";
+    SchemeColor["lt1"] = "lt1";
+    SchemeColor["dk2"] = "dk2";
+    SchemeColor["lt2"] = "lt2";
     SchemeColor["text1"] = "tx1";
     SchemeColor["text2"] = "tx2";
     SchemeColor["background1"] = "bg1";
@@ -381,6 +385,8 @@ var SchemeColor;
     SchemeColor["accent4"] = "accent4";
     SchemeColor["accent5"] = "accent5";
     SchemeColor["accent6"] = "accent6";
+    SchemeColor["hlink"] = "hlink";
+    SchemeColor["folHlink"] = "folHlink";
 })(SchemeColor || (SchemeColor = {}));
 var AlignH;
 (function (AlignH) {
@@ -861,7 +867,13 @@ function createColorElement(colorStr, innerElements) {
         colorVal !== SchemeColor.accent3 &&
         colorVal !== SchemeColor.accent4 &&
         colorVal !== SchemeColor.accent5 &&
-        colorVal !== SchemeColor.accent6) {
+        colorVal !== SchemeColor.accent6 &&
+        colorVal !== SchemeColor.folHlink &&
+        colorVal !== SchemeColor.hlink &&
+        colorVal !== SchemeColor.dk1 &&
+        colorVal !== SchemeColor.lt1 &&
+        colorVal !== SchemeColor.dk2 &&
+        colorVal !== SchemeColor.lt2) {
         console.warn("\"".concat(colorVal, "\" is not a valid scheme color or hex RGB! \"").concat(DEF_FONT_COLOR, "\" used instead. Only provide 6-digit RGB or 'pptx.SchemeColor' values!"));
         colorVal = DEF_FONT_COLOR;
     }

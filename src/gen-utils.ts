@@ -213,7 +213,13 @@ export function createColorElement(colorStr: string | SCHEME_COLORS, innerElemen
 		colorVal !== SchemeColor.accent3 &&
 		colorVal !== SchemeColor.accent4 &&
 		colorVal !== SchemeColor.accent5 &&
-		colorVal !== SchemeColor.accent6
+		colorVal !== SchemeColor.accent6 &&
+		colorVal !== SchemeColor.folHlink &&
+		colorVal !== SchemeColor.hlink &&
+		colorVal !== SchemeColor.dk1 &&
+		colorVal !== SchemeColor.lt1 &&
+		colorVal !== SchemeColor.dk2 &&
+		colorVal !== SchemeColor.lt2
 	) {
 		console.warn(`"${colorVal}" is not a valid scheme color or hex RGB! "${DEF_FONT_COLOR}" used instead. Only provide 6-digit RGB or 'pptx.SchemeColor' values!`)
 		colorVal = DEF_FONT_COLOR

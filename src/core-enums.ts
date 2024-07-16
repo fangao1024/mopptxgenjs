@@ -303,6 +303,10 @@ export enum ShapeType {
  * TODO: FUTURE: v4.0: rename to `ThemeColor`
  */
 export enum SchemeColor {
+	'dk1' = 'dk1',
+	'lt1' = 'lt1',
+	'dk2' = 'dk2',
+	'lt2' = 'lt2',
 	'text1' = 'tx1',
 	'text2' = 'tx2',
 	'background1' = 'bg1',
@@ -312,7 +316,9 @@ export enum SchemeColor {
 	'accent3' = 'accent3',
 	'accent4' = 'accent4',
 	'accent5' = 'accent5',
-	'accent6' = 'accent6'
+	'accent6' = 'accent6',
+	'hlink' = 'hlink',
+	'folHlink' = 'folHlink'
 }
 export enum AlignH {
 	'left' = 'left',
