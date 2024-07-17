@@ -1,4 +1,4 @@
-/* mopptxgenjs 0.0.35 @ 2024/7/16 16:56:30 */
+/* mopptxgenjs 1.0.0 @ 2024/7/17 14:59:27 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -955,7 +955,6 @@ function createGradFillElement(options) {
     var _a, _b;
     var gradientStopList = options.gradientStopList, gradientType = options.gradientType, flip = options.flip, rotWithShape = options.rotWithShape;
     var element = '';
-    console.log(flip, 'flip=================');
     element += "<a:gradFill flip=\"".concat(flip !== null && flip !== void 0 ? flip : 'y', "\" rotWithShape=\"").concat(rotWithShape ? '1' : '0', "\">");
     if (gradientStopList.length > 0) {
         element += "<a:gsLst>";
@@ -1054,13 +1053,11 @@ function initColorSelection(options, target) {
     var _a, _b, _c, _d, _e, _f, _g, _h;
     switch (options.type) {
         case 'grad': {
-            console.log(options, 'options=================');
             // 初始化渐变填充参数
             options.gradientStopList = (_a = options.gradientStopList) !== null && _a !== void 0 ? _a : [];
             options.gradientType = (_b = options.gradientType) !== null && _b !== void 0 ? _b : 'linear';
             options.flip = (_c = options.flip) !== null && _c !== void 0 ? _c : 'y';
             options.rotWithShape = (_d = options.rotWithShape) !== null && _d !== void 0 ? _d : true;
-            console.log(options, 'options to=================');
             break;
         }
         case 'blip': {
