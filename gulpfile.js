@@ -4,7 +4,7 @@ const { resolve } = require('@rollup/plugin-node-resolve')
 const { commonjs } = require('@rollup/plugin-commonjs')
 const typescript = require('rollup-plugin-typescript2')
 const { watch, series } = require('gulp')
-const replace = require('gulp-replace');
+const replace = require('gulp-replace')
 const gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	ignore = require('gulp-ignore'),
@@ -19,7 +19,7 @@ gulp.task('build', () => {
 			external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
 			plugins: [typescript(), resolve, commonjs]
 		})
-		.then(bundle => {
+		.then((bundle) => {
 			bundle.write({
 				file: './src/bld/pptxgen.gulp.js',
 				format: 'iife',
@@ -31,7 +31,7 @@ gulp.task('build', () => {
 			})
 			return bundle
 		})
-		.then(bundle => {
+		.then((bundle) => {
 			bundle.write({
 				file: './src/bld/pptxgen.cjs.js',
 				format: 'cjs',
@@ -39,7 +39,7 @@ gulp.task('build', () => {
 			})
 			return bundle
 		})
-		.then(bundle => {
+		.then((bundle) => {
 			return bundle.write({
 				file: './src/bld/pptxgen.es.js',
 				format: 'es'
@@ -74,75 +74,58 @@ gulp.task('bundle', () => {
 })
 
 gulp.task('cjs', () => {
-	return gulp
-		.src(['./src/bld/pptxgen.cjs.js'])
-		.pipe(insert.prepend(info))
-		.pipe(gulp.dest('./dist/'))
+	return gulp.src(['./src/bld/pptxgen.cjs.js']).pipe(insert.prepend(info)).pipe(gulp.dest('./dist/'))
 })
 
 gulp.task('es', () => {
-	return gulp
-		.src(['./src/bld/pptxgen.es.js'])
-		.pipe(insert.prepend(info))
-		.pipe(gulp.dest('./dist/'))
+	return gulp.src(['./src/bld/pptxgen.es.js']).pipe(insert.prepend(info)).pipe(gulp.dest('./dist/'))
 })
 
 gulp.task('dts', () => {
-	return gulp
-		.src(['./src/bld/*.d.ts'])
-		.pipe(gulp.dest('./dist/types/'))
+	return gulp.src(['./src/bld/*.d.ts']).pipe(gulp.dest('./dist/types/'))
 })
 
 gulp.task('reactTestCode', () => {
-	return gulp
-		.src(['./dist/*.js', './dist/*.js.map'])
-		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist'))
+	return gulp.src(['./dist/*.js', './dist/*.js.map']).pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist'))
 })
 
 gulp.task('reactTestDts', () => {
-	return gulp
-		.src(['./dist/types/*.d.ts'])
-		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist/types'))
+	return gulp.src(['./dist/types/*.d.ts']).pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/dist/types'))
 })
 
-
 gulp.task('reactTestDefs', () => {
-	return gulp
-		.src(['./types/index.d.ts'])
-		.pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/types'))
+	return gulp.src(['./types/index.d.ts']).pipe(gulp.dest('./demos/react-demo/node_modules/pptxgenjs/types'))
 })
 
 gulp.task('nodeTest', () => {
-	return gulp
-		.src(['./dist/pptxgen.cjs.js'])
-		.pipe(gulp.dest('./demos/node/node_modules/pptxgenjs/dist'))
+	return gulp.src(['./dist/pptxgen.cjs.js']).pipe(gulp.dest('./demos/node/node_modules/pptxgenjs/dist'))
 })
 
 // 打包到frontend
 gulp.task('frontendCode', () => {
 	return gulp
 		.src(['./dist/**/*'])
-		.pipe(insert.prepend(`/* 来自 frontendCode 命令 */\n`))
+		.pipe(insert.prepend(`/* 来自 frontendCode 命令，版本：${pkg.version} */\n`))
 		.pipe(gulp.dest('../frontend/node_modules/mopptxgenjs/dist'))
 })
 gulp.task('frontendDefs', () => {
 	return gulp
 		.src(['./types/**/*'])
-		.pipe(insert.prepend(`/* 来自 frontendDefs 命令 */\n`))
+		.pipe(insert.prepend(`/* 来自 frontendDefs 命令，版本：${pkg.version} */\n`))
 		.pipe(gulp.dest('../frontend/node_modules/mopptxgenjs/types'))
 })
 gulp.task('frontendMin', () => {
 	return gulp
 		.src(['./dist/pptxgen.min.js', './dist/pptxgen.min.js.map'])
-		.pipe(insert.prepend(`/* 来自 frontendMin 命令 */\n console.log('frontendMin=========','${new Date().toLocaleString()}');\n`))
+		.pipe(insert.prepend(`/* 来自 frontendMin 命令，版本：${pkg.version} */\n console.log('frontendMin=========','${new Date().toLocaleString()}');\n`))
 		.pipe(gulp.dest('../frontend/public/assets/js/mopptxgenjs'))
 })
 gulp.task('frontend', gulp.series('frontendCode', 'frontendDefs', 'frontendMin'), () => {
-	console.log('... frontend files created!');
+	console.log('... frontend files created!')
 })
 
 gulp.task('defs', gulp.series('reactTestDts', 'reactTestDefs'), () => {
-	console.log('... ./dist/types/*.d.ts files created!');
+	console.log('... ./dist/types/*.d.ts files created!')
 })
 
 // Build/Deploy (ad-hoc, no watch)

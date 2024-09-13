@@ -34,6 +34,7 @@ import {
 } from './core-interfaces'
 import {
 	convertRotationDegrees,
+	createColorConfigElement,
 	createColorElement,
 	createGlowElement,
 	encodeXmlEntities,
@@ -497,9 +498,32 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 				// NOTE: This works for both cases: either `path` or `data` contains the SVG
 				if ((slide._relsMedia || []).filter((rel) => rel.rId === slideItemObj.imageRid)[0] && (slide._relsMedia || []).filter((rel) => rel.rId === slideItemObj.imageRid)[0].extn === 'svg') {
 					strSlideXml += `<a:blip r:embed="rId${slideItemObj.imageRid - 1}">`
+
 					if (!isNil(slideItemObj.options.opacity)) {
 						strSlideXml += ` <a:alphaModFix amt="${Math.round(slideItemObj.options.opacity * 1000)}"/>`
 					}
+					// 滤镜
+					if (slideItemObj.options.filter) {
+						const filter = slideItemObj.options.filter
+						switch (filter.type) {
+							case 'duotone':
+								strSlideXml += `<a:duotone>`
+								strSlideXml += createColorElement(filter.params[0].color, createColorConfigElement(filter.params[0].colorConfig))
+								strSlideXml += createColorElement(filter.params[1].color, createColorConfigElement(filter.params[1].colorConfig))
+								strSlideXml += `</a:duotone>`
+								break
+							case 'grayscale':
+								strSlideXml += `<a:grayscl/>`
+								break
+							case 'luminosity':
+								strSlideXml += `<a:lum contrast="${inch2Emu(filter.params.contrast)}" bright="${inch2Emu(filter.params.contrast)}"/>`
+								break
+							case 'binaryLevel':
+								strSlideXml += `<a:biLevel thresh="${inch2Emu(filter.params)}"/>`
+								break
+						}
+					}
+
 					strSlideXml += ' <a:extLst>'
 					strSlideXml += '  <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">'
 					strSlideXml += `   <asvg:svgBlip xmlns:asvg="http://schemas.microsoft.com/office/drawing/2016/SVG/main" r:embed="rId${slideItemObj.imageRid}"/>`
@@ -510,6 +534,27 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					strSlideXml += `<a:blip r:embed="rId${slideItemObj.imageRid}">`
 					if (!isNil(slideItemObj.options.opacity)) {
 						strSlideXml += `<a:alphaModFix amt="${Math.round(slideItemObj.options.opacity * 1000)}"/>`
+					}
+					// 滤镜
+					if (slideItemObj.options.filter) {
+						const filter = slideItemObj.options.filter
+						switch (filter.type) {
+							case 'duotone':
+								strSlideXml += `<a:duotone>`
+								strSlideXml += createColorElement(filter.params[0].color, createColorConfigElement(filter.params[0].colorConfig))
+								strSlideXml += createColorElement(filter.params[1].color, createColorConfigElement(filter.params[1].colorConfig))
+								strSlideXml += `</a:duotone>`
+								break
+							case 'grayscale':
+								strSlideXml += `<a:grayscl/>`
+								break
+							case 'luminosity':
+								strSlideXml += `<a:lum contrast="${inch2Emu(filter.params.contrast)}" bright="${inch2Emu(filter.params.bright)}"/>`
+								break
+							case 'binaryLevel':
+								strSlideXml += `<a:biLevel thresh="${inch2Emu(filter.params)}"/>`
+								break
+						}
 					}
 					strSlideXml += '</a:blip>'
 				}

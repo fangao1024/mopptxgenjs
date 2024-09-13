@@ -1,4 +1,4 @@
-/* mopptxgenjs 1.0.0 @ 2024/7/17 14:59:27 */
+/* mopptxgenjs 1.0.1 @ 2024/9/13 17:09:52 */
 'use strict';
 
 var JSZip = require('jszip');
@@ -2369,7 +2369,8 @@ function addImageDefinition(target, opt) {
         objectName: objectName,
         shadow: correctShadowOptions(opt.shadow),
         clipShape: opt.clipShape || null,
-        line: opt.line || null
+        line: opt.line || null,
+        filter: opt.filter || null
     };
     // STEP 4: Add this image to this Slide Rels (rId/rels count spans all slides! Count all images to get next rId)
     if (strImgExtn === 'svg') {
@@ -5835,6 +5836,27 @@ function slideObjectToXml(slide) {
                     if (!isNil(slideItemObj.options.opacity)) {
                         strSlideXml += " <a:alphaModFix amt=\"".concat(Math.round(slideItemObj.options.opacity * 1000), "\"/>");
                     }
+                    // 滤镜
+                    if (slideItemObj.options.filter) {
+                        var filter = slideItemObj.options.filter;
+                        switch (filter.type) {
+                            case 'duotone':
+                                strSlideXml += "<a:duotone>";
+                                strSlideXml += createColorElement(filter.params[0].color, createColorConfigElement(filter.params[0].colorConfig));
+                                strSlideXml += createColorElement(filter.params[1].color, createColorConfigElement(filter.params[1].colorConfig));
+                                strSlideXml += "</a:duotone>";
+                                break;
+                            case 'grayscale':
+                                strSlideXml += "<a:grayscl/>";
+                                break;
+                            case 'luminosity':
+                                strSlideXml += "<a:lum contrast=\"".concat(inch2Emu(filter.params.contrast), "\" bright=\"").concat(inch2Emu(filter.params.contrast), "\"/>");
+                                break;
+                            case 'binaryLevel':
+                                strSlideXml += "<a:biLevel thresh=\"".concat(inch2Emu(filter.params), "\"/>");
+                                break;
+                        }
+                    }
                     strSlideXml += ' <a:extLst>';
                     strSlideXml += '  <a:ext uri="{96DAC541-7B7A-43D3-8B79-37D633B846F1}">';
                     strSlideXml += "   <asvg:svgBlip xmlns:asvg=\"http://schemas.microsoft.com/office/drawing/2016/SVG/main\" r:embed=\"rId".concat(slideItemObj.imageRid, "\"/>");
@@ -5846,6 +5868,27 @@ function slideObjectToXml(slide) {
                     strSlideXml += "<a:blip r:embed=\"rId".concat(slideItemObj.imageRid, "\">");
                     if (!isNil(slideItemObj.options.opacity)) {
                         strSlideXml += "<a:alphaModFix amt=\"".concat(Math.round(slideItemObj.options.opacity * 1000), "\"/>");
+                    }
+                    // 滤镜
+                    if (slideItemObj.options.filter) {
+                        var filter = slideItemObj.options.filter;
+                        switch (filter.type) {
+                            case 'duotone':
+                                strSlideXml += "<a:duotone>";
+                                strSlideXml += createColorElement(filter.params[0].color, createColorConfigElement(filter.params[0].colorConfig));
+                                strSlideXml += createColorElement(filter.params[1].color, createColorConfigElement(filter.params[1].colorConfig));
+                                strSlideXml += "</a:duotone>";
+                                break;
+                            case 'grayscale':
+                                strSlideXml += "<a:grayscl/>";
+                                break;
+                            case 'luminosity':
+                                strSlideXml += "<a:lum contrast=\"".concat(inch2Emu(filter.params.contrast), "\" bright=\"").concat(inch2Emu(filter.params.contrast), "\"/>");
+                                break;
+                            case 'binaryLevel':
+                                strSlideXml += "<a:biLevel thresh=\"".concat(inch2Emu(filter.params), "\"/>");
+                                break;
+                        }
                     }
                     strSlideXml += '</a:blip>';
                 }

@@ -460,7 +460,8 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		objectName,
 		shadow: correctShadowOptions(opt.shadow),
 		clipShape: opt.clipShape || null,
-		line: opt.line || null
+		line: opt.line || null,
+		filter: opt.filter || null
 	}
 
 	// STEP 4: Add this image to this Slide Rels (rId/rels count spans all slides! Count all images to get next rId)

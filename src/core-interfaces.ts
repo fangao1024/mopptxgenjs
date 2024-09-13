@@ -664,6 +664,17 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	 * @example 25 // 25% opacity
 	 */
 	opacity?: number
+	/**
+	 * 滤镜
+	 */
+	filter?:
+		| {
+				type: 'duotone'
+				params: [FillColor, FillColor]
+		  }
+		| { type: 'grayscale'; params: number }
+		| { type: 'luminosity'; params: { contrast: number; bright: number } }
+		| { type: 'binaryLevel'; params: number }
 }
 /**
  * Add media (audio/video) to slide

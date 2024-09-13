@@ -1,4 +1,3 @@
-// Type definitions for pptxgenjs 0.0.9
 // Project: https://gitbrent.github.io/PptxGenJS/
 // Definitions by: Brent Ely <https://github.com/gitbrent/>
 //                 Michael Beaumont <https://github.com/michaelbeaumont>
@@ -1526,6 +1525,17 @@ declare namespace PptxGenJS {
 		 * @example 25 // 25% opacity
 		 */
 		opacity?: number
+		/**
+		 * 滤镜
+		 */
+		filter?:
+			| {
+					type: 'duotone'
+					params: [FillColor, FillColor]
+			  }
+			| { type: 'grayscale'; params: number }
+			| { type: 'luminosity'; params: { contrast: number; bright: number } }
+			| { type: 'binaryLevel'; params: number }
 	}
 	/**
 	 * Add media (audio/video) to slide
