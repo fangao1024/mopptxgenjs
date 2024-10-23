@@ -24,7 +24,8 @@
 		"fr": "gulp frontend",
 		"doctoc": "./node_modules/doctoc/doctoc.js README.md",
 		"publish:miz": "npm publish --registry http://npm.miz.com/",
-		"publish:all": "npm publish && npm run publish:miz"
+		"publish:npm": "npm publish --registry https://registry.npmjs.org/",
+		"publish:all": "npm run publish:npm && npm run publish:miz"
 	},
 	"browser": {
 		"express": false,
